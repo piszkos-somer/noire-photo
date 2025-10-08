@@ -1,6 +1,6 @@
 .szinatmenet {
 background: linear-gradient(90deg, rgba(72, 178, 219, 1) 0%, rgba(168, 83, 237, 1) 56%); 
--webkit-background-clip: text; /* Safari/Chrome */
-  -webkit-text-fill-color: transparent; /* Safari/Chrome */
-  background-clip: text; /* Firefox (néha prefixelni kell) */
+-webkit-background-clip: text; 
+  -webkit-text-fill-color: transparent; 
+  background-clip: text; 
   color: transparent;}
