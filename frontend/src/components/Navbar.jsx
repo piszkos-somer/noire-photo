@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Navbar, Nav, Container,  Form, FormControl, Button } from 'react-bootstrap';
+import { Navbar, Nav, Container, Form, FormControl, Button } from 'react-bootstrap';
 import '../css/Navbar.css';
 
 function NavbarNoire() {
@@ -19,6 +19,7 @@ function NavbarNoire() {
           <Nav className="me-auto">
             <Nav.Link as={Link} to="/">Képek</Nav.Link>
             <Nav.Link as={Link} to="/features">Képek feltöltése</Nav.Link>
+            <Nav.Link as={Link} to="/About">Rólunk</Nav.Link>
           </Nav>
 
           <Form className="d-flex me-3">
@@ -26,7 +27,6 @@ function NavbarNoire() {
               type="search"
               placeholder="Keresés..."
               className="me-2"
-              width="100px"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
             />
@@ -34,7 +34,7 @@ function NavbarNoire() {
           </Form>
 
           <Nav>
-            <Nav.Link as={Link} to="/login">Bejelentkezés</Nav.Link>
+            <Nav.Link as={Link} to="/registration">Bejelentkezés</Nav.Link>
           </Nav>
         </Navbar.Collapse>
       </Container>

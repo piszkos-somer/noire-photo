@@ -1,18 +1,21 @@
-import { useState } from 'react'
-import './App.css'
-import NavbarNoire from './components/Navbar.jsx'
-import Footer from './components/Footer.jsx'
-
+import React from 'react';
+import { Routes, Route } from 'react-router-dom';
+import NavbarNoire from './components/Navbar';
+import About from './pages/About';
+import Registration from './pages/Registration';
+import Home from './pages/Home';
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
     <>
       <NavbarNoire />
-      <Footer />
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/About" element={<About />} />
+        <Route path="/Registration" element={<Registration />} />
+      </Routes>
     </>
-  )
+  );
 }
 
-export default App
+export default App;
