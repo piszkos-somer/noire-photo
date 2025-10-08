@@ -9,7 +9,7 @@ function NavbarNoire() {
   return (
     <Navbar bg="light" expand="lg" className="shadow-sm sticky-top">
       <Container fluid>
-        <Navbar.Brand className="szinatmenet" as={Link} to="/Home">
+        <Navbar.Brand className="szinatmenet" as={Link} to="/">
           Noire Photo Collection
         </Navbar.Brand>
 
@@ -17,7 +17,7 @@ function NavbarNoire() {
 
         <Navbar.Collapse id="main-navbar">
           <Nav className="me-auto">
-            <Nav.Link as={Link} to="/">Képek</Nav.Link>
+            <Nav.Link as={Link} to="/Home">Képek</Nav.Link>
             <Nav.Link as={Link} to="/features">Képek feltöltése</Nav.Link>
             <Nav.Link as={Link} to="/About">Rólunk</Nav.Link>
           </Nav>

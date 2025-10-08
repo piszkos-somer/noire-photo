@@ -4,6 +4,7 @@ import NavbarNoire from './components/Navbar';
 import About from './pages/About';
 import Registration from './pages/Registration';
 import Home from './pages/Home';
+import Footer from './components/Footer';
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
         <Route path="/About" element={<About />} />
         <Route path="/Registration" element={<Registration />} />
       </Routes>
+      <Footer />
     </>
   );
 }
