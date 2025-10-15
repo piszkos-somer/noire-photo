@@ -17,8 +17,8 @@ function NavbarNoire() {
 
         <Navbar.Collapse id="main-navbar">
           <Nav className="me-auto">
-            <Nav.Link as={Link} to="/Home">Képek</Nav.Link>
-            <Nav.Link as={Link} to="/features">Képek feltöltése</Nav.Link>
+            <Nav.Link as={Link} to="/Photos">Képek</Nav.Link>
+            <Nav.Link as={Link} to="/Upload">Képek feltöltése</Nav.Link>
             <Nav.Link as={Link} to="/About">Rólunk</Nav.Link>
           </Nav>
 
@@ -34,7 +34,7 @@ function NavbarNoire() {
           </Form>
 
           <Nav>
-            <Nav.Link as={Link} to="/registration">Bejelentkezés</Nav.Link>
+            <Nav.Link as={Link} to="/Registration">Bejelentkezés</Nav.Link>
           </Nav>
         </Navbar.Collapse>
       </Container>

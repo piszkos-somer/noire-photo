@@ -11,9 +11,9 @@ const Footer = () => {
             <h5>Hasznos linkek</h5>
             <ul className="list-unstyled">
               <li><a href="/" >Főoldal</a></li>
-              <li><a href="/about" >Képek</a></li>
-              <li><a href="/contact" >Képek feltöltése</a></li>
-              <li><a href="/contact" >Rólunk</a></li>
+              <li><a href="/Photos" >Képek</a></li>
+              <li><a href="/Upload" >Képek feltöltése</a></li>
+              <li><a href="/About" >Rólunk</a></li>
             </ul>
           </Col>
           <Col md={6}>

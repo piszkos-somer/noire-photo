@@ -29,10 +29,10 @@ function Registration() {
       ) : (
         <Form onSubmit={handleSubmit}>
           <Form.Group className="mb-3">
-            <Form.Label>Név</Form.Label>
+            <Form.Label>Felhasználónév</Form.Label>
             <Form.Control
               type="text"
-              placeholder="Add meg a neved"
+              placeholder="Add meg a felhasználóneved"
               name="name"
               value={formData.name}
               onChange={handleChange}
@@ -57,6 +57,18 @@ function Registration() {
             <Form.Control
               type="password"
               placeholder="Adj meg egy jelszót"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              required
+            />
+          </Form.Group>
+
+          <Form.Group className="mb-4">
+            <Form.Label>Jelszó mégegyszer</Form.Label>
+            <Form.Control
+              type="password"
+              placeholder="Ismételd meg a jelszót"
               name="password"
               value={formData.password}
               onChange={handleChange}

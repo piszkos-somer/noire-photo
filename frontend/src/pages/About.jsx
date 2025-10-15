@@ -6,10 +6,12 @@ function About() {
     <Container className="py-5">
       <h1 className="mb-4 text-center">Rólunk</h1>
       <p className="lead text-center">
-        A <strong>Noire Photo Collection</strong> egy online fotógyűjtemény, ahol a fekete-fehér képek
+        A <strong>Noire Photo Collection</strong> egy online fotógyűjtemény, ahol a képeid
         eleganciája és hangulata kerül előtérbe. Célunk, hogy lehetőséget adjunk
         a fotósoknak és művészeknek, hogy megosszák alkotásaikat egy inspiráló közösségben.
       </p>
+
+      <h2 className="mb-4 text-center">Ismerj meg minket, kik is vagyunk valójában.</h2>
 
       <p className="mt-4 text-center">
         Az oldalt 2025-ben hoztuk létre, és azóta is folyamatosan fejlesztjük, hogy a látogatók
