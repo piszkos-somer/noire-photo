@@ -1,5 +1,6 @@
 import React from 'react';
 import { Container } from 'react-bootstrap';
+import "../css/About.css";
 
 function About() {
   return (
@@ -12,6 +13,22 @@ function About() {
       </p>
 
       <h2 className="mb-4 text-center">Ismerj meg minket, kik is vagyunk valójában.</h2>
+
+      <div className="about-grid">
+        {/* Attila */}
+        <div className="about-item text-box">Sziasztok Attila vagyok.</div>
+        <div className="about-item image-box">Kép Attiláról</div>
+
+        {/* Zsombor */}
+        <div className="about-item image-box">Kép Zsomborról</div>
+        <div className="about-item text-box">Sziasztok Zsombor vagyok.</div>
+
+        {/* Tamás */}
+        <div className="about-item text-box">Sziasztok Tamás vagyok.</div>
+        <div className="about-item image-box">Kép Tamásról</div>
+      </div>
+
+
 
       <p className="mt-4 text-center">
         Az oldalt 2025-ben hoztuk létre, és azóta is folyamatosan fejlesztjük, hogy a látogatók

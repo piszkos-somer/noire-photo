@@ -1,0 +1,89 @@
+.upload-container {
+    max-width: 900px;
+  }
+  
+  .upload-content {
+    display: flex;
+    justify-content: space-between;
+    gap: 3rem;
+    flex-wrap: wrap;
+  }
+  
+  
+  .upload-left {
+    flex: 1;
+    min-width: 400px;
+  }
+  
+  .upload-btn {
+    border-radius: 20px;
+    padding: 0.6rem 2rem;
+    font-weight: 500;
+  }
+  
+ 
+  .upload-right {
+    width: 230px;
+    background: #e9e9e9;
+    padding: 1rem;
+    border-radius: 10px;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  
+  .tags-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+  
+
+  .tag-item {
+    background: white;
+    border-radius: 8px;
+    padding: 0.3rem 0.6rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+  
+  .tag-text {
+    font-size: 0.9rem;
+  }
+  
+ 
+  .delete-tag-btn {
+    background: none;
+    border: none;
+    color: #ff4c4c;
+    font-size: 1.1rem;
+    cursor: pointer;
+    margin-left: 6px;
+    transition: color 0.2s ease;
+  }
+  
+  .delete-tag-btn:hover {
+    color: #d60000;
+  }
+  
+  
+  .tag-input-container {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .add-btn {
+    width: 35px;
+    height: 35px;
+    border-radius: 8px;
+    font-weight: bold;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
