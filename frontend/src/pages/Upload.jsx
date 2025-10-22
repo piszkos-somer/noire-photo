@@ -13,6 +13,9 @@ function Upload() {
   const [newTag, setNewTag] = useState("");
   const [fileError, setFileError] = useState("");
   const [selectedFile, setSelectedFile] = useState(null);
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [uploadStatus, setUploadStatus] = useState("");
 
   useEffect(() => {
     localStorage.setItem("tags", JSON.stringify(tags));
@@ -52,6 +55,49 @@ function Upload() {
     setSelectedFile(file);
   };
 
+  const handleUpload = async () => {
+    if (!selectedFile) {
+      setUploadStatus("❌ Nincs kiválasztott fájl!");
+      return;
+    }
+    if (!title.trim()) {
+      setUploadStatus("❌ A kép címét meg kell adni!");
+      return;
+    }
+
+    setUploadStatus("Feltöltés folyamatban...");
+
+    const formData = new FormData();
+    formData.append("image", selectedFile);
+    formData.append("title", title);
+    formData.append("description", description);
+    formData.append("tags", JSON.stringify(tags));
+    // Ide kellene a felhasználó ID-ja, most dummy 1:
+    formData.append("userId", 1);
+
+    try {
+      const response = await fetch("http://localhost:3001/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        setUploadStatus("✅ Feltöltés sikeres!");
+        // Alaphelyzetbe állítás
+        setSelectedFile(null);
+        setTitle("");
+        setDescription("");
+        setTags([]);
+      } else {
+        setUploadStatus(`❌ Hiba: ${data.error || "Ismeretlen hiba"}`);
+      }
+    } catch (error) {
+      setUploadStatus("❌ Hálózati hiba történt.");
+      console.error(error);
+    }
+  };
+
   return (
     <Container className="upload-container py-5">
       <h1 className="text-center mb-4">Kép feltöltése</h1>
@@ -79,7 +125,12 @@ function Upload() {
 
           <Form.Group className="mb-3">
             <Form.Label>Kép címe</Form.Label>
-            <Form.Control type="text" placeholder="Add meg a kép címét..." />
+            <Form.Control
+              type="text"
+              placeholder="Add meg a kép címét..."
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+            />
           </Form.Group>
 
           <Form.Group className="mb-3">
@@ -88,13 +139,16 @@ function Upload() {
               as="textarea"
               rows={5}
               placeholder="Írj néhány sort a képről..."
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
             />
           </Form.Group>
 
           <div className="text-center mt-4">
-            <Button variant="outline-dark" className="upload-btn">
+            <Button variant="outline-dark" className="upload-btn" onClick={handleUpload}>
               Feltöltés
             </Button>
+            {uploadStatus && <div className="mt-3">{uploadStatus}</div>}
           </div>
         </div>
 
@@ -115,19 +169,16 @@ function Upload() {
             ))}
           </div>
 
-          <div className="tag-input-container">
+          <div className="tag-input-container d-flex gap-2 mt-3">
             <input
               type="text"
               className="form-control"
               placeholder="Új tag..."
               value={newTag}
               onChange={(e) => setNewTag(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleAddTag()}
             />
-            <Button
-              variant="success"
-              onClick={handleAddTag}
-              className="add-btn"
-            >
+            <Button variant="success" onClick={handleAddTag} className="add-btn">
               ✓
             </Button>
           </div>
