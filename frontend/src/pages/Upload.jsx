@@ -3,22 +3,21 @@ import { Container, Form, Button } from "react-bootstrap";
 import "../css/Upload.css";
 
 function Upload() {
-  
+  const defaultTags = [];
 
- 
   const [tags, setTags] = useState(() => {
     const saved = localStorage.getItem("tags");
     return saved ? JSON.parse(saved) : defaultTags;
   });
 
   const [newTag, setNewTag] = useState("");
+  const [fileError, setFileError] = useState("");
+  const [selectedFile, setSelectedFile] = useState(null);
 
-  
   useEffect(() => {
     localStorage.setItem("tags", JSON.stringify(tags));
   }, [tags]);
 
-  
   const handleAddTag = () => {
     if (newTag.trim() !== "" && !tags.includes(newTag.trim())) {
       setTags([...tags, newTag.trim()]);
@@ -26,10 +25,31 @@ function Upload() {
     }
   };
 
-
   const handleDeleteTag = (index) => {
     const updated = tags.filter((_, i) => i !== index);
     setTags(updated);
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      setFileError("❌ Csak képfájlokat tölthetsz fel! (jpg, png, gif, stb.)");
+      e.target.value = "";
+      setSelectedFile(null);
+      return;
+    }
+
+    if (file.size > 25 * 1024 * 1024) {
+      setFileError("❌ A fájl túl nagy! Maximum 25 MB engedélyezett.");
+      e.target.value = "";
+      setSelectedFile(null);
+      return;
+    }
+
+    setFileError("");
+    setSelectedFile(file);
   };
 
   return (
@@ -42,9 +62,19 @@ function Upload() {
           <Form.Group className="mb-3">
             <Form.Label>Fájl feltöltése</Form.Label>
             <div className="d-flex align-items-center gap-2">
-              <Form.Control type="file" />
-              <span className="text-muted small">max. 25 mb</span>
+              <Form.Control
+                type="file"
+                accept="image/*"
+                onChange={handleFileChange}
+              />
+              <span className="text-muted small">max. 25 MB</span>
             </div>
+            {fileError && <div className="text-danger mt-2">{fileError}</div>}
+            {selectedFile && (
+              <div className="text-success mt-2">
+                ✅ {selectedFile.name} kiválasztva
+              </div>
+            )}
           </Form.Group>
 
           <Form.Group className="mb-3">
@@ -93,7 +123,11 @@ function Upload() {
               value={newTag}
               onChange={(e) => setNewTag(e.target.value)}
             />
-            <Button variant="success" onClick={handleAddTag} className="add-btn">
+            <Button
+              variant="success"
+              onClick={handleAddTag}
+              className="add-btn"
+            >
               ✓
             </Button>
           </div>
