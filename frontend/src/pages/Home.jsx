@@ -10,7 +10,7 @@ function Home() {
         Fedezd fel a színesebbnél színesebb fényképek világát – időtlen hangulat, egyedi kompozíciók,
         és inspiráló művészek egy helyen.
       </p>
-      <Button as={Link} to="/features" variant="dark">
+      <Button as={Link} to="/Upload" variant="dark">
         Kezdj el feltölteni
       </Button>
     </Container>

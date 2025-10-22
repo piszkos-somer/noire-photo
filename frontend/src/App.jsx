@@ -5,6 +5,7 @@ import About from './pages/About';
 import Registration from './pages/Registration';
 import Home from './pages/Home';
 import Footer from './components/Footer';
+import Upload from './pages/Upload';
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/About" element={<About />} />
         <Route path="/Registration" element={<Registration />} />
+        <Route path="/Upload" element={<Upload />} />
       </Routes>
       <Footer />
     </>
