@@ -95,7 +95,7 @@ CREATE TABLE `image_reactions` (
 -- A tábla adatainak kiíratása `image_reactions`
 --
 
-INSERT INTO `image_reactions` (`id`, `image_id`, `user_id`, `reaction_id`, `reacted_at`) VALUES
+INSERT INTO `image_reactions` (`id`, `image_id`, `user_id`, `reaction_id`) VALUES
 (1, 1, 1, 1),
 (2, 1, 2, 2),
 (3, 2, 3, 3),
