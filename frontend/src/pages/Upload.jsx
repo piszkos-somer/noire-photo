@@ -22,10 +22,18 @@ function Upload() {
   const [description, setDescription] = useState("");
   const [uploadStatus, setUploadStatus] = useState("");
 
-  // ⛔️ Ha nincs token → átirányítás
-  useEffect(() => {
-    if (!token) navigate("/Registration");
-  }, [navigate, token]);
+
+useEffect(() => {
+  const userData = localStorage.getItem("user");
+  const parsedUser = userData ? JSON.parse(userData) : null;
+  const isLoggedIn = parsedUser && parsedUser.token;
+
+  if (!isLoggedIn) {
+    navigate("/Registration");
+  }
+}, [navigate]);
+
+
 
   // 📦 LocalStorage sync
   useEffect(() => {
