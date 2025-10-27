@@ -5,7 +5,8 @@ import { useNavigate } from "react-router-dom";
 
 function Upload() {
   const navigate = useNavigate();
-  const token = localStorage.getItem("token");
+  const userData = localStorage.getItem("user");
+const token = userData ? JSON.parse(userData).token : null;
 
   const [tags, setTags] = useState(() => {
     const saved = localStorage.getItem("tags");

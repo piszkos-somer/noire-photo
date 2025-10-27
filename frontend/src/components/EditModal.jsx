@@ -11,7 +11,8 @@ function EditModal({ show, onHide, image, onSave }) {
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
 
-  const token = localStorage.getItem("token"); // ha máshonnan nem jön a user
+  const userData = localStorage.getItem("user");
+const token = userData ? JSON.parse(userData).token : null;
 
   useEffect(() => {
     if (image) {
