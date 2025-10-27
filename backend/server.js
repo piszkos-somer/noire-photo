@@ -390,5 +390,43 @@ app.get("/api/me", verifyToken, async (req, res) => {
 // -----------------------------
 // 🔹 Szerver indítás
 // -----------------------------
+
+app.get("/api/latest-images", verifyToken, async (req, res) => {
+  const conn = await pool.getConnection();
+  try {
+    const [rows] = await conn.execute(
+      `
+      SELECT i.id, i.title, i.description, i.url, i.likes,
+             u.username AS author
+      FROM images i
+      JOIN users u ON i.user_id = u.id
+      ORDER BY i.id DESC
+      LIMIT 12
+      `
+    );
+    res.json(rows);
+  } catch (err) {
+    console.error("❌ Hiba képek lekérdezésénél:", err);
+    res.status(500).json({ error: "Szerverhiba." });
+  } finally {
+    conn.release();
+  }
+});
+
+app.put("/api/images/:id/like", verifyToken, async (req, res) => {
+  const imageId = req.params.id;
+  const conn = await pool.getConnection();
+  try {
+    await conn.execute("UPDATE images SET likes = likes + 1 WHERE id = ?", [imageId]);
+    res.json({ success: true });
+  } catch (err) {
+    console.error("❌ Like frissítési hiba:", err);
+    res.status(500).json({ error: "Szerverhiba." });
+  } finally {
+    conn.release();
+  }
+});
+
+
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => console.log(`✅ Szerver fut a ${PORT} porton!`));
