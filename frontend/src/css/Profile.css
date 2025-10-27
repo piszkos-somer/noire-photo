@@ -1,0 +1,48 @@
+.badge {
+  font-size: 0.9rem;
+  background: #6c757d !important;
+  color: #fff !important;
+  cursor: default;
+  transition: 0.2s ease;
+}
+
+.badge:hover {
+  background: #5a6268 !important;
+}
+
+/* Képek egységes mérete */
+.image-wrapper {
+  width: 100%;
+  height: 250px; /* fix magasság, minden kártyán ugyanannyi */
+  overflow: hidden;
+  border-top-left-radius: 0.5rem;
+  border-top-right-radius: 0.5rem;
+}
+
+.card-img-fixed {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* megtartja az arányt, kitölti a dobozt */
+}
+
+/* Kártyák mérete és árnyéka */
+.card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+}
+
+/* Tag badge stílus finomítás */
+.tag-badge {
+  background-color: #6c757d !important;
+  border-radius: 0.4rem !important; /* csak enyhén lekerekített */
+  padding: 0.35em 0.7em;
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.tag-badge:hover {
+  background-color: #5a6268 !important;
+}

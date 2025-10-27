@@ -1,0 +1,82 @@
+/* --- Háttér blur és középre igazítás --- */
+.edit-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(8px);
+  z-index: 1050;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+/* --- Maga a modal keret --- */
+.edit-modal-container {
+  background: white;
+  border-radius: 16px;
+  max-width: 650px;
+  width: 90%;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
+}
+
+/* --- Görgethető belső rész, szellős margókkal --- */
+.edit-modal-body-scroll {
+  overflow-y: auto;
+  padding: 1.25rem 1.5rem; /* 🔹 ez adja a „légzést” */
+  scrollbar-width: thin;
+  scrollbar-color: #ccc transparent;
+}
+
+/* WebKit (Chrome, Edge) scroll stílus */
+.edit-modal-body-scroll::-webkit-scrollbar {
+  width: 8px;
+}
+.edit-modal-body-scroll::-webkit-scrollbar-thumb {
+  background: #bcbcbc;
+  border-radius: 8px;
+}
+.edit-modal-body-scroll::-webkit-scrollbar-thumb:hover {
+  background: #999;
+}
+
+/* --- Kép formázása --- */
+.edit-modal-body-scroll img {
+  border-radius: 12px;
+  margin-bottom: 1rem;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+/* --- Tag badge stílus --- */
+.tag-badge {
+  cursor: pointer;
+  padding: 0.45rem 0.65rem;
+  font-size: 0.9rem;
+  border-radius: 0.4rem;
+  transition: background-color 0.2s ease;
+}
+.tag-badge:hover {
+  background-color: #5a6268 !important;
+}
+
+/* --- Láb és gombok --- */
+.modal-footer {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid #e9ecef;
+  background-color: #f8f9fa;
+}
+
+/* --- Fejléc (Title + Close gomb) --- */
+.modal-header {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid #e9ecef;
+  background-color: #f8f9fa;
+}
+
+.modal-title {
+  font-weight: 600;
+}

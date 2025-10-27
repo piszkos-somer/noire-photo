@@ -165,20 +165,37 @@ app.post("/upload", verifyToken, upload.single("image"), async (req, res) => {
 });
 
 // backend/server.js
+// 🔹 Saját képek lekérdezése tagekkel együtt
 app.get("/api/my-images", verifyToken, async (req, res) => {
   try {
     const conn = await pool.getConnection();
+
     const [images] = await conn.execute(
-      "SELECT * FROM images WHERE user_id = ? ORDER BY upload_date DESC",
+      `
+      SELECT 
+        i.id,
+        i.title,
+        i.description,
+        i.url,
+        COALESCE(GROUP_CONCAT(t.tag SEPARATOR ','), '') AS tags
+      FROM images i
+      LEFT JOIN image_tags it ON i.id = it.image_id
+      LEFT JOIN tags t ON it.tag_id = t.id
+      WHERE i.user_id = ?
+      GROUP BY i.id
+      ORDER BY i.id DESC
+      `,
       [req.user.id]
     );
+
     conn.release();
     res.json(images);
   } catch (err) {
-    console.error("Hiba a saját képek lekérdezésénél:", err);
-    res.status(500).json({ error: "Szerverhiba" });
+    console.error("❌ Hiba a saját képek lekérdezésénél:", err);
+    res.status(500).json({ error: "Szerverhiba a képek lekérésekor." });
   }
 });
+
 
 app.put("/api/update-profile", verifyToken, async (req, res) => {
   const { username, email, password } = req.body;
@@ -219,6 +236,79 @@ app.put("/api/update-profile", verifyToken, async (req, res) => {
   }
 });
 
+// Kép szerkesztése
+app.put("/api/update-image/:id", verifyToken, async (req, res) => {
+  const { title, description, tags } = req.body;
+  const imageId = req.params.id;
+
+  try {
+    const conn = await pool.getConnection();
+
+    // Frissítjük az image táblát
+    await conn.execute(
+      "UPDATE images SET title = ?, description = ? WHERE id = ? AND user_id = ?",
+      [title, description, imageId, req.user.id]
+    );
+
+    // Kitöröljük a régi tageket
+    await conn.execute("DELETE FROM image_tags WHERE image_id = ?", [imageId]);
+
+    // Új tagek beszúrása
+    const tagList = JSON.parse(tags || "[]");
+    for (const tag of tagList) {
+      const [existing] = await conn.execute("SELECT id FROM tags WHERE tag = ?", [tag]);
+      let tagId;
+      if (existing.length > 0) tagId = existing[0].id;
+      else {
+        const [tagResult] = await conn.execute("INSERT INTO tags (tag) VALUES (?)", [tag]);
+        tagId = tagResult.insertId;
+      }
+      await conn.execute("INSERT INTO image_tags (image_id, tag_id) VALUES (?, ?)", [
+        imageId,
+        tagId,
+      ]);
+    }
+
+    conn.release();
+    res.json({ success: true, message: "Kép sikeresen frissítve!" });
+  } catch (err) {
+    console.error("Képszerkesztési hiba:", err);
+    res.status(500).json({ error: "Szerverhiba" });
+  }
+});
+
+// ===================
+// 🔹 IDŐZÍTETT TISZTÍTÁS – Árva tagek törlése automatikusan
+// ===================
+
+// Ez a funkció törli azokat a tageket, amikhez nincs image_tags kapcsolat
+async function cleanupUnusedTags() {
+  try {
+    const conn = await pool.getConnection();
+
+    // 🔍 Töröljük azokat a tageket, amelyekhez nincs kapcsolódó image_tags rekord
+    const [result] = await conn.execute(`
+      DELETE FROM tags
+      WHERE id NOT IN (SELECT DISTINCT tag_id FROM image_tags)
+    `);
+
+    if (result.affectedRows > 0) {
+      console.log(`🧹 ${result.affectedRows} használatlan tag törölve az adatbázisból.`);
+    } else {
+      console.log("✅ Nincsenek törlendő tagek – adatbázis tiszta.");
+    }
+
+    conn.release();
+  } catch (err) {
+    console.error("❌ Hiba az árva tagek tisztítása közben:", err.message);
+  }
+}
+
+// Lefuttatjuk induláskor is
+cleanupUnusedTags();
+
+// Ezután óránként automatikusan fut
+setInterval(cleanupUnusedTags, 60 * 60 * 1000); // 1 óra = 3600000 ms
 
 
 const PORT = process.env.PORT || 3001;
