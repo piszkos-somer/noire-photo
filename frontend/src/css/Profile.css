@@ -46,3 +46,49 @@
 .tag-badge:hover {
   background-color: #5a6268 !important;
 }
+
+.object-fit-cover {
+  object-fit: cover;
+}
+
+textarea {
+  resize: none;
+}
+
+img.rounded-circle {
+  border: 3px solid #ddd;
+  transition: transform 0.3s ease;
+}
+
+img.rounded-circle:hover {
+  transform: scale(1.03);
+}
+.profile-section {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 40px;
+  flex-wrap: wrap;
+}
+
+.profile-left {
+  flex: 1;
+  min-width: 280px;
+  border-right: 2px solid rgba(0, 0, 0, 0.1);
+}
+
+.profile-right {
+  flex: 1.2;
+  min-width: 320px;
+  max-width: 480px;
+}
+
+.profile-right form input,
+.profile-right form textarea {
+  border-radius: 10px;
+}
+
+.card-img-fixed {
+  height: 250px;
+  object-fit: cover;
+}

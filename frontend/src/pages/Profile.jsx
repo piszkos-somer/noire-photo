@@ -8,6 +8,7 @@ import {
   Col,
   Card,
   Badge,
+  Image,
 } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { UserContext } from "../context/UserContext";
@@ -18,50 +19,88 @@ function Profile() {
   const [newUsername, setNewUsername] = useState("");
   const [newEmail, setNewEmail] = useState("");
   const [newPassword, setNewPassword] = useState("");
-  const [images, setImages] = useState([]); // mindig tömb
+  const [bio, setBio] = useState("");
+  const [profilePic, setProfilePic] = useState(null);
+  const [preview, setPreview] = useState(null);
+  const [images, setImages] = useState([]);
   const [message, setMessage] = useState("");
   const [selectedImage, setSelectedImage] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const { user, updateUsername } = useContext(UserContext);
   const navigate = useNavigate();
 
-  // 🔹 Saját képek lekérése
+  // 🔹 Betöltéskor lekérjük a profil adatokat
   useEffect(() => {
-    // ha nincs token, ne csináljon semmit
-    if (!user || !user.token) return;
+    if (!user?.token) {
+      navigate("/Login");
+      return;
+    }
+
+    const fetchProfileData = async () => {
+      try {
+        const res = await fetch("http://localhost:3001/api/me", {
+          headers: { Authorization: `Bearer ${user.token}` },
+        });
+        const data = await res.json();
+        setBio(data.bio || "");
+        if (data.profile_picture)
+          setPreview(`http://localhost:3001${data.profile_picture}`);
+      } catch (err) {
+        console.error("Profil betöltési hiba:", err);
+      }
+    };
 
     const fetchImages = async () => {
       try {
         const res = await fetch("http://localhost:3001/api/my-images", {
           headers: { Authorization: `Bearer ${user.token}` },
         });
-
-        if (res.status === 403) {
-          console.warn("❌ Token érvénytelen vagy lejárt. Visszairányítás a bejelentkezésre...");
-          navigate("/Login");
-          return;
-        }
-
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
         const data = await res.json();
-        if (Array.isArray(data)) {
-          setImages(data);
-        } else {
-          console.error("Nem tömb érkezett:", data);
-          setImages([]); // fallback
-        }
+        if (Array.isArray(data)) setImages(data);
       } catch (err) {
-        console.error("Lekérdezési hiba:", err);
-        setImages([]); // fallback, hogy ne dobjon hibát map-nél
+        console.error("Képek lekérési hiba:", err);
       }
     };
 
+    fetchProfileData();
     fetchImages();
   }, [user, navigate]);
 
-  // 🔹 Profil adatok frissítése
-  const handleUpdate = async (e) => {
+  // 🔹 Profil frissítése (bio + kép)
+  const handleProfileUpdate = async (e) => {
+    e.preventDefault();
+    const formData = new FormData();
+    formData.append("bio", bio);
+    if (profilePic) formData.append("profile_picture", profilePic);
+
+    try {
+      const res = await fetch("http://localhost:3001/api/update-profile-extended", {
+        method: "PUT",
+        headers: { Authorization: `Bearer ${user.token}` },
+        body: formData,
+      });
+      const data = await res.json();
+
+      if (res.ok) {
+        setMessage("✅ Profil frissítve!");
+        const refreshed = await fetch("http://localhost:3001/api/me", {
+          headers: { Authorization: `Bearer ${user.token}` },
+        });
+        const newData = await refreshed.json();
+        setBio(newData.bio || "");
+        if (newData.profile_picture)
+          setPreview(`http://localhost:3001${newData.profile_picture}`);
+      } else {
+        setMessage(data.error || "❌ Hiba a frissítés közben.");
+      }
+    } catch (err) {
+      console.error("Profil frissítési hiba:", err);
+      setMessage("❌ Szerverhiba a profil mentésekor.");
+    }
+  };
+
+  // 🔹 Account adatok frissítése
+  const handleAccountUpdate = async (e) => {
     e.preventDefault();
     try {
       const res = await fetch("http://localhost:3001/api/update-profile", {
@@ -81,7 +120,7 @@ function Profile() {
       setMessage(data.message || "Adatok frissítve!");
 
       if (res.ok && newUsername) {
-        updateUsername(newUsername); // navbar frissítése azonnal
+        updateUsername(newUsername);
         setNewUsername("");
       }
 
@@ -93,7 +132,15 @@ function Profile() {
     }
   };
 
-  // 🔹 Modal megnyitása
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setProfilePic(file);
+      setPreview(URL.createObjectURL(file));
+    }
+  };
+
+  // 🔹 Modal
   const handleEdit = (img) => {
     setSelectedImage({
       ...img,
@@ -104,7 +151,6 @@ function Profile() {
     setShowModal(true);
   };
 
-  // 🔹 Kép mentése a modalból
   const handleSave = async (updatedImage) => {
     try {
       const res = await fetch(
@@ -128,8 +174,6 @@ function Profile() {
       if (res.ok) {
         setMessage("✅ Kép sikeresen frissítve!");
         setShowModal(false);
-
-        // újra lekérjük a képeket
         const refresh = await fetch("http://localhost:3001/api/my-images", {
           headers: { Authorization: `Bearer ${user.token}` },
         });
@@ -146,103 +190,117 @@ function Profile() {
 
   return (
     <Container className="py-5">
-      <h1 className="text-center mb-4">Profilom</h1>
+      <h1 className="text-center mb-5">Profilom</h1>
 
-      {message && (
-        <Alert variant="info" className="text-center">
-          {message}
-        </Alert>
-      )}
+      {message && <Alert variant="info" className="text-center">{message}</Alert>}
 
-      {/* 🔹 Profiladatok szerkesztése */}
-      <Form
-        onSubmit={handleUpdate}
-        className="mb-5"
-        style={{ maxWidth: "500px", margin: "auto" }}
-      >
-        <Form.Group className="mb-3">
-          <Form.Label>Jelenlegi felhasználónév</Form.Label>
-          <Form.Control type="text" value={user.username || ""} disabled />
-        </Form.Group>
-
-        <Form.Group className="mb-3">
-          <Form.Label>Új felhasználónév</Form.Label>
-          <Form.Control
-            type="text"
-            placeholder="Add meg az új felhasználónevet"
-            value={newUsername}
-            onChange={(e) => setNewUsername(e.target.value)}
+      <div className="profile-section d-flex justify-content-center align-items-start mb-5">
+        {/* BAL OLDAL */}
+        <div className="profile-left text-center me-5 pe-5 border-end">
+          <Image
+            src={preview || "/profile-pictures/default.png"}
+            roundedCircle
+            width={180}
+            height={180}
+            className="object-fit-cover mb-3 shadow-sm"
           />
-        </Form.Group>
+          <Form onSubmit={handleProfileUpdate}>
+            <Form.Group controlId="formFile" className="mb-3">
+              <Form.Label>Profilkép módosítása</Form.Label>
+              <Form.Control type="file" accept="image/*" onChange={handleFileChange} />
+            </Form.Group>
 
-        <Form.Group className="mb-3">
-          <Form.Label>Új email cím</Form.Label>
-          <Form.Control
-            type="email"
-            placeholder="Add meg az új email címet"
-            value={newEmail}
-            onChange={(e) => setNewEmail(e.target.value)}
-          />
-        </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>Rólam</Form.Label>
+              <Form.Control
+                as="textarea"
+                rows={4}
+                maxLength={500}
+                placeholder="Írj magadról valamit..."
+                value={bio}
+                onChange={(e) => setBio(e.target.value)}
+              />
+            </Form.Group>
 
-        <Form.Group className="mb-4">
-          <Form.Label>Új jelszó</Form.Label>
-          <Form.Control
-            type="password"
-            placeholder="Adj meg új jelszót"
-            value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
-          />
-        </Form.Group>
-
-        <div className="text-center">
-          <Button variant="primary" type="submit">
-            Mentés
-          </Button>
+            <Button variant="primary" type="submit" className="w-100">
+              Mentés
+            </Button>
+          </Form>
         </div>
-      </Form>
+
+        {/* JOBB OLDAL */}
+        <div className="profile-right ps-5" style={{ maxWidth: "500px", width: "100%" }}>
+          <Form onSubmit={handleAccountUpdate}>
+            <Form.Group className="mb-3">
+              <Form.Label>Jelenlegi felhasználónév</Form.Label>
+              <Form.Control type="text" value={user.username || ""} disabled />
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label>Új felhasználónév</Form.Label>
+              <Form.Control
+                type="text"
+                placeholder="Add meg az új felhasználónevet"
+                value={newUsername}
+                onChange={(e) => setNewUsername(e.target.value)}
+              />
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label>Új email cím</Form.Label>
+              <Form.Control
+                type="email"
+                placeholder="Add meg az új email címet"
+                value={newEmail}
+                onChange={(e) => setNewEmail(e.target.value)}
+              />
+            </Form.Group>
+
+            <Form.Group className="mb-4">
+              <Form.Label>Új jelszó</Form.Label>
+              <Form.Control
+                type="password"
+                placeholder="Adj meg új jelszót"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+              />
+            </Form.Group>
+
+            <Button variant="success" type="submit" className="w-100">
+              Adatok mentése
+            </Button>
+          </Form>
+        </div>
+      </div>
 
       <hr />
-
-      {/* 🔹 Saját képek */}
       <h3 className="mt-5 mb-3 text-center">Saját feltöltéseim</h3>
 
       <Row xs={1} md={3} className="g-4">
-        {Array.isArray(images) && images.length > 0 ? (
+        {images.length > 0 ? (
           images.map((img) => (
             <Col key={img.id}>
               <Card className="shadow-sm h-100 d-flex flex-column">
-                <div className="image-wrapper">
-                  <Card.Img
-                    variant="top"
-                    src={`http://localhost:3001${img.url}`}
-                    alt={img.title}
-                    className="card-img-fixed"
-                  />
-                </div>
-
+                <Card.Img
+                  variant="top"
+                  src={`http://localhost:3001${img.url}`}
+                  alt={img.title}
+                  className="card-img-fixed"
+                />
                 <Card.Body className="d-flex flex-column justify-content-between flex-grow-1">
                   <div>
                     <Card.Title>{img.title}</Card.Title>
                     <Card.Text>{img.description}</Card.Text>
-
                     {img.tags && img.tags.trim() !== "" && (
                       <div className="mb-3">
-                        {img.tags
-                          .split(",")
-                          .map((tag, i) => (
-                            <Badge
-                              key={`${tag}-${i}`}
-                              bg="secondary"
-                              className="me-2 mb-1 tag-badge"
-                            >
-                              #{tag.trim()}
-                            </Badge>
-                          ))}
+                        {img.tags.split(",").map((tag, i) => (
+                          <Badge key={`${tag}-${i}`} bg="secondary" className="me-2 mb-1 tag-badge">
+                            #{tag.trim()}
+                          </Badge>
+                        ))}
                       </div>
                     )}
                   </div>
-
                   <Button
                     variant="outline-primary"
                     className="w-100 mt-auto"
@@ -255,13 +313,10 @@ function Profile() {
             </Col>
           ))
         ) : (
-          <p className="text-center text-muted">
-            Még nincs feltöltött képed.
-          </p>
+          <p className="text-center text-muted">Még nincs feltöltött képed.</p>
         )}
       </Row>
 
-      {/* 🔹 Edit Modal */}
       <EditModal
         show={showModal}
         onHide={() => setShowModal(false)}

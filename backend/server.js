@@ -13,6 +13,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use("/images", express.static(path.join(__dirname, "images"))); // képek kiszolgálása
+app.use("/profile-pictures", express.static(path.join(__dirname, "profile-pictures")));
 
 // Multer konfigurálása fájlokhoz
 const storage = multer.diskStorage({
@@ -28,6 +29,21 @@ const storage = multer.diskStorage({
   },
 });
 const upload = multer({ storage });
+
+// Profilképekhez külön storage
+const profilePicStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const dir = path.join(__dirname, "profile-pictures");
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir);
+    cb(null, dir);
+  },
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname);
+    cb(null, `${Date.now()}${ext}`);
+  },
+});
+const uploadProfilePic = multer({ storage: profilePicStorage });
+
 
 // MySQL kapcsolat
 const pool = mysql.createPool({
@@ -309,6 +325,56 @@ cleanupUnusedTags();
 
 // Ezután óránként automatikusan fut
 setInterval(cleanupUnusedTags, 60 * 60 * 1000); // 1 óra = 3600000 ms
+
+// Profil frissítése (bio + profilkép)
+app.put("/api/update-profile-extended", verifyToken, uploadProfilePic.single("profile_picture"), async (req, res) => {
+  const { bio } = req.body;
+  const file = req.file;
+
+  try {
+    const conn = await pool.getConnection();
+    let query = "UPDATE users SET bio = ?";
+    let params = [bio || null];
+
+    if (file) {
+      const profilePicUrl = `/profile-pictures/${file.filename}`;
+      query += ", profile_picture = ?";
+      params.push(profilePicUrl);
+    }
+
+    query += " WHERE id = ?";
+    params.push(req.user.id);
+
+    await conn.execute(query, params);
+    conn.release();
+
+    res.json({ success: true, message: "Profil frissítve!" });
+  } catch (err) {
+    console.error("Profil frissítési hiba:", err);
+    res.status(500).json({ error: "Szerverhiba" });
+  }
+});
+
+// Felhasználó saját profil adatainak lekérése
+app.get("/api/me", verifyToken, async (req, res) => {
+  try {
+    const conn = await pool.getConnection();
+    const [rows] = await conn.execute(
+      "SELECT username, email, bio, profile_picture FROM users WHERE id = ?",
+      [req.user.id]
+    );
+    conn.release();
+
+    if (rows.length === 0) {
+      return res.status(404).json({ error: "Felhasználó nem található" });
+    }
+
+    res.json(rows[0]);
+  } catch (err) {
+    console.error("Profil lekérési hiba:", err);
+    res.status(500).json({ error: "Szerverhiba" });
+  }
+});
 
 
 const PORT = process.env.PORT || 3001;
