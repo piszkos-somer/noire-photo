@@ -1,10 +1,18 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Navbar, Nav, Container, Form, FormControl, Button } from 'react-bootstrap';
-import '../css/Navbar.css';
+import React, { useContext, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { Navbar, Nav, Container, Form, FormControl, Button, Dropdown } from "react-bootstrap";
+import "../css/Navbar.css";
+import { UserContext } from "../context/UserContext";
 
 function NavbarNoire() {
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState("");
+  const { user, logout } = useContext(UserContext);
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate("/Login");
+  };
 
   return (
     <Navbar bg="light" expand="lg" className="shadow-sm sticky-top">
@@ -34,7 +42,20 @@ function NavbarNoire() {
           </Form>
 
           <Nav>
-            <Nav.Link as={Link} to="/Registration">Bejelentkezés</Nav.Link>
+            {!user.username ? (
+              <Nav.Link as={Link} to="/Registration">Bejelentkezés</Nav.Link>
+            ) : (
+              <Dropdown align="end">
+                <Dropdown.Toggle variant="outline-dark" id="dropdown-user">
+                  {user.username}
+                </Dropdown.Toggle>
+                <Dropdown.Menu>
+                  <Dropdown.Item as={Link} to="/Profile">Profilom</Dropdown.Item>
+                  <Dropdown.Divider />
+                  <Dropdown.Item onClick={handleLogout}>Kijelentkezés</Dropdown.Item>
+                </Dropdown.Menu>
+              </Dropdown>
+            )}
           </Nav>
         </Navbar.Collapse>
       </Container>

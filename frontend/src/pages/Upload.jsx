@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { Container, Form, Button } from "react-bootstrap";
 import "../css/Upload.css";
+import { useNavigate } from "react-router-dom";
 
 function Upload() {
+  const navigate = useNavigate();
+
   const defaultTags = [];
 
   const [tags, setTags] = useState(() => {
@@ -17,6 +20,13 @@ function Upload() {
   const [description, setDescription] = useState("");
   const [uploadStatus, setUploadStatus] = useState("");
 
+  // ⛔️ ha nincs bejelentkezve, irány a regisztráció
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) navigate("/Registration");
+  }, [navigate]);
+
+  // tagek mentése localStorage-be
   useEffect(() => {
     localStorage.setItem("tags", JSON.stringify(tags));
   }, [tags]);
@@ -56,6 +66,12 @@ function Upload() {
   };
 
   const handleUpload = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      navigate("/Registration");
+      return;
+    }
+
     if (!selectedFile) {
       setUploadStatus("❌ Nincs kiválasztott fájl!");
       return;
@@ -72,25 +88,25 @@ function Upload() {
     formData.append("title", title);
     formData.append("description", description);
     formData.append("tags", JSON.stringify(tags));
-    // Ide kellene a felhasználó ID-ja, most dummy 1:
-    formData.append("userId", 1);
 
     try {
       const response = await fetch("http://localhost:3001/upload", {
         method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`, // ✅ JWT token
+        },
         body: formData,
       });
 
       const data = await response.json();
       if (response.ok) {
         setUploadStatus("✅ Feltöltés sikeres!");
-        // Alaphelyzetbe állítás
         setSelectedFile(null);
         setTitle("");
         setDescription("");
         setTags([]);
       } else {
-        setUploadStatus(`❌ Hiba: ${data.error || "Ismeretlen hiba"}`);
+        setUploadStatus(`❌ Hiba: ${data.error || data.message || "Ismeretlen hiba"}`);
       }
     } catch (error) {
       setUploadStatus("❌ Hálózati hiba történt.");
@@ -145,7 +161,11 @@ function Upload() {
           </Form.Group>
 
           <div className="text-center mt-4">
-            <Button variant="outline-dark" className="upload-btn" onClick={handleUpload}>
+            <Button
+              variant="outline-dark"
+              className="upload-btn"
+              onClick={handleUpload}
+            >
               Feltöltés
             </Button>
             {uploadStatus && <div className="mt-3">{uploadStatus}</div>}
