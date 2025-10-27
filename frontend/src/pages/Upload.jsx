@@ -1,46 +1,72 @@
 import React, { useState, useEffect } from "react";
-import { Container, Form, Button } from "react-bootstrap";
+import { Container, Form, Button, ListGroup } from "react-bootstrap";
 import "../css/Upload.css";
 import { useNavigate } from "react-router-dom";
 
 function Upload() {
   const navigate = useNavigate();
-
-  const defaultTags = [];
+  const token = localStorage.getItem("token");
 
   const [tags, setTags] = useState(() => {
     const saved = localStorage.getItem("tags");
-    return saved ? JSON.parse(saved) : defaultTags;
+    return saved ? JSON.parse(saved) : [];
   });
 
   const [newTag, setNewTag] = useState("");
+  const [suggestions, setSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+
   const [fileError, setFileError] = useState("");
   const [selectedFile, setSelectedFile] = useState(null);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [uploadStatus, setUploadStatus] = useState("");
 
-  // ⛔️ ha nincs bejelentkezve, irány a regisztráció
+  // ⛔️ Ha nincs token → átirányítás
   useEffect(() => {
-    const token = localStorage.getItem("token");
     if (!token) navigate("/Registration");
-  }, [navigate]);
+  }, [navigate, token]);
 
-  // tagek mentése localStorage-be
+  // 📦 LocalStorage sync
   useEffect(() => {
     localStorage.setItem("tags", JSON.stringify(tags));
   }, [tags]);
 
-  const handleAddTag = () => {
-    if (newTag.trim() !== "" && !tags.includes(newTag.trim())) {
-      setTags([...tags, newTag.trim()]);
+  // 🔍 Tag-ajánlás gépelés közben
+  useEffect(() => {
+    const fetchSuggestions = async () => {
+      if (newTag.trim().length < 1) {
+        setSuggestions([]);
+        return;
+      }
+      try {
+        const res = await fetch(
+          `http://localhost:3001/api/tags/search?q=${encodeURIComponent(newTag)}`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        const data = await res.json();
+        setSuggestions(data);
+        setShowSuggestions(true);
+      } catch (err) {
+        console.error("Tag ajánlási hiba:", err);
+      }
+    };
+    const delay = setTimeout(fetchSuggestions, 250); // debounce
+    return () => clearTimeout(delay);
+  }, [newTag, token]);
+
+  const handleAddTag = (tagValue) => {
+    const value = tagValue || newTag.trim();
+    if (value !== "" && !tags.includes(value)) {
+      setTags([...tags, value]);
       setNewTag("");
+      setSuggestions([]);
+      setShowSuggestions(false);
     }
   };
 
   const handleDeleteTag = (index) => {
-    const updated = tags.filter((_, i) => i !== index);
-    setTags(updated);
+    setTags(tags.filter((_, i) => i !== index));
   };
 
   const handleFileChange = (e) => {
@@ -66,7 +92,6 @@ function Upload() {
   };
 
   const handleUpload = async () => {
-    const token = localStorage.getItem("token");
     if (!token) {
       navigate("/Registration");
       return;
@@ -92,9 +117,7 @@ function Upload() {
     try {
       const response = await fetch("http://localhost:3001/upload", {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`, // ✅ JWT token
-        },
+        headers: { Authorization: `Bearer ${token}` },
         body: formData,
       });
 
@@ -109,8 +132,8 @@ function Upload() {
         setUploadStatus(`❌ Hiba: ${data.error || data.message || "Ismeretlen hiba"}`);
       }
     } catch (error) {
-      setUploadStatus("❌ Hálózati hiba történt.");
       console.error(error);
+      setUploadStatus("❌ Hálózati hiba történt.");
     }
   };
 
@@ -119,23 +142,17 @@ function Upload() {
       <h1 className="text-center mb-4">Kép feltöltése</h1>
 
       <div className="upload-content">
-        {/* Bal oldal */}
+        {/* BAL OLDAL */}
         <div className="upload-left">
           <Form.Group className="mb-3">
             <Form.Label>Fájl feltöltése</Form.Label>
             <div className="d-flex align-items-center gap-2">
-              <Form.Control
-                type="file"
-                accept="image/*"
-                onChange={handleFileChange}
-              />
+              <Form.Control type="file" accept="image/*" onChange={handleFileChange} />
               <span className="text-muted small">max. 25 MB</span>
             </div>
             {fileError && <div className="text-danger mt-2">{fileError}</div>}
             {selectedFile && (
-              <div className="text-success mt-2">
-                ✅ {selectedFile.name} kiválasztva
-              </div>
+              <div className="text-success mt-2">✅ {selectedFile.name} kiválasztva</div>
             )}
           </Form.Group>
 
@@ -161,35 +178,28 @@ function Upload() {
           </Form.Group>
 
           <div className="text-center mt-4">
-            <Button
-              variant="outline-dark"
-              className="upload-btn"
-              onClick={handleUpload}
-            >
+            <Button variant="outline-dark" className="upload-btn" onClick={handleUpload}>
               Feltöltés
             </Button>
             {uploadStatus && <div className="mt-3">{uploadStatus}</div>}
           </div>
         </div>
 
-        {/* Jobb oldal (tagek) */}
-        <div className="upload-right">
+        {/* JOBB OLDAL (tagek) */}
+        <div className="upload-right position-relative">
           <h5>Tag-ek</h5>
           <div className="tags-list">
             {tags.map((tag, i) => (
               <div key={i} className="tag-item">
                 <span className="tag-text">{tag}</span>
-                <button
-                  className="delete-tag-btn"
-                  onClick={() => handleDeleteTag(i)}
-                >
+                <button className="delete-tag-btn" onClick={() => handleDeleteTag(i)}>
                   ×
                 </button>
               </div>
             ))}
           </div>
 
-          <div className="tag-input-container d-flex gap-2 mt-3">
+          <div className="tag-input-container d-flex gap-2 mt-3 position-relative">
             <input
               type="text"
               className="form-control"
@@ -201,6 +211,20 @@ function Upload() {
             <Button variant="success" onClick={handleAddTag} className="add-btn">
               ✓
             </Button>
+
+            {showSuggestions && suggestions.length > 0 && (
+              <ListGroup className="tag-suggestion-box shadow-sm">
+                {suggestions.map((sug) => (
+                  <ListGroup.Item
+                    key={sug}
+                    action
+                    onClick={() => handleAddTag(sug)}
+                  >
+                    {sug}
+                  </ListGroup.Item>
+                ))}
+              </ListGroup>
+            )}
           </div>
         </div>
       </div>

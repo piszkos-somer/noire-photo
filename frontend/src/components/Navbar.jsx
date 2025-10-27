@@ -1,18 +1,13 @@
-import React, { useContext, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { Navbar, Nav, Container, Form, FormControl, Button, Dropdown } from "react-bootstrap";
-import "../css/Navbar.css";
+// src/components/NavbarNoire.jsx
+import React, { useState, useContext } from "react";
+import { Link } from "react-router-dom";
+import { Navbar, Nav, Container, Form, FormControl, Button } from "react-bootstrap";
 import { UserContext } from "../context/UserContext";
+import "../css/Navbar.css";
 
 function NavbarNoire() {
   const [query, setQuery] = useState("");
   const { user, logout } = useContext(UserContext);
-  const navigate = useNavigate();
-
-  const handleLogout = () => {
-    logout();
-    navigate("/Login");
-  };
 
   return (
     <Navbar bg="light" expand="lg" className="shadow-sm sticky-top">
@@ -22,12 +17,17 @@ function NavbarNoire() {
         </Navbar.Brand>
 
         <Navbar.Toggle aria-controls="main-navbar" />
-
         <Navbar.Collapse id="main-navbar">
           <Nav className="me-auto">
-            <Nav.Link as={Link} to="/Photos">Képek</Nav.Link>
-            <Nav.Link as={Link} to="/Upload">Képek feltöltése</Nav.Link>
-            <Nav.Link as={Link} to="/About">Rólunk</Nav.Link>
+            <Nav.Link as={Link} to="/Photos">
+              Képek
+            </Nav.Link>
+            <Nav.Link as={Link} to="/Upload">
+              Képek feltöltése
+            </Nav.Link>
+            <Nav.Link as={Link} to="/About">
+              Rólunk
+            </Nav.Link>
           </Nav>
 
           <Form className="d-flex me-3">
@@ -42,19 +42,24 @@ function NavbarNoire() {
           </Form>
 
           <Nav>
-            {!user.username ? (
-              <Nav.Link as={Link} to="/Registration">Bejelentkezés</Nav.Link>
+            {user?.username ? (
+              <>
+                <Nav.Link as={Link} to="/Profile">
+                  👤 {user.username}
+                </Nav.Link>
+                <Button
+                  variant="outline-danger"
+                  size="sm"
+                  className="ms-2"
+                  onClick={logout}
+                >
+                  Kijelentkezés
+                </Button>
+              </>
             ) : (
-              <Dropdown align="end">
-                <Dropdown.Toggle variant="outline-dark" id="dropdown-user">
-                  {user.username}
-                </Dropdown.Toggle>
-                <Dropdown.Menu>
-                  <Dropdown.Item as={Link} to="/Profile">Profilom</Dropdown.Item>
-                  <Dropdown.Divider />
-                  <Dropdown.Item onClick={handleLogout}>Kijelentkezés</Dropdown.Item>
-                </Dropdown.Menu>
-              </Dropdown>
+              <Nav.Link as={Link} to="/Login">
+                Bejelentkezés
+              </Nav.Link>
             )}
           </Nav>
         </Navbar.Collapse>

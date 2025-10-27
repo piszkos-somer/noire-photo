@@ -1,41 +1,55 @@
-import React, { useState } from "react";
-import { Container, Form, Button, Alert } from "react-bootstrap";
-import axios from "axios";
+// src/pages/Login.jsx
+import React, { useState, useContext } from "react";
+import { Form, Button, Container, Alert } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
+import { UserContext } from "../context/UserContext";
 
 function Login() {
-  const [formData, setFormData] = useState({ email: "", password: "" });
-  const [message, setMessage] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const { login } = useContext(UserContext);
   const navigate = useNavigate();
 
-  const handleChange = (e) =>
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-
-  const handleSubmit = async (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
+    setError("");
+
     try {
-      const res = await axios.post("http://localhost:3001/api/login", formData);
-      localStorage.setItem("token", res.data.token);
-      localStorage.setItem("username", res.data.username);
-      navigate("/Upload");
+      const res = await fetch("http://localhost:3001/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        login(data.username, data.token); // ✅ Context frissítés
+        navigate("/profile");
+      } else {
+        setError(data.message || "Hibás bejelentkezés.");
+      }
     } catch (err) {
-      setMessage(err.response?.data?.message || "Hiba történt.");
+      console.error(err);
+      setError("Szerverhiba vagy hálózati hiba történt.");
     }
   };
 
   return (
-    <Container className="py-5" style={{ maxWidth: "500px" }}>
-      <h1 className="mb-4 text-center">Bejelentkezés</h1>
-      {message && <Alert variant="danger">{message}</Alert>}
-      <Form onSubmit={handleSubmit}>
+    <Container style={{ maxWidth: "400px" }} className="py-5">
+      <h2 className="text-center mb-4">Bejelentkezés</h2>
+
+      {error && <Alert variant="danger">{error}</Alert>}
+
+      <Form onSubmit={handleLogin}>
         <Form.Group className="mb-3">
-          <Form.Label>Email</Form.Label>
+          <Form.Label>Email cím</Form.Label>
           <Form.Control
             type="email"
-            name="email"
-            placeholder="Email"
-            value={formData.email}
-            onChange={handleChange}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Add meg az email címed"
             required
           />
         </Form.Group>
@@ -44,19 +58,16 @@ function Login() {
           <Form.Label>Jelszó</Form.Label>
           <Form.Control
             type="password"
-            name="password"
-            placeholder="Jelszó"
-            value={formData.password}
-            onChange={handleChange}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Add meg a jelszavad"
             required
           />
         </Form.Group>
 
-        <div className="d-grid">
-          <Button variant="primary" type="submit">
-            Bejelentkezem
-          </Button>
-        </div>
+        <Button variant="primary" type="submit" className="w-100">
+          Bejelentkezés
+        </Button>
       </Form>
     </Container>
   );

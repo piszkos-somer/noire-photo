@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Modal, Button, Form, Badge } from "react-bootstrap";
+import { Modal, Button, Form, Badge, ListGroup } from "react-bootstrap";
 import { motion, AnimatePresence } from "framer-motion";
 import "../css/EditModal.css";
 
@@ -8,6 +8,10 @@ function EditModal({ show, onHide, image, onSave }) {
   const [description, setDescription] = useState("");
   const [tags, setTags] = useState([]);
   const [newTag, setNewTag] = useState("");
+  const [suggestions, setSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+
+  const token = localStorage.getItem("token"); // ha máshonnan nem jön a user
 
   useEffect(() => {
     if (image) {
@@ -17,30 +21,49 @@ function EditModal({ show, onHide, image, onSave }) {
     }
   }, [image]);
 
-  // 🔹 Megakadályozza, hogy a háttér scrollozódjon, amíg a modal nyitva van
   useEffect(() => {
-    if (show) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "auto";
-    }
-    return () => {
-      document.body.style.overflow = "auto";
-    };
+    if (show) document.body.style.overflow = "hidden";
+    else document.body.style.overflow = "auto";
+    return () => (document.body.style.overflow = "auto");
   }, [show]);
 
-  const handleAddTag = () => {
-    if (newTag.trim() !== "" && !tags.includes(newTag.trim())) {
-      setTags([...tags, newTag.trim()]);
+  // 🔹 Tag hozzáadás
+  const handleAddTag = (tagValue) => {
+    const value = tagValue || newTag.trim();
+    if (value !== "" && !tags.includes(value)) {
+      setTags([...tags, value]);
       setNewTag("");
+      setSuggestions([]);
+      setShowSuggestions(false);
     }
   };
 
-const handleRemoveTag = (tag) => {
-  setTags(tags.filter((t) => t !== tag));
-};
+  // 🔹 Tag keresés (ajánló funkció)
+  useEffect(() => {
+    const fetchSuggestions = async () => {
+      if (newTag.trim().length < 1) {
+        setSuggestions([]);
+        return;
+      }
 
+      try {
+        const res = await fetch(
+          `http://localhost:3001/api/tags/search?q=${encodeURIComponent(newTag)}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        const data = await res.json();
+        setSuggestions(data);
+        setShowSuggestions(true);
+      } catch (err) {
+        console.error("Tag ajánlási hiba:", err);
+      }
+    };
 
+    const delay = setTimeout(fetchSuggestions, 250); // kis debounce
+    return () => clearTimeout(delay);
+  }, [newTag, token]);
 
   const handleSave = () => {
     onSave({
@@ -49,6 +72,10 @@ const handleRemoveTag = (tag) => {
       description,
       tags,
     });
+  };
+
+  const handleRemoveTag = (tag) => {
+    setTags(tags.filter((t) => t !== tag));
   };
 
   return (
@@ -73,7 +100,6 @@ const handleRemoveTag = (tag) => {
               <Button variant="close" onClick={onHide}></Button>
             </Modal.Header>
 
-            {/* 🔹 A tartalom most scrollozható, ha túl nagy */}
             <Modal.Body className="edit-modal-body-scroll">
               <img
                 src={`http://localhost:3001${image.url}`}
@@ -100,32 +126,40 @@ const handleRemoveTag = (tag) => {
                 />
               </Form.Group>
 
-              <Form.Group>
+              <Form.Group className="position-relative">
                 <Form.Label>Tag-ek</Form.Label>
                 <div className="mb-2">
                   {tags.map((tag) => (
                     <Badge
                       key={tag}
                       bg="secondary"
-                      className="me-2 tag-badge"
+                      className="me-2 mb-1 tag-badge"
                       onClick={() => handleRemoveTag(tag)}
                     >
                       {tag} ×
                     </Badge>
                   ))}
                 </div>
-                <div className="d-flex gap-2">
-                  <Form.Control
-                    type="text"
-                    placeholder="Új tag..."
-                    value={newTag}
-                    onChange={(e) => setNewTag(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && handleAddTag()}
-                  />
-                  <Button variant="success" onClick={handleAddTag}>
-                    ✓
-                  </Button>
-                </div>
+                <Form.Control
+                  type="text"
+                  placeholder="Új tag..."
+                  value={newTag}
+                  onChange={(e) => setNewTag(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleAddTag()}
+                />
+                {showSuggestions && suggestions.length > 0 && (
+                  <ListGroup className="tag-suggestion-box shadow-sm">
+                    {suggestions.map((sug) => (
+                      <ListGroup.Item
+                        key={sug}
+                        action
+                        onClick={() => handleAddTag(sug)}
+                      >
+                        {sug}
+                      </ListGroup.Item>
+                    ))}
+                  </ListGroup>
+                )}
               </Form.Group>
             </Modal.Body>
 

@@ -86,4 +86,24 @@
     justify-content: center;
     align-items: center;
   }
-  
+  .tag-suggestion-box {
+  position: absolute;
+  z-index: 999;
+  width: 100%;
+  top: 100%;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  max-height: 180px;
+  overflow-y: auto;
+}
+
+.tag-suggestion-box .list-group-item {
+  cursor: pointer;
+  padding: 8px 12px;
+  transition: background 0.2s ease;
+}
+
+.tag-suggestion-box .list-group-item:hover {
+  background-color: #f3f3f3;
+}

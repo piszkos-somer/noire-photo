@@ -376,6 +376,27 @@ app.get("/api/me", verifyToken, async (req, res) => {
   }
 });
 
+// 🔍 Keresés hasonló tagekre
+app.get("/api/tags/search", verifyToken, async (req, res) => {
+  const query = req.query.q;
+  if (!query || query.trim().length < 1)
+    return res.json([]);
+
+  try {
+    const conn = await pool.getConnection();
+    const [rows] = await conn.execute(
+      "SELECT tag FROM tags WHERE tag LIKE ? ORDER BY tag LIMIT 10",
+      [`%${query}%`]
+    );
+    conn.release();
+
+    res.json(rows.map(r => r.tag));
+  } catch (err) {
+    console.error("Tag keresési hiba:", err);
+    res.status(500).json({ error: "Szerverhiba a tag keresésekor" });
+  }
+});
+
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => console.log(`✅ Szerver fut a ${PORT} porton!`));
