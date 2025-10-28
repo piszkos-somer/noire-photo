@@ -14,6 +14,7 @@ import { useNavigate } from "react-router-dom";
 import { UserContext } from "../context/UserContext";
 import EditModal from "../components/EditModal";
 import "../css/Profile.css";
+import "../css/Home.css"
 
 function Profile() {
   const [newUsername, setNewUsername] = useState("");
@@ -276,46 +277,39 @@ function Profile() {
       <hr />
       <h3 className="mt-5 mb-3 text-center">Saját feltöltéseim</h3>
 
-      <Row xs={1} md={3} className="g-4">
-        {images.length > 0 ? (
-          images.map((img) => (
-            <Col key={img.id}>
-              <Card className="shadow-sm h-100 d-flex flex-column">
-                <Card.Img
-                  variant="top"
-                  src={`http://localhost:3001${img.url}`}
-                  alt={img.title}
-                  className="card-img-fixed"
-                />
-                <Card.Body className="d-flex flex-column justify-content-between flex-grow-1">
-                  <div>
-                    <Card.Title>{img.title}</Card.Title>
-                    <Card.Text>{img.description}</Card.Text>
-                    {img.tags && img.tags.trim() !== "" && (
-                      <div className="mb-3">
-                        {img.tags.split(",").map((tag, i) => (
-                          <Badge key={`${tag}-${i}`} bg="secondary" className="me-2 mb-1 tag-badge">
-                            #{tag.trim()}
-                          </Badge>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                  <Button
-                    variant="outline-primary"
-                    className="w-100 mt-auto"
-                    onClick={() => handleEdit(img)}
-                  >
-                    ✏️ Szerkesztés
-                  </Button>
-                </Card.Body>
-              </Card>
-            </Col>
-          ))
-        ) : (
-          <p className="text-center text-muted">Még nincs feltöltött képed.</p>
-        )}
-      </Row>
+      <Row xs={1} sm={2} md={3} lg={4} className="g-4">
+  {images.map((image) => (
+    <Col key={image.id}>
+      <div className="glass-card">
+        <Card className="glass-inner">
+          <Card.Img
+            variant="top"
+            src={`http://localhost:3001${image.url}`}
+
+            alt={image.title}
+            style={{
+              borderTopLeftRadius: "22px",
+              borderTopRightRadius: "22px",
+              height: "250px",
+              objectFit: "cover",
+            }}
+          />
+          <Card.Body className="d-flex flex-column align-items-center text-center">
+            <Card.Title>{image.title}</Card.Title>
+            <Button
+              variant="outline-primary"
+              size="sm"
+              onClick={() => handleEdit(image)}
+            >
+              ✏️ Szerkesztés
+            </Button>
+          </Card.Body>
+        </Card>
+      </div>
+    </Col>
+  ))}
+</Row>
+
 
       <EditModal
         show={showModal}
