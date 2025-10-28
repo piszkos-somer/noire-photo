@@ -90,7 +90,7 @@ const pool = mysql.createPool({
 function verifyToken(req, res, next) {
   const authHeader = req.headers.authorization;
   if (!authHeader)
-    return res.status(401).json({ message: "Nincs hitelesítés, kérlek jelentkezz be." });
+    return res.status(401).json({ message: "Hiányzó token (Authorization header)." });
 
   const token = authHeader.split(" ")[1];
   try {
@@ -99,9 +99,14 @@ function verifyToken(req, res, next) {
     next();
   } catch (err) {
     console.error("❌ JWT hiba:", err.message);
-    return res.status(403).json({ message: "Érvénytelen vagy lejárt token." });
+    if (err.name === "TokenExpiredError")
+      return res.status(401).json({ message: "A bejelentkezés lejárt, kérlek jelentkezz be újra." });
+    if (err.name === "JsonWebTokenError")
+      return res.status(403).json({ message: "Érvénytelen token formátum." });
+    return res.status(403).json({ message: "Token hiba." });
   }
 }
+
 
 // -----------------------------
 // 🔹 REGISZTRÁCIÓ
@@ -391,19 +396,55 @@ app.get("/api/me", verifyToken, async (req, res) => {
 // 🔹 Szerver indítás
 // -----------------------------
 
-app.get("/api/latest-images", verifyToken, async (req, res) => {
+// 🔓 Publikus (nem kell token)
+// 🔓 Publikus (nem kell token, de ha van, akkor használjuk)
+app.get("/api/latest-images", async (req, res) => {
+  let userId = null;
+
+  // Ha van token, próbáljuk dekódolni
+  const authHeader = req.headers.authorization;
+  if (authHeader && authHeader.startsWith("Bearer ")) {
+    try {
+      const token = authHeader.split(" ")[1];
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      userId = decoded.id;
+    } catch (err) {
+      // Token hibát nem logolunk hangosan – nem kötelező a token
+    }
+  }
+
   const conn = await pool.getConnection();
   try {
-    const [rows] = await conn.execute(
-      `
-      SELECT i.id, i.title, i.description, i.url, i.likes,
-             u.username AS author
+    let query = `
+      SELECT 
+        i.id, i.title, i.description, i.url, i.likes,
+        u.username AS author
       FROM images i
       JOIN users u ON i.user_id = u.id
       ORDER BY i.id DESC
       LIMIT 12
-      `
-    );
+    `;
+
+    const [rows] = await conn.query(query);
+
+    if (userId) {
+      // 🔍 Ha be van jelentkezve a felhasználó, lekérjük az ő like-jait
+      const [likedRows] = await conn.query(
+        "SELECT image_id FROM image_likes WHERE user_id = ?",
+        [userId]
+      );
+
+      const likedSet = new Set(likedRows.map((r) => r.image_id));
+      rows.forEach((img) => {
+        img.isLiked = likedSet.has(img.id);
+      });
+    } else {
+      // Ha nincs bejelentkezve → alapértelmezés: false
+      rows.forEach((img) => {
+        img.isLiked = false;
+      });
+    }
+
     res.json(rows);
   } catch (err) {
     console.error("❌ Hiba képek lekérdezésénél:", err);
@@ -413,19 +454,203 @@ app.get("/api/latest-images", verifyToken, async (req, res) => {
   }
 });
 
-app.put("/api/images/:id/like", verifyToken, async (req, res) => {
+
+
+// controllers/imageController.js
+// ❤️ KÉP LIKE / UNLIKE
+app.post("/api/images/:id/like", verifyToken, async (req, res) => {
   const imageId = req.params.id;
+  const userId = req.user.id;
+
+  if (!userId) {
+    return res.status(401).json({ error: "Felhasználó nincs bejelentkezve." });
+  }
+
   const conn = await pool.getConnection();
   try {
-    await conn.execute("UPDATE images SET likes = likes + 1 WHERE id = ?", [imageId]);
-    res.json({ success: true });
+    // Ellenőrizzük, hogy már likeolta-e
+    const [existing] = await conn.query(
+      "SELECT * FROM image_likes WHERE user_id = ? AND image_id = ?",
+      [userId, imageId]
+    );
+
+    if (existing.length > 0) {
+      // 🔁 Ha már likeolta → unlike
+      await conn.query("DELETE FROM image_likes WHERE user_id = ? AND image_id = ?", [
+        userId,
+        imageId,
+      ]);
+      await conn.query("UPDATE images SET likes = likes - 1 WHERE id = ?", [imageId]);
+
+      const [[updatedImage]] = await conn.query(
+        "SELECT likes FROM images WHERE id = ?",
+        [imageId]
+      );
+
+      return res.json({ likes: updatedImage.likes, isLiked: false });
+    } else {
+      // ❤️ Ha még nem → like
+      await conn.query("INSERT INTO image_likes (user_id, image_id) VALUES (?, ?)", [
+        userId,
+        imageId,
+      ]);
+      await conn.query("UPDATE images SET likes = likes + 1 WHERE id = ?", [imageId]);
+
+      const [[updatedImage]] = await conn.query(
+        "SELECT likes FROM images WHERE id = ?",
+        [imageId]
+      );
+
+      return res.json({ likes: updatedImage.likes, isLiked: true });
+    }
   } catch (err) {
-    console.error("❌ Like frissítési hiba:", err);
-    res.status(500).json({ error: "Szerverhiba." });
+    console.error("❌ Like művelet hiba:", err);
+    res.status(500).json({ error: "Adatbázis hiba a like művelet közben." });
   } finally {
     conn.release();
   }
 });
+
+
+app.post("/api/refresh-token", verifyToken, (req, res) => {
+  const newToken = jwt.sign(
+    { id: req.user.id, username: req.user.username },
+    process.env.JWT_SECRET,
+    { expiresIn: "1h" }
+  );
+  res.json({ token: newToken });
+});
+
+// ===============================================
+// 💬 KOMMENTEK + LIKE RENDSZER
+// ===============================================
+
+// 🔹 Képhez tartozó kommentek lekérése (publikus)
+// 💬 Kommentek lekérése adott képhez
+// 💬 Kommentek lekérése adott képhez (like státuszokkal)
+app.get("/api/images/:id/comments", async (req, res) => {
+  const imageId = req.params.id;
+  const authHeader = req.headers.authorization;
+
+  let userId = null;
+  if (authHeader && authHeader.startsWith("Bearer ")) {
+    try {
+      const token = authHeader.split(" ")[1];
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      userId = decoded.id;
+    } catch (err) {
+      // Token hiba nem kritikus itt
+    }
+  }
+
+  const conn = await pool.getConnection();
+  try {
+    const [rows] = await conn.query(
+      `
+      SELECT 
+        c.id,
+        c.comment,
+        c.upload_date AS created_at,
+        u.username,
+        u.profile_picture,
+        c.image_id,
+        (SELECT COUNT(*) FROM comment_likes WHERE comment_id = c.id) AS likes,
+        CASE
+          WHEN ? IS NOT NULL AND EXISTS (
+            SELECT 1 FROM comment_likes WHERE comment_id = c.id AND user_id = ?
+          )
+          THEN TRUE
+          ELSE FALSE
+        END AS isLiked
+      FROM comments c
+      JOIN users u ON c.user_id = u.id
+      WHERE c.image_id = ?
+      ORDER BY c.upload_date DESC
+      `,
+      [userId, userId, imageId]
+    );
+
+    res.json(rows);
+  } catch (err) {
+    console.error("❌ Komment lekérési hiba:", err);
+    res.status(500).json({ error: "Szerverhiba a kommentek lekérdezésénél." });
+  } finally {
+    conn.release();
+  }
+});
+
+
+
+// 🔹 Új komment létrehozása (csak bejelentkezve)
+// 💬 Új komment létrehozása
+app.post("/api/images/:id/comments", verifyToken, async (req, res) => {
+  const imageId = req.params.id;
+  const userId = req.user.id;
+  const { comment } = req.body;
+
+  if (!comment || comment.trim() === "") {
+    return res.status(400).json({ error: "A komment nem lehet üres." });
+  }
+
+  const conn = await pool.getConnection();
+  try {
+    await conn.query(
+      "INSERT INTO comments (user_id, image_id, comment) VALUES (?, ?, ?)",
+      [userId, imageId, comment]
+    );
+    res.json({ success: true });
+  } catch (err) {
+    console.error("❌ Komment mentési hiba:", err);
+    res.status(500).json({ error: "Szerverhiba a komment mentésénél." });
+  } finally {
+    conn.release();
+  }
+});
+
+
+// ❤️ Komment like / unlike
+app.post("/api/comments/:id/like", verifyToken, async (req, res) => {
+  const commentId = req.params.id;
+  const userId = req.user.id;
+
+  const conn = await pool.getConnection();
+  try {
+    const [existing] = await conn.query(
+      "SELECT * FROM comment_likes WHERE user_id = ? AND comment_id = ?",
+      [userId, commentId]
+    );
+
+    let isLiked;
+
+    if (existing.length > 0) {
+      await conn.query("DELETE FROM comment_likes WHERE user_id = ? AND comment_id = ?", [
+        userId,
+        commentId,
+      ]);
+      isLiked = false;
+    } else {
+      await conn.query("INSERT INTO comment_likes (user_id, comment_id) VALUES (?, ?)", [
+        userId,
+        commentId,
+      ]);
+      isLiked = true;
+    }
+
+    const [[updated]] = await conn.query(
+      "SELECT COUNT(*) AS likes FROM comment_likes WHERE comment_id = ?",
+      [commentId]
+    );
+
+    res.json({ likes: updated.likes, isLiked });
+  } catch (err) {
+    console.error("❌ Komment like hiba:", err);
+    res.status(500).json({ error: "Szerverhiba a komment like műveletnél." });
+  } finally {
+    conn.release();
+  }
+});
+
+
 
 
 const PORT = process.env.PORT || 3001;

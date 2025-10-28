@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { Modal, Button, Form, Badge, ListGroup } from "react-bootstrap";
 import { motion, AnimatePresence } from "framer-motion";
 import "../css/EditModal.css";
+import { getAuthHeader, handleTokenError } from "../utils/auth";
+import { useNavigate } from "react-router-dom";
 
 function EditModal({ show, onHide, image, onSave }) {
   const [title, setTitle] = useState("");
@@ -10,9 +12,7 @@ function EditModal({ show, onHide, image, onSave }) {
   const [newTag, setNewTag] = useState("");
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
-
-  const userData = localStorage.getItem("user");
-const token = userData ? JSON.parse(userData).token : null;
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (image) {
@@ -23,12 +23,10 @@ const token = userData ? JSON.parse(userData).token : null;
   }, [image]);
 
   useEffect(() => {
-    if (show) document.body.style.overflow = "hidden";
-    else document.body.style.overflow = "auto";
+    document.body.style.overflow = show ? "hidden" : "auto";
     return () => (document.body.style.overflow = "auto");
   }, [show]);
 
-  // 🔹 Tag hozzáadás
   const handleAddTag = (tagValue) => {
     const value = tagValue || newTag.trim();
     if (value !== "" && !tags.includes(value)) {
@@ -39,7 +37,7 @@ const token = userData ? JSON.parse(userData).token : null;
     }
   };
 
-  // 🔹 Tag keresés (ajánló funkció)
+  // 🔹 Tag keresés biztonságosan, tokennel
   useEffect(() => {
     const fetchSuggestions = async () => {
       if (newTag.trim().length < 1) {
@@ -50,10 +48,14 @@ const token = userData ? JSON.parse(userData).token : null;
       try {
         const res = await fetch(
           `http://localhost:3001/api/tags/search?q=${encodeURIComponent(newTag)}`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
+          { headers: getAuthHeader() }
         );
+
+        if (!res.ok) {
+          handleTokenError(res.status, navigate);
+          return;
+        }
+
         const data = await res.json();
         setSuggestions(data);
         setShowSuggestions(true);
@@ -62,17 +64,12 @@ const token = userData ? JSON.parse(userData).token : null;
       }
     };
 
-    const delay = setTimeout(fetchSuggestions, 250); // kis debounce
+    const delay = setTimeout(fetchSuggestions, 250);
     return () => clearTimeout(delay);
-  }, [newTag, token]);
+  }, [newTag, navigate]);
 
   const handleSave = () => {
-    onSave({
-      id: image.id,
-      title,
-      description,
-      tags,
-    });
+    onSave({ id: image.id, title, description, tags });
   };
 
   const handleRemoveTag = (tag) => {

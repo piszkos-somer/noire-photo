@@ -1,6 +1,6 @@
-/* 🌤️ Világos, kékes háttér */
+/* 🌤️ Világos, hideg háttér */
 body {
-  background: linear-gradient(135deg, #c9e5ff, #e8f4ff, #ffffff);
+  background: linear-gradient(135deg, #d8e2eb, #e9f0f6, #f4f7fa);
   font-family: "Poppins", sans-serif;
   color: #222;
   min-height: 100vh;
@@ -11,12 +11,12 @@ body {
 /* Oldal elrendezés */
 .home-page {
   min-height: 100vh;
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(12px);
 }
 
 /* Színátmenetes cím */
 .szinatmenet {
-  background: linear-gradient(90deg, #007bff, #00bcd4, #4dd0e1);
+  background: linear-gradient(90deg, #2a6cff, #00bcd4, #00acc1);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   font-weight: 800;
@@ -29,32 +29,58 @@ body {
   gap: 2rem;
 }
 
-/* 🧊 Üveg hatású kártyák */
+/* 🧊 Üveg hatású kártyák – szürkés, hűvös tónus */
 .glass-card {
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .glass-inner {
-  background: rgba(255, 255, 255, 0.25);
-  border: 1px solid rgba(255, 255, 255, 0.35);
-  backdrop-filter: blur(25px) saturate(180%);
-  -webkit-backdrop-filter: blur(25px) saturate(180%);
-  border-radius: 20px;
+  background: rgba(200, 200, 200, 0.1);
+  border: 5px solid rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(35px) saturate(160%);
+  -webkit-backdrop-filter: blur(35px) saturate(160%);
+  border-radius: 22px;
   color: #222;
   height: 100%;
-  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 12px 45px rgba(0, 0, 0, 0.18);
   transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Fényes, üvegél-szerű reflexió */
+.glass-inner::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 22px;
+  padding: 1px;
+  background: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.5),
+    rgba(180, 180, 180, 0.1)
+  );
+  mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  -webkit-mask-composite: xor;
+  pointer-events: none;
 }
 
 .glass-card:hover .glass-inner {
-  transform: translateY(-6px);
+  transform: translateY(-5px) scale(1.02);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
 }
 
 /* Képek */
 .img-wrapper {
   height: 200px;
   overflow: hidden;
-  border-radius: 20px 20px 0 0;
+  border-radius: 22px 22px 0 0;
 }
 
 .img-wrapper img {
@@ -81,42 +107,90 @@ body {
 .heart-btn {
   background: transparent;
   border: none;
-  color: #ff3b3b;
+  color: #e84118;
   cursor: pointer;
   display: flex;
   align-items: center;
   font-weight: 600;
-  transition: transform 0.2s;
+  transition: transform 0.2s ease, color 0.2s ease;
 }
 
 .heart-btn:hover {
   transform: scale(1.15);
+  color: #ff0000;
 }
 
 /* 🪟 Üveghatású modal */
 .glass-modal .modal-dialog {
   max-width: 900px;
+  border-radius: 24px !important;
+  overflow: hidden !important;
 }
 
-.glass-modal .modal-content-glass {
-  background: rgba(255, 255, 255, 0.25);
-  border: 1px solid rgba(255, 255, 255, 0.4);
-  backdrop-filter: blur(30px) saturate(180%);
-  -webkit-backdrop-filter: blur(30px) saturate(180%);
-  border-radius: 24px;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+/* ❄️ Egyetlen, valódi üvegpanel */
+.glass-modal .modal-content {
+  background: rgba(210, 210, 210, 0.12) !important;
+  border: 5px solid rgba(255, 255, 255, 0.25) !important;
+  backdrop-filter: blur(40px) saturate(160%) !important;
+  -webkit-backdrop-filter: blur(40px) saturate(160%) !important;
+  border-radius: 24px !important;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.3) !important;
   text-align: center;
-  padding: 20px;
+  position: relative;
+  overflow: hidden !important;
+  padding: 0 !important; /* Fontos: a Modal.Body adja a belső paddinget */
 }
 
+/* Reflexió keret */
+.glass-modal .modal-content::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 2px;
+  background: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.6),
+    rgba(150, 150, 150, 0.1)
+  );
+  mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  -webkit-mask-composite: xor;
+  pointer-events: none;
+}
+
+/* Felső fényátmenet */
+.glass-modal .modal-content::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 40%;
+  border-radius: inherit;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.25),
+    rgba(255, 255, 255, 0)
+  );
+  pointer-events: none;
+}
+
+/* Modal kép */
 .modal-image {
   width: 100%;
   max-height: 70vh;
   object-fit: contain;
-  border-radius: 16px;
+  border-radius: 16px !important;
+  display: block;
 }
 
-/* Bővebben gomb */
+/* Gombok */
 .btn-outline-light {
   border-color: #007bff;
   color: #007bff;
@@ -138,62 +212,248 @@ body {
   height: 100%;
   background: radial-gradient(
     circle at top left,
-    rgba(255, 255, 255, 0.4),
+    rgba(255, 255, 255, 0.35),
     transparent
   );
   z-index: -1;
 }
-/* ========================================== */
-/* 🧊 ÜVEGHATÁSÚ MODAL (VALÓDI GLASSMORPHISM) */
-/* ========================================== */
 
-/* A háttér (backdrop) halványan áttetsző és blur-ös */
+/* Modal háttér */
 .modal-backdrop.show {
-  background: rgba(255, 255, 255, 0.05) !important;
-  backdrop-filter: blur(10px) saturate(180%) !important;
-  -webkit-backdrop-filter: blur(10px) saturate(180%) !important;
+  background: rgba(255, 255, 255, 0.04) !important;
+  backdrop-filter: blur(10px) saturate(160%) !important;
+  -webkit-backdrop-filter: blur(10px) saturate(160%) !important;
 }
 
-/* Maga a modal tartalom (üveg panel) */
-.glass-modal .modal-content {
-  background: rgba(255, 255, 255, 0.18) !important;
-  border: 1px solid rgba(255, 255, 255, 0.4) !important;
-  backdrop-filter: blur(25px) saturate(180%) !important;
-  -webkit-backdrop-filter: blur(25px) saturate(180%) !important;
-  border-radius: 24px !important;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25) !important;
-  color: #111 !important;
-  overflow: hidden;
-  position: relative;
-}
 
-/* Finom fényes reflexió a felső részben */
-.glass-modal .modal-content::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 40%;
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.3),
-    rgba(255, 255, 255, 0)
-  );
-  pointer-events: none;
+/* =============================================== */
+/* 🧊 MODAL HEADER & INFO SZEKCIÓK (új üveg design) */
+/* =============================================== */
+
+/* HEADER - üveges, de olvasható sáv */
+.glass-header {
+  background: rgba(240, 240, 240, 0.25);
+  backdrop-filter: blur(25px) saturate(150%);
+  -webkit-backdrop-filter: blur(25px) saturate(150%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 16px 24px;
+  text-align: left;
   border-radius: 24px 24px 0 0;
 }
 
-/* Kép */
-.modal-image {
-  width: 100%;
-  max-height: 70vh;
-  object-fit: contain;
-  border-radius: 16px;
+.glass-title {
+  color: #111;
+  font-weight: 600;
+  font-size: 1.4rem;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
 }
 
-/* Szöveg */
-.glass-modal h3,
-.glass-modal p {
+/* INFO rész (leírás + szerző + gombok) */
+.glass-info {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(20px) saturate(150%);
+  -webkit-backdrop-filter: blur(20px) saturate(150%);
+  border-top: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 0 0 24px 24px;
+  text-align: left;
+  color: #111;
+  font-size: 0.95rem;
+  position: relative;
+}
+
+/* Szerző */
+.glass-author {
+  font-weight: 600;
+  color: #1a1a1a;
+  background: rgba(255, 255, 255, 0.4);
+  padding: 6px 10px;
+  border-radius: 10px;
+  display: inline-block;
+  backdrop-filter: blur(10px);
+}
+
+/* Leírás */
+.glass-description {
+  line-height: 1.6;
   color: #222;
+  background: rgba(255, 255, 255, 0.35);
+  padding: 8px 10px;
+  border-radius: 12px;
+  display: inline-block;
+  backdrop-filter: blur(10px);
+  max-width: 90%;
+}
+
+/* ❤️ Like gomb a modalban */
+.heart-btn-modal {
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 50px;
+  padding: 6px 14px;
+  color: #e84118;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  font-weight: 600;
+  transition: all 0.25s ease;
+  backdrop-filter: blur(10px);
+}
+
+.heart-btn-modal:hover {
+  transform: scale(1.1);
+  background: rgba(255, 255, 255, 0.4);
+}
+/* ================================ */
+/* 📄 Modal szöveges rész layout fix */
+/* ================================ */
+
+.glass-info-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.glass-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  flex: 1;
+}
+
+/* Szerző (címke buborék) */
+.glass-author {
+  font-weight: 600;
+  color: #111;
+  background: rgba(255, 255, 255, 0.45);
+  padding: 6px 10px;
+  border-radius: 10px;
+  backdrop-filter: blur(10px);
+  display: inline-block;
+  margin-bottom: 6px;
+}
+
+/* Leírás */
+.glass-description {
+  line-height: 1.6;
+  color: #111;
+  background: rgba(255, 255, 255, 0.35);
+  padding: 8px 10px;
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  display: inline-block;
+  max-width: 90%;
+}
+
+/* ❤️ Like gomb jobbra */
+.heart-btn-modal {
+  align-self: center;
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 50px;
+  padding: 6px 14px;
+  color: #e84118;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  font-weight: 600;
+  transition: all 0.25s ease;
+  backdrop-filter: blur(10px);
+  flex-shrink: 0;
+}
+
+.heart-btn-modal:hover {
+  transform: scale(1.1);
+  background: rgba(255, 255, 255, 0.4);
+}
+/* ================================ */
+/* 📄 Modal szöveges rész layout fix */
+/* ================================ */
+
+.glass-info-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+/* Szerző (címke buborék) */
+.glass-author {
+  font-weight: 600;
+  color: #111;
+  background: rgba(255, 255, 255, 0.45);
+  padding: 6px 12px;
+  border-radius: 10px;
+  backdrop-filter: blur(10px);
+  display: inline-block;
+  margin-bottom: 0;
+}
+
+/* Leírás */
+.glass-description {
+  line-height: 1.6;
+  color: #111;
+  background: rgba(255, 255, 255, 0.35);
+  padding: 10px 12px;
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  display: inline-block;
+  width: 100%;
+  text-align: left;
+}
+
+/* ❤️ Like gomb (jobb oldal, egy sorban a szerzővel) */
+.heart-btn-modal {
+  background: rgba(255, 255, 255, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 50px;
+  padding: 6px 14px;
+  color: #e84118;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  font-weight: 600;
+  transition: all 0.25s ease;
+  backdrop-filter: blur(10px);
+  flex-shrink: 0;
+}
+
+.heart-btn-modal:hover {
+  transform: scale(1.1);
+  background: rgba(255, 255, 255, 0.4);
+}
+.heart-btn-modal {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  transition: transform 0.15s ease;
+  position: relative;
+}
+
+.heart-btn-modal:hover {
+  transform: scale(1.1);
+}
+
+.heart-btn-modal:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.comment-section {
+  background: rgba(255, 255, 255, 0.08);
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(12px);
+  border-radius: 0 0 24px 24px;
+}
+
+.glass-comment {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.comment-section {
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  padding-top: 15px;
 }

@@ -3,10 +3,38 @@ import { Container, Form, Button, ListGroup } from "react-bootstrap";
 import "../css/Upload.css";
 import { useNavigate } from "react-router-dom";
 
+// 🔐 Token segédfüggvények
+const getToken = () => {
+  const userData = localStorage.getItem("user");
+  if (!userData) return null;
+
+  try {
+    const parsed = JSON.parse(userData);
+    if (!parsed.token || parsed.token === "null" || parsed.token === "undefined") {
+      return null;
+    }
+    return parsed.token;
+  } catch {
+    return null;
+  }
+};
+
+const getAuthHeader = () => {
+  const token = getToken();
+  return token ? { Authorization: `Bearer ${token}` } : {};
+};
+
+const handleTokenError = (status, navigate) => {
+  if (status === 401 || status === 403) {
+    console.warn("⚠️ Token érvénytelen vagy lejárt, kijelentkeztetés...");
+    localStorage.removeItem("user");
+    navigate("/Registration");
+  }
+};
+
 function Upload() {
   const navigate = useNavigate();
-  const userData = localStorage.getItem("user");
-const token = userData ? JSON.parse(userData).token : null;
+  const token = getToken();
 
   const [tags, setTags] = useState(() => {
     const saved = localStorage.getItem("tags");
@@ -23,18 +51,12 @@ const token = userData ? JSON.parse(userData).token : null;
   const [description, setDescription] = useState("");
   const [uploadStatus, setUploadStatus] = useState("");
 
-
-useEffect(() => {
-  const userData = localStorage.getItem("user");
-  const parsedUser = userData ? JSON.parse(userData) : null;
-  const isLoggedIn = parsedUser && parsedUser.token;
-
-  if (!isLoggedIn) {
-    navigate("/Registration");
-  }
-}, [navigate]);
-
-
+  // 🔹 Ellenőrizd, hogy be van-e jelentkezve a felhasználó
+  useEffect(() => {
+    if (!token) {
+      navigate("/Registration");
+    }
+  }, [token, navigate]);
 
   // 📦 LocalStorage sync
   useEffect(() => {
@@ -51,8 +73,14 @@ useEffect(() => {
       try {
         const res = await fetch(
           `http://localhost:3001/api/tags/search?q=${encodeURIComponent(newTag)}`,
-          { headers: { Authorization: `Bearer ${token}` } }
+          { headers: getAuthHeader() }
         );
+
+        if (!res.ok) {
+          handleTokenError(res.status, navigate);
+          return;
+        }
+
         const data = await res.json();
         setSuggestions(data);
         setShowSuggestions(true);
@@ -62,7 +90,7 @@ useEffect(() => {
     };
     const delay = setTimeout(fetchSuggestions, 250); // debounce
     return () => clearTimeout(delay);
-  }, [newTag, token]);
+  }, [newTag, navigate]);
 
   const handleAddTag = (tagValue) => {
     const value = tagValue || newTag.trim();
@@ -124,13 +152,18 @@ useEffect(() => {
     formData.append("tags", JSON.stringify(tags));
 
     try {
-      const response = await fetch("http://localhost:3001/upload", {
+      const response = await fetch("http://localhost:3001/api/upload", {
         method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
+        headers: getAuthHeader(),
         body: formData,
       });
 
+      if (!response.ok) {
+        handleTokenError(response.status, navigate);
+      }
+
       const data = await response.json();
+
       if (response.ok) {
         setUploadStatus("✅ Feltöltés sikeres!");
         setSelectedFile(null);
@@ -224,11 +257,7 @@ useEffect(() => {
             {showSuggestions && suggestions.length > 0 && (
               <ListGroup className="tag-suggestion-box shadow-sm">
                 {suggestions.map((sug) => (
-                  <ListGroup.Item
-                    key={sug}
-                    action
-                    onClick={() => handleAddTag(sug)}
-                  >
+                  <ListGroup.Item key={sug} action onClick={() => handleAddTag(sug)}>
                     {sug}
                   </ListGroup.Item>
                 ))}
