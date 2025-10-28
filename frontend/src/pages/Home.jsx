@@ -271,7 +271,11 @@ const handleCommentLike = async (commentId) => {
 
   // 🔍 Modal nyitása / zárása
   const openModal = (image) => setSelectedImage(image);
-  const closeModal = () => setSelectedImage(null);
+  const closeModal = () => {
+  setSelectedImage(null);
+  setNewComment(""); // 🔥 Ürítjük az input mezőt bezáráskor
+};
+
 
   if (loading)
     return (
