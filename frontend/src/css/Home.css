@@ -134,3 +134,52 @@ body {
   );
   z-index: -1;
 }
+/* 🏷️ Tag buborékok */
+.tag-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.tag-badge {
+  background: rgba(30, 30, 30, 0.65);
+  backdrop-filter: blur(6px);
+  color: #f1f1f1;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.tag-badge:hover {
+  background: rgba(0, 0, 0, 0.75);
+  transform: scale(1.08);
+  cursor: pointer;
+}
+/* ================================ */
+/* 💎 ÜVEGES TAG BUBORÉKOK STÍLUSA */
+/* ================================ */
+
+.tag-bubble {
+  display: inline-block;
+  padding: 6px 12px;
+  margin: 4px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #666;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  transition: all 0.2s ease;
+  cursor: default;
+}
+
+.tag-bubble:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: translateY(-2px);
+}

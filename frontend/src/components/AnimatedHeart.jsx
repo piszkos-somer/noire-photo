@@ -104,7 +104,7 @@ const AnimatedHeart = ({ isLiked, onClick, disabled, likeCount }) => {
       <span
         className="ms-1"
         style={{
-          color: "#fff",
+          color: "#111",
           fontSize: "14px",
           verticalAlign: "middle",
           marginLeft: "6px",

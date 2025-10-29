@@ -396,8 +396,6 @@ app.get("/api/me", verifyToken, async (req, res) => {
 // 🔹 Szerver indítás
 // -----------------------------
 
-// 🔓 Publikus (nem kell token)
-// 🔓 Publikus (nem kell token, de ha van, akkor használjuk)
 app.get("/api/latest-images", async (req, res) => {
   let userId = null;
 
@@ -415,35 +413,46 @@ app.get("/api/latest-images", async (req, res) => {
 
   const conn = await pool.getConnection();
   try {
-    let query = `
+    // 🔹 Mostantól visszaadjuk az i.user_id-t is
+    const [rows] = await conn.query(
+      `
       SELECT 
-        i.id, i.title, i.description, i.url, i.likes,
-        u.username AS author
+        i.id,
+        i.user_id,
+        i.title,
+        i.description,
+        i.url,
+        i.likes,
+        u.username AS author,
+        COALESCE(GROUP_CONCAT(t.tag SEPARATOR ','), '') AS tags
       FROM images i
       JOIN users u ON i.user_id = u.id
+      LEFT JOIN image_tags it ON i.id = it.image_id
+      LEFT JOIN tags t ON it.tag_id = t.id
+      GROUP BY i.id
       ORDER BY i.id DESC
       LIMIT 12
-    `;
+      `
+    );
 
-    const [rows] = await conn.query(query);
-
+    // 🔹 Like státusz beállítása
     if (userId) {
-      // 🔍 Ha be van jelentkezve a felhasználó, lekérjük az ő like-jait
       const [likedRows] = await conn.query(
         "SELECT image_id FROM image_likes WHERE user_id = ?",
         [userId]
       );
-
       const likedSet = new Set(likedRows.map((r) => r.image_id));
       rows.forEach((img) => {
         img.isLiked = likedSet.has(img.id);
       });
     } else {
-      // Ha nincs bejelentkezve → alapértelmezés: false
-      rows.forEach((img) => {
-        img.isLiked = false;
-      });
+      rows.forEach((img) => (img.isLiked = false));
     }
+
+    // 🔹 A tageket alakítsuk tömbbé a frontend kényelméért
+    rows.forEach((img) => {
+      img.tags = img.tags ? img.tags.split(",").filter((t) => t.trim() !== "") : [];
+    });
 
     res.json(rows);
   } catch (err) {
@@ -453,7 +462,6 @@ app.get("/api/latest-images", async (req, res) => {
     conn.release();
   }
 });
-
 
 
 // controllers/imageController.js
@@ -549,6 +557,7 @@ app.get("/api/images/:id/comments", async (req, res) => {
       `
       SELECT 
         c.id,
+        c.user_id,
         c.comment,
         c.upload_date AS created_at,
         u.username,
@@ -650,8 +659,161 @@ app.post("/api/comments/:id/like", verifyToken, async (req, res) => {
   }
 });
 
+// 🔓 Publikus: felhasználó adatainak lekérése
+app.get("/api/users/:id", async (req, res) => {
+  const userId = req.params.id;
+  const conn = await pool.getConnection();
+  try {
+    const [rows] = await conn.query(
+      "SELECT id, username, bio, profile_picture FROM users WHERE id = ?",
+      [userId]
+    );
+    if (rows.length === 0)
+      return res.status(404).json({ error: "Felhasználó nem található." });
+    res.json(rows[0]);
+  } catch (err) {
+    console.error("❌ Felhasználó lekérési hiba:", err);
+    res.status(500).json({ error: "Szerverhiba." });
+  } finally {
+    conn.release();
+  }
+});
 
+// 🔓 Publikus: adott user képei
+// 🔓 Publikus: adott user képei (tagekkel és like adatokkal)
+// 🔓 Publikus: adott user képei (szerző névvel, tagekkel és like adatokkal)
+app.get("/api/user-images/:id", async (req, res) => {
+  const userId = req.params.id;
+  const authHeader = req.headers.authorization;
+  let viewerId = null;
 
+  // Ha van token, próbáljuk dekódolni
+  if (authHeader && authHeader.startsWith("Bearer ")) {
+    try {
+      const token = authHeader.split(" ")[1];
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      viewerId = decoded.id;
+    } catch (err) {
+      // ha nincs érvényes token, nem baj
+    }
+  }
+
+  const conn = await pool.getConnection();
+  try {
+    // 🔹 Itt is visszaadjuk az i.user_id-t és a szerző nevét
+    const [rows] = await conn.query(
+      `
+      SELECT 
+        i.id,
+        i.user_id,
+        i.title,
+        i.description,
+        i.url,
+        i.likes,
+        u.username AS author,
+        COALESCE(GROUP_CONCAT(t.tag SEPARATOR ','), '') AS tags
+      FROM images i
+      JOIN users u ON i.user_id = u.id
+      LEFT JOIN image_tags it ON i.id = it.image_id
+      LEFT JOIN tags t ON it.tag_id = t.id
+      WHERE i.user_id = ?
+      GROUP BY i.id
+      ORDER BY i.id DESC
+      `,
+      [userId]
+    );
+
+    // Like státusz megjelölése (ha be van jelentkezve a néző)
+    if (viewerId) {
+      const [likedRows] = await conn.query(
+        "SELECT image_id FROM image_likes WHERE user_id = ?",
+        [viewerId]
+      );
+      const likedSet = new Set(likedRows.map((r) => r.image_id));
+      rows.forEach((img) => (img.isLiked = likedSet.has(img.id)));
+    } else {
+      rows.forEach((img) => (img.isLiked = false));
+    }
+
+    // 🔹 A tageket alakítsuk tömbbé a frontend kényelméért
+    rows.forEach((img) => {
+      img.tags = img.tags ? img.tags.split(",").filter((t) => t.trim() !== "") : [];
+    });
+
+    res.json(rows);
+  } catch (err) {
+    console.error("❌ Felhasználó képeinek lekérési hiba:", err);
+    res.status(500).json({ error: "Szerverhiba." });
+  } finally {
+    conn.release();
+  }
+});
+
+// 🔓 Publikus: képek lekérdezése adott tag alapján
+app.get("/api/images/by-tag/:tag", async (req, res) => {
+  const { tag } = req.params;
+  const authHeader = req.headers.authorization;
+  let userId = null;
+
+  if (authHeader && authHeader.startsWith("Bearer ")) {
+    try {
+      const token = authHeader.split(" ")[1];
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      userId = decoded.id;
+    } catch (err) {
+      // nem baj ha nincs token
+    }
+  }
+
+  const conn = await pool.getConnection();
+  try {
+    const [rows] = await conn.query(
+      `
+      SELECT 
+        i.id,
+        i.user_id,
+        i.title,
+        i.description,
+        i.url,
+        i.likes,
+        u.username AS author,
+        COALESCE(GROUP_CONCAT(t.tag SEPARATOR ','), '') AS tags
+      FROM images i
+      JOIN users u ON i.user_id = u.id
+      JOIN image_tags it ON i.id = it.image_id
+      JOIN tags t ON it.tag_id = t.id
+      WHERE t.tag = ?
+      GROUP BY i.id
+      ORDER BY i.id DESC
+      `,
+      [tag]
+    );
+
+    // like státusz (ha van user)
+    if (userId) {
+      const [likedRows] = await conn.query(
+        "SELECT image_id FROM image_likes WHERE user_id = ?",
+        [userId]
+      );
+      const likedSet = new Set(likedRows.map((r) => r.image_id));
+      rows.forEach((img) => (img.isLiked = likedSet.has(img.id)));
+    } else {
+      rows.forEach((img) => (img.isLiked = false));
+    }
+
+    // tagek tömbbé alakítása
+    rows.forEach((img) => {
+      img.tags = img.tags ? img.tags.split(",").filter((t) => t.trim() !== "") : [];
+    });
+
+    res.json(rows);
+  } catch (err) {
+    console.error("❌ Tag szerinti képlekérdezés hiba:", err);
+    res.status(500).json({ error: "Szerverhiba." });
+  } finally {
+    conn.release();
+  }
+});
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => console.log(`✅ Szerver fut a ${PORT} porton!`));

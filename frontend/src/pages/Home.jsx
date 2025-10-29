@@ -1,15 +1,14 @@
-// src/pages/Home.jsx
 import React, { useState, useEffect, useRef } from "react";
-import { Container, Card, Button } from "react-bootstrap";
-import { Heart } from "lucide-react";
+import { Container } from "react-bootstrap";
 import "../css/Home.css";
 import { useNavigate } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
-import AnimatedCommentHeart from "../components/AnimatedCommentHeart";
+import ImageCard from "../components/ImageCard";
 import ImageModal from "../components/ImageModal";
+import { motion, AnimatePresence } from "framer-motion";
+import { Heart } from "lucide-react";
 
-// 🔹 AnimatedHeart maradhat itt, ahogy volt (ha szeretnéd, külön fájlba is tehetjük)
-const AnimatedHeart = ({ isLiked, onClick, disabled, likeCount }) => {
+// 💖 AnimatedHeart maradhat itt vagy külön fájlban
+export const AnimatedHeart = ({ isLiked, onClick, disabled, likeCount }) => {
   const [animate, setAnimate] = useState(false);
   const [showSparkle, setShowSparkle] = useState(false);
   const prevLiked = useRef(isLiked);
@@ -99,7 +98,6 @@ function Home() {
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
   const [commentLoading, setCommentLoading] = useState(false);
-
   const navigate = useNavigate();
 
   const userData = localStorage.getItem("user");
@@ -121,94 +119,20 @@ function Home() {
     fetchImages();
   }, [token]);
 
-  useEffect(() => {
-    if (selectedImage) fetchComments(selectedImage.id);
-  }, [selectedImage]);
-
-  const fetchComments = async (imageId) => {
-    try {
-      const headers = token ? { Authorization: `Bearer ${token}` } : {};
-      const res = await fetch(`http://localhost:3001/api/images/${imageId}/comments`, { headers });
-      const data = await res.json();
-      setComments(Array.isArray(data) ? data : []);
-    } catch (err) {
-      console.error("❌ Komment lekérési hiba:", err);
-    }
-  };
-
-  const handleCommentSubmit = async () => {
-    if (!token) return navigate("/Registration");
-    if (!newComment.trim()) return;
-
-    setCommentLoading(true);
-    try {
-      const res = await fetch(
-        `http://localhost:3001/api/images/${selectedImage.id}/comments`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ comment: newComment }),
-        }
-      );
-      if (res.ok) {
-        setNewComment("");
-        fetchComments(selectedImage.id);
-      }
-    } catch (err) {
-      console.error("❌ Komment küldési hiba:", err);
-    } finally {
-      setCommentLoading(false);
-    }
-  };
-
-  const handleCommentLike = async (commentId) => {
-    if (!token) return navigate("/Registration");
-    try {
-      const res = await fetch(`http://localhost:3001/api/comments/${commentId}/like`, {
-        method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (res.ok) {
-        const updated = await res.json();
-        setComments((prev) =>
-          prev.map((c) =>
-            c.id === commentId
-              ? { ...c, likes: updated.likes, isLiked: updated.isLiked }
-              : c
-          )
-        );
-      }
-    } catch (err) {
-      console.error("❌ Komment like hiba:", err);
-    }
-  };
-
   const handleLike = async (imageId) => {
     if (!token) return navigate("/Registration");
-
     setLikeLoading(imageId);
     try {
       const res = await fetch(`http://localhost:3001/api/images/${imageId}/like`, {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
       });
-
       if (res.ok) {
         const updated = await res.json();
         setImages((prev) =>
           prev.map((img) =>
-            img.id === imageId
-              ? { ...img, likes: updated.likes, isLiked: updated.isLiked }
-              : img
+            img.id === imageId ? { ...img, likes: updated.likes, isLiked: updated.isLiked } : img
           )
-        );
-        setSelectedImage((prev) =>
-          prev && prev.id === imageId
-            ? { ...prev, likes: updated.likes, isLiked: updated.isLiked }
-            : prev
         );
       }
     } catch (err) {
@@ -217,11 +141,78 @@ function Home() {
       setLikeLoading(null);
     }
   };
+// 🔹 Kommentek lekérése
+const fetchComments = async (imageId) => {
+  try {
+    const headers = token ? { Authorization: `Bearer ${token}` } : {};
+    const res = await fetch(`http://localhost:3001/api/images/${imageId}/comments`, { headers });
+    const data = await res.json();
+    setComments(Array.isArray(data) ? data : []);
+  } catch (err) {
+    console.error("❌ Komment lekérési hiba:", err);
+  }
+};
 
-  const openModal = (image) => setSelectedImage(image);
+// 🔹 Új komment beküldése
+const handleCommentSubmit = async () => {
+  if (!token) return navigate("/Registration");
+  if (!newComment.trim()) return;
+
+  setCommentLoading(true);
+  try {
+    const res = await fetch(
+      `http://localhost:3001/api/images/${selectedImage.id}/comments`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ comment: newComment }),
+      }
+    );
+    if (res.ok) {
+      setNewComment("");
+      fetchComments(selectedImage.id); // ✅ kommentek újratöltése
+    }
+  } catch (err) {
+    console.error("❌ Komment küldési hiba:", err);
+  } finally {
+    setCommentLoading(false);
+  }
+};
+
+// 🔹 Komment like / unlike
+const handleCommentLike = async (commentId) => {
+  if (!token) return navigate("/Registration");
+  try {
+    const res = await fetch(`http://localhost:3001/api/comments/${commentId}/like`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (res.ok) {
+      const updated = await res.json();
+      setComments((prev) =>
+        prev.map((c) =>
+          c.id === commentId
+            ? { ...c, likes: updated.likes, isLiked: updated.isLiked }
+            : c
+        )
+      );
+    }
+  } catch (err) {
+    console.error("❌ Komment like hiba:", err);
+  }
+};
+
+const openModal = (image) => {
+  setSelectedImage(image);
+  fetchComments(image.id); // ✅ Hozzáadva
+};
   const closeModal = () => {
     setSelectedImage(null);
     setNewComment("");
+    
   };
 
   if (loading)
@@ -239,46 +230,30 @@ function Home() {
 
       <Container className="image-grid">
         {images.map((img) => (
-          <div key={img.id} className="glass-card">
-            <Card className="glass-inner">
-              <div className="img-wrapper">
-                <Card.Img variant="top" src={`http://localhost:3001${img.url}`} />
-              </div>
-              <Card.Body>
-                <div className="d-flex justify-content-between align-items-center mb-2">
-                  <Card.Title className="m-0">{img.title}</Card.Title>
-                  <AnimatedHeart
-                    isLiked={img.isLiked}
-                    likeCount={img.likes}
-                    disabled={likeLoading === img.id}
-                    onClick={() => handleLike(img.id)}
-                  />
-                </div>
-                <Card.Subtitle className="text-muted mb-2">{img.author}</Card.Subtitle>
-                <Card.Text className="text-truncate-multiline">{img.description}</Card.Text>
-                <Button variant="outline-light" onClick={() => openModal(img)}>
-                  Bővebben
-                </Button>
-              </Card.Body>
-            </Card>
-          </div>
+          <ImageCard
+            key={img.id}
+            image={img}
+            onLike={handleLike}
+            onOpen={openModal}
+            likeLoading={likeLoading}
+          />
         ))}
       </Container>
 
-      {/* 🪟 Új, külön ImageModal komponens */}
       <ImageModal
-        show={!!selectedImage}
-        image={selectedImage}
-        onClose={closeModal}
-        onLike={handleLike}
-        likeLoading={likeLoading}
-        comments={comments}
-        newComment={newComment}
-        onCommentChange={(e) => setNewComment(e.target.value)}
-        onCommentSubmit={handleCommentSubmit}
-        commentLoading={commentLoading}
-        onCommentLike={handleCommentLike}
-      />
+  show={!!selectedImage}
+  image={selectedImage}
+  onClose={closeModal}
+  onLike={handleLike}
+  likeLoading={likeLoading}
+  comments={comments}
+  newComment={newComment}
+  onCommentChange={(e) => setNewComment(e.target.value)}
+  onCommentSubmit={handleCommentSubmit}        // ✅ működő handler
+  commentLoading={commentLoading}
+  onCommentLike={handleCommentLike}            // ✅ működő handler
+/>
+
     </div>
   );
 }
