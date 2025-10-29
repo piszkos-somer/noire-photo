@@ -1,6 +1,6 @@
 // src/components/NavbarNoire.jsx
 import React, { useState, useContext } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Navbar, Nav, Container, Form, FormControl, Button } from "react-bootstrap";
 import { UserContext } from "../context/UserContext";
 import "../css/Navbar.css";
@@ -8,6 +8,17 @@ import "../css/Navbar.css";
 function NavbarNoire() {
   const [query, setQuery] = useState("");
   const { user, logout } = useContext(UserContext);
+  const navigate = useNavigate();
+
+  // 🔍 Keresés indítása → Browse oldalra irányítás (cím/leírás keresés)
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (!query.trim()) return;
+
+    // Browse oldalra irányítunk query paraméterrel (nem :tag-ként!)
+    navigate(`/browse?q=${encodeURIComponent(query.trim())}`);
+    setQuery("");
+  };
 
   return (
     <Navbar bg="light" expand="lg" className="shadow-sm sticky-top">
@@ -30,7 +41,8 @@ function NavbarNoire() {
             </Nav.Link>
           </Nav>
 
-          <Form className="d-flex me-3">
+          {/* 🔍 Kereső (ugyanúgy néz ki) */}
+          <Form className="d-flex me-3" onSubmit={handleSearch}>
             <FormControl
               type="search"
               placeholder="Keresés..."
@@ -38,7 +50,9 @@ function NavbarNoire() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
             />
-            <Button variant="outline-primary">Keresés</Button>
+            <Button variant="outline-primary" type="submit">
+              Keresés
+            </Button>
           </Form>
 
           <Nav>

@@ -1,145 +1,225 @@
-import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import { Container, Row, Spinner } from "react-bootstrap";
+// src/pages/Browse.jsx
+import React, { useState, useEffect } from "react";
+import { Container, Form, Button, Row, Col } from "react-bootstrap";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import ImageCard from "../components/ImageCard";
 import ImageModal from "../components/ImageModal";
 import "../css/Home.css";
 
 function Browse() {
-  const { tag } = useParams();
   const [images, setImages] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [likeLoading, setLikeLoading] = useState(null);
+  const [query, setQuery] = useState("");
+  const [filter, setFilter] = useState("title");
+  const [loading, setLoading] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
-  const [modalShow, setModalShow] = useState(false);
+  const [likeLoading, setLikeLoading] = useState(null);
+  const [comments, setComments] = useState([]);
+  const [newComment, setNewComment] = useState("");
+  const [commentLoading, setCommentLoading] = useState(false);
 
-  // 🔹 Token lekérése (ha be vagy jelentkezve)
-  const token = localStorage.getItem("token");
+  const navigate = useNavigate();
+  const { tag } = useParams();
+  const location = useLocation();
 
-  // 🔹 Képek lekérése adott tag alapján
-  const fetchImages = async () => {
+  const userData = localStorage.getItem("user");
+  const token = userData ? JSON.parse(userData).token : null;
+
+  // Ha URL-ből jön egy tag
+  useEffect(() => {
+  const urlParams = new URLSearchParams(location.search);
+  const qParam = urlParams.get("q");
+
+  if (tag) {
+    // ha URL paraméter van, pl. /browse/macska → tag keresés
+    setQuery(tag);
+    setFilter("tag");
+    handleSearch(tag, "tag");
+  } else if (qParam) {
+    // ha ?q=valami → title/description keresés
+    setQuery(qParam);
+    setFilter("title");
+    handleSearch(qParam, "title");
+  }
+}, [tag, location.search]);
+
+
+  // 🔍 Keresés backendről
+  const handleSearch = async (q = query, f = filter) => {
+    setLoading(true);
     try {
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
       const res = await fetch(
-        `http://localhost:3001/api/images/by-tag/${encodeURIComponent(tag)}`,
-        {
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-        }
+        `http://localhost:3001/api/images/search?q=${encodeURIComponent(q)}&filter=${f}`,
+        { headers }
       );
       const data = await res.json();
       setImages(Array.isArray(data) ? data : []);
     } catch (err) {
-      console.error("Képek betöltési hiba:", err);
+      console.error("❌ Keresési hiba:", err);
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    fetchImages();
-  }, [tag]);
-
-  // ❤️ Like / Unlike logika
+  // ❤️ Like kezelése
   const handleLike = async (imageId) => {
-    if (!token) {
-      alert("Be kell jelentkezned a like-oláshoz!");
-      return;
-    }
-
+    if (!token) return navigate("/Registration");
     setLikeLoading(imageId);
     try {
       const res = await fetch(`http://localhost:3001/api/images/${imageId}/like`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
-
-      const data = await res.json();
-
       if (res.ok) {
-        setImages((prevImages) =>
-          prevImages.map((img) =>
-            img.id === imageId
-              ? { ...img, isLiked: data.isLiked, likes: data.likes }
-              : img
+        const updated = await res.json();
+        setImages((prev) =>
+          prev.map((img) =>
+            img.id === imageId ? { ...img, likes: updated.likes, isLiked: updated.isLiked } : img
           )
         );
-
-        // 🔹 Ha modal nyitva van, frissítsük azt is
-        if (selectedImage && selectedImage.id === imageId) {
-          setSelectedImage((prev) => ({
-            ...prev,
-            isLiked: data.isLiked,
-            likes: data.likes,
-          }));
-        }
       }
     } catch (err) {
-      console.error("Hiba a like művelet közben:", err);
+      console.error("❌ Like fetch hiba:", err);
     } finally {
       setLikeLoading(null);
     }
   };
 
-  // 🖼️ Modal megnyitása
-  const handleOpenModal = (image) => {
+  // 💬 Kommentek
+  const fetchComments = async (imageId) => {
+    try {
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+      const res = await fetch(`http://localhost:3001/api/images/${imageId}/comments`, { headers });
+      const data = await res.json();
+      setComments(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error("❌ Komment lekérési hiba:", err);
+    }
+  };
+
+  const handleCommentSubmit = async () => {
+    if (!token) return navigate("/Registration");
+    if (!newComment.trim()) return;
+    setCommentLoading(true);
+    try {
+      const res = await fetch(
+        `http://localhost:3001/api/images/${selectedImage.id}/comments`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ comment: newComment }),
+        }
+      );
+      if (res.ok) {
+        setNewComment("");
+        fetchComments(selectedImage.id);
+      }
+    } catch (err) {
+      console.error("❌ Komment küldési hiba:", err);
+    } finally {
+      setCommentLoading(false);
+    }
+  };
+
+  const handleCommentLike = async (commentId) => {
+    if (!token) return navigate("/Registration");
+    try {
+      const res = await fetch(`http://localhost:3001/api/comments/${commentId}/like`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        const updated = await res.json();
+        setComments((prev) =>
+          prev.map((c) =>
+            c.id === commentId ? { ...c, likes: updated.likes, isLiked: updated.isLiked } : c
+          )
+        );
+      }
+    } catch (err) {
+      console.error("❌ Komment like hiba:", err);
+    }
+  };
+
+  const openModal = (image) => {
     setSelectedImage(image);
-    setModalShow(true);
+    fetchComments(image.id);
   };
 
-  // ❌ Modal bezárása
-  const handleCloseModal = () => {
-    setModalShow(false);
+  const closeModal = () => {
     setSelectedImage(null);
+    setNewComment("");
   };
-
-  if (loading)
-    return (
-      <div className="text-center py-5">
-        <Spinner animation="border" />
-      </div>
-    );
 
   return (
-    <Container className="py-5">
-      <h2 className="text-center mb-4">
-        📸 Képek ezzel a taggel: <span className="szinatmenet">#{tag}</span>
-      </h2>
+    <div className="home-page py-5">
+      <h1 className="text-center text-light mb-5 szinatmenet">Képek böngészése</h1>
 
-      {images.length === 0 ? (
-        <p className="text-center text-muted">Nincs találat ezzel a taggel.</p>
-      ) : (
-        <Row xs={1} sm={2} md={3} lg={4} className="g-4">
-          {images.map((img) => (
+      {/* 🔍 Kereső és szűrő */}
+      <Container className="mb-4">
+        <Row className="justify-content-center">
+          <Col md={8}>
+            <div className="d-flex gap-2">
+              <Form.Control
+                type="text"
+                placeholder="Keresés cím, leírás, tag vagy feltöltő alapján..."
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+              />
+              <Form.Select
+                value={filter}
+                onChange={(e) => setFilter(e.target.value)}
+                style={{ maxWidth: "150px" }}
+              >
+                <option value="title">Cím / Leírás</option>
+                <option value="tag">Tag</option>
+                <option value="author">Feltöltő</option>
+              </Form.Select>
+              <Button variant="outline-light" onClick={() => handleSearch()}>
+                Keresés
+              </Button>
+            </div>
+          </Col>
+        </Row>
+      </Container>
+
+      {/* 🔹 Találatok */}
+      <Container className="image-grid">
+        {loading ? (
+          <h4 className="text-center text-light py-5">Keresés folyamatban...</h4>
+        ) : images.length === 0 ? (
+          <h5 className="text-center text-light py-5">Nincs találat.</h5>
+        ) : (
+          images.map((img) => (
             <ImageCard
               key={img.id}
               image={img}
               onLike={handleLike}
-              onOpen={handleOpenModal}
+              onOpen={openModal}
               likeLoading={likeLoading}
             />
-          ))}
-        </Row>
-      )}
+          ))
+        )}
+      </Container>
 
-      {/* 🖼️ Modal (ugyanaz mint Home-ban) */}
-      {selectedImage && (
-        <ImageModal
-          show={modalShow}
-          image={selectedImage}
-          onClose={handleCloseModal}
-          onLike={handleLike}
-          likeLoading={likeLoading}
-          comments={[]}
-          newComment=""
-          onCommentChange={() => {}}
-          onCommentSubmit={() => {}}
-          commentLoading={false}
-          onCommentLike={() => {}}
-        />
-      )}
-    </Container>
+      {/* 🔹 Modal */}
+      <ImageModal
+        show={!!selectedImage}
+        image={selectedImage}
+        onClose={closeModal}
+        onLike={handleLike}
+        likeLoading={likeLoading}
+        comments={comments}
+        newComment={newComment}
+        onCommentChange={(e) => setNewComment(e.target.value)}
+        onCommentSubmit={handleCommentSubmit}
+        commentLoading={commentLoading}
+        onCommentLike={handleCommentLike}
+      />
+    </div>
   );
 }
 
