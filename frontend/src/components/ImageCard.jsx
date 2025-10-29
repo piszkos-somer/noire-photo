@@ -2,7 +2,8 @@ import React from "react";
 import { Card, Button } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import AnimatedHeart from "./AnimatedHeart";
-import "../css/Home.css";
+import "../css/ImageCard.css";
+
 
 function ImageCard({ image, onLike, onOpen, likeLoading }) {
   const navigate = useNavigate();
