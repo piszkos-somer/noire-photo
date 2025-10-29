@@ -1,11 +1,13 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Card, Button } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import AnimatedHeart from "./AnimatedHeart";
 import "../css/ImageCard.css";
+import { MessageCircle } from "lucide-react";
 
 function ImageCard({ image, onLike, onOpen, likeLoading }) {
   const navigate = useNavigate();
+  const [commentCount, setCommentCount] = useState(0);
 
   // 🔹 Szerző nevére kattintás → ViewProfile oldal
   const handleAuthorClick = () => {
@@ -13,6 +15,14 @@ function ImageCard({ image, onLike, onOpen, likeLoading }) {
       navigate(`/profile/${image.user_id}`);
     }
   };
+
+  // 🔹 kommentek számának lekérése
+  useEffect(() => {
+    fetch(`http://localhost:3001/api/images/${image.id}/comment-count`)
+      .then((res) => res.json())
+      .then((data) => setCommentCount(data.count))
+      .catch((err) => console.error("Komment szám lekérése sikertelen:", err));
+  }, [image.id]);
 
   // 🔹 Tagre kattintás → Browse oldal
   const handleTagClick = (tag) => {
@@ -32,15 +42,21 @@ function ImageCard({ image, onLike, onOpen, likeLoading }) {
         </div>
 
         <Card.Body>
-          {/* 🔹 Cím + Like gomb */}
-          <div className="d-flex justify-content-between align-items-center mb-2">
+          {/* 🔹 Cím + Like gomb (jobb oldalon, alatta komment számláló) */}
+          <div className="d-flex justify-content-between align-items-start mb-2">
             <h5 className="info-bubble img-title">{image.title}</h5>
-            <AnimatedHeart
-              isLiked={image.isLiked}
-              likeCount={image.likes}
-              disabled={likeLoading === image.id}
-              onClick={() => onLike(image.id)}
-            />
+            <div className="text-end">
+              <AnimatedHeart
+                isLiked={image.isLiked}
+                likeCount={image.likes}
+                disabled={likeLoading === image.id}
+                onClick={() => onLike(image.id)}
+              />
+              <div className="comment-counter mt-1">
+                <MessageCircle size={18} className="comment-icon" />
+                <span>{commentCount}</span>
+              </div>
+            </div>
           </div>
 
           {/* 🔹 Feltöltő neve */}
@@ -59,7 +75,7 @@ function ImageCard({ image, onLike, onOpen, likeLoading }) {
             <div className="info-bubble text">{image.description}</div>
           )}
 
-          {/* 🔹 Tagek (üveges buborékokkal és kattinthatóan) */}
+          {/* 🔹 Tagek */}
           {Array.isArray(image.tags) && image.tags.length > 0 ? (
             <div className="d-flex flex-wrap gap-2 mb-3">
               {image.tags.map((tag, i) => (

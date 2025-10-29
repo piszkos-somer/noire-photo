@@ -221,3 +221,23 @@
 .author {
   color: #555;
 }
+.comment-counter {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  color: #333;
+  font-weight: 500;
+  font-size: 0.9rem;
+  cursor: default;
+  transition: transform 0.2s ease;
+}
+
+.comment-counter:hover {
+  transform: translateY(-2px);
+}
+
+.comment-icon {
+  color: #007bff;
+  opacity: 0.8;
+}

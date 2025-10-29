@@ -866,5 +866,22 @@ app.get("/api/images/search", async (req, res) => {
   }
 });
 
+app.get("/api/images/:id/comment-count", async (req, res) => {
+  const imageId = req.params.id;
+  const conn = await pool.getConnection();
+  try {
+    const [[row]] = await conn.query(
+      "SELECT COUNT(*) AS count FROM comments WHERE image_id = ?",
+      [imageId]
+    );
+    res.json({ count: row.count });
+  } catch (err) {
+    console.error("❌ Komment szám lekérési hiba:", err);
+    res.status(500).json({ error: "Szerverhiba a kommentek számolásakor." });
+  } finally {
+    conn.release();
+  }
+});
+
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => console.log(`✅ Szerver fut a ${PORT} porton!`));
