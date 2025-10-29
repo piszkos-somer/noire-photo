@@ -183,3 +183,50 @@ body {
   background: rgba(255, 255, 255, 0.25);
   transform: translateY(-2px);
 }
+.glass-bubble {
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(12px);
+  color: #000;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+/* ============================== */
+/* 📏 KÁRTYÁK EGYSÉGES MAGASSÁGA */
+/* ============================== */
+
+.image-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 2rem;
+  align-items: stretch; /* minden kártya ugyanakkora magasságot vesz fel */
+}
+
+/* A teljes kártya kitölti a cellát */
+.glass-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* A belső tartalom is rugalmasan kitölt */
+.glass-inner {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between; /* leírás + gomb elrendezés */
+  height: 100%;
+}
+
+/* A kép ne nyúljon túl */
+.img-wrapper {
+  flex-shrink: 0;
+  height: 200px;
+  overflow: hidden;
+  border-radius: 22px 22px 0 0;
+}
+
+.card-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
