@@ -1,13 +1,25 @@
-/* Grid */
+/* ========== GRID ========== */
 .image-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr); /* 👉 pontosan 3 oszlop */
+  grid-template-columns: repeat(3, 1fr);
   gap: 2rem;
   align-items: stretch;
   justify-items: center;
 }
 
-/* 🧊 Üveg hatású kártyák */
+@media (max-width: 992px) {
+  .image-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 576px) {
+  .image-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ========== ÜVEGES KÁRTYÁK ========== */
 .glass-card {
   display: flex;
   flex-direction: column;
@@ -15,15 +27,16 @@
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
+/* 💎 Modal-szerű üveges háttér */
 .glass-inner {
-  background: rgba(255, 255, 255, 0.3); /* enyhe áttetszőség */
-  border: 1px solid rgba(255, 255, 255, 0.25); /* finom fehér szegély */
+  background: rgba(210, 210, 210, 0.12); /* azonos a modal-content-tel */
+  border: 2px solid rgba(255, 255, 255, 0.25);
   border-radius: 22px;
-  color: #222;
+  color: #111;
   height: 100%;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08); /* lágy árnyék */
-  backdrop-filter: blur(8px) saturate(150%);
-  -webkit-backdrop-filter: blur(8px) saturate(150%);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(40px) saturate(160%);
+  -webkit-backdrop-filter: blur(40px) saturate(160%);
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
@@ -32,7 +45,7 @@
   justify-content: space-between;
 }
 
-
+/* Külső fényes gradient keret */
 .glass-inner::before {
   content: "";
   position: absolute;
@@ -41,8 +54,8 @@
   padding: 1px;
   background: linear-gradient(
     145deg,
-    rgba(255, 255, 255, 0.5),
-    rgba(180, 180, 180, 0.1)
+    rgba(255, 255, 255, 0.6),
+    rgba(150, 150, 150, 0.1)
   );
   mask:
     linear-gradient(#fff 0 0) content-box,
@@ -55,12 +68,14 @@
   pointer-events: none;
 }
 
+/* Hover effekt */
 .glass-card:hover .glass-inner {
   transform: translateY(-5px) scale(1.02);
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+  background: rgba(210, 210, 210, 0.18);
 }
 
-/* Képek */
+/* ========== KÉPEK ========== */
 .img-wrapper {
   flex-shrink: 0;
   height: 200px;
@@ -79,16 +94,42 @@
   transform: scale(1.08);
 }
 
-/* Leírás */
-.text-truncate-multiline {
+/* ========== ÜVEGBUBORÉKOK (Cím, szerző, leírás, tagek) ========== */
+.info-bubble,
+.tag-bubble {
+  display: inline-block;
+  background: rgba(255, 255, 255, 0.15); /* mint a .glass-comment */
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 16px;
+  padding: 6px 12px;
+  margin-bottom: 6px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  color: #111; /* azonos a modal szövegével */
+  font-weight: 500;
+  width: fit-content;
+  transition: all 0.25s ease;
+}
+
+.info-bubble:hover,
+.tag-bubble:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: translateY(-2px);
+}
+
+/* Több soros leírás */
+.info-bubble.text {
   display: -webkit-box;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  color: #333;
+  max-width: 90%;
+  color: #111;
+  background: rgba(255, 255, 255, 0.35); /* mint a .glass-description */
 }
 
-/* ❤️ Like gomb */
+/* ========== LIKE GOMB ========== */
 .heart-btn {
   background: transparent;
   border: none;
@@ -105,69 +146,22 @@
   color: #ff0000;
 }
 
-/* 🏷️ Tag buborékok */
+/* ========== TAG TARTÓ ========== */
 .tag-container {
   display: flex;
   flex-wrap: wrap;
   gap: 0.4rem;
 }
 
-.tag-badge {
-  background: rgba(30, 30, 30, 0.65);
-  backdrop-filter: blur(6px);
-  color: #f1f1f1;
-  padding: 3px 10px;
-  border-radius: 12px;
-  font-size: 0.8rem;
-  font-weight: 500;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
-  transition: background 0.2s ease, transform 0.2s ease;
+/* ========== BŐVEBBEN GOMB ========== */
+.btn-outline-light {
+  border: 1px solid rgba(0, 123, 255, 0.6);
+  color: #007bff;
+  transition: all 0.3s ease;
 }
 
-.tag-badge:hover {
-  background: rgba(0, 0, 0, 0.75);
-  transform: scale(1.08);
-  cursor: pointer;
-}
-
-/* 💎 Üveges tag buborékok */
-.tag-bubble {
-  display: inline-block;
-  padding: 6px 12px;
-  margin: 4px;
-  border-radius: 20px;
-  font-size: 0.9rem;
-  font-weight: 500;
-  color: #666;
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-  transition: all 0.2s ease;
-  cursor: default;
-}
-
-.tag-bubble:hover {
-  background: rgba(255, 255, 255, 0.25);
-  transform: translateY(-2px);
-}
-
-.glass-bubble {
-  background: rgba(255, 255, 255, 0.12);
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  backdrop-filter: blur(12px);
-  color: #000;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-}
-@media (max-width: 992px) {
-  .image-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (max-width: 576px) {
-  .image-grid {
-    grid-template-columns: 1fr;
-  }
+.btn-outline-light:hover {
+  background: #007bff;
+  color: white;
+  border-color: #007bff;
 }

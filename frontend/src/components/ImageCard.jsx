@@ -4,7 +4,6 @@ import { useNavigate } from "react-router-dom";
 import AnimatedHeart from "./AnimatedHeart";
 import "../css/ImageCard.css";
 
-
 function ImageCard({ image, onLike, onOpen, likeLoading }) {
   const navigate = useNavigate();
 
@@ -35,7 +34,7 @@ function ImageCard({ image, onLike, onOpen, likeLoading }) {
         <Card.Body>
           {/* 🔹 Cím + Like gomb */}
           <div className="d-flex justify-content-between align-items-center mb-2">
-            <Card.Title className="m-0">{image.title}</Card.Title>
+            <span className="info-bubble">{image.title}</span>
             <AnimatedHeart
               isLiked={image.isLiked}
               likeCount={image.likes}
@@ -46,20 +45,18 @@ function ImageCard({ image, onLike, onOpen, likeLoading }) {
 
           {/* 🔹 Feltöltő neve */}
           {image.author && (
-            <Card.Subtitle
-              className="text-muted mb-2 author-link"
+            <div
+              className="info-bubble"
               style={{ cursor: "pointer" }}
               onClick={handleAuthorClick}
             >
               📷 {image.author}
-            </Card.Subtitle>
+            </div>
           )}
 
           {/* 🔹 Leírás */}
           {image.description && (
-            <Card.Text className="text-truncate-multiline">
-              {image.description}
-            </Card.Text>
+            <div className="info-bubble text">{image.description}</div>
           )}
 
           {/* 🔹 Tagek (üveges buborékokkal és kattinthatóan) */}
