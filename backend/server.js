@@ -815,5 +815,56 @@ app.get("/api/images/by-tag/:tag", async (req, res) => {
   }
 });
 
+// 🔍 Kép keresés (cím, leírás, szerző vagy tag alapján)
+app.get("/api/images/search", async (req, res) => {
+  const { q, filter } = req.query;
+  const search = q ? `%${q}%` : "%";
+
+  const conn = await pool.getConnection();
+  try {
+    let query = `
+      SELECT 
+        i.id,
+        i.title,
+        i.description,
+        i.url,
+        i.likes,
+        u.username AS author,
+        u.id AS user_id,
+        COALESCE(GROUP_CONCAT(t.tag SEPARATOR ','), '') AS tags
+      FROM images i
+      JOIN users u ON i.user_id = u.id
+      LEFT JOIN image_tags it ON i.id = it.image_id
+      LEFT JOIN tags t ON it.tag_id = t.id
+    `;
+
+    // Szűrés típus szerint
+    if (filter === "author") {
+      query += " WHERE u.username LIKE ?";
+    } else if (filter === "tag") {
+      query += " WHERE t.tag LIKE ?";
+    } else {
+      // Alapértelmezett: cím + leírás
+      query += " WHERE i.title LIKE ? OR i.description LIKE ?";
+    }
+
+    query += " GROUP BY i.id ORDER BY i.id DESC";
+
+    const [rows] =
+      filter === "author"
+        ? await conn.query(query, [search])
+        : filter === "tag"
+        ? await conn.query(query, [search])
+        : await conn.query(query, [search, search]);
+
+    res.json(rows);
+  } catch (err) {
+    console.error("❌ Keresési hiba:", err);
+    res.status(500).json({ error: "Szerverhiba keresés közben." });
+  } finally {
+    conn.release();
+  }
+});
+
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => console.log(`✅ Szerver fut a ${PORT} porton!`));

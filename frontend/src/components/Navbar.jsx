@@ -19,7 +19,7 @@ function NavbarNoire() {
         <Navbar.Toggle aria-controls="main-navbar" />
         <Navbar.Collapse id="main-navbar">
           <Nav className="me-auto">
-            <Nav.Link as={Link} to="/Photos">
+            <Nav.Link as={Link} to="/Browse">
               Képek
             </Nav.Link>
             <Nav.Link as={Link} to="/Upload">
