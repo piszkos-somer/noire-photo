@@ -34,7 +34,7 @@ function ImageCard({ image, onLike, onOpen, likeLoading }) {
         <Card.Body>
           {/* 🔹 Cím + Like gomb */}
           <div className="d-flex justify-content-between align-items-center mb-2">
-            <span className="info-bubble">{image.title}</span>
+            <h5 className="info-bubble img-title">{image.title}</h5>
             <AnimatedHeart
               isLiked={image.isLiked}
               likeCount={image.likes}
@@ -46,7 +46,7 @@ function ImageCard({ image, onLike, onOpen, likeLoading }) {
           {/* 🔹 Feltöltő neve */}
           {image.author && (
             <div
-              className="info-bubble"
+              className="info-bubble author"
               style={{ cursor: "pointer" }}
               onClick={handleAuthorClick}
             >

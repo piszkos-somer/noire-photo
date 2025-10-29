@@ -217,3 +217,9 @@
   color: white;
   border-color: #007bff;
 }
+.img-title {
+    font-weight: 600;
+}
+.author {
+    color: #555;
+}
