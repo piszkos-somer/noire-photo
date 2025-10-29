@@ -27,9 +27,9 @@
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-/* 💎 Modal-szerű üveges háttér */
+/* 💎 Szürkés, üveges kártya háttér */
 .glass-inner {
-  background: rgba(210, 210, 210, 0.12); /* azonos a modal-content-tel */
+  background: rgba(180, 180, 180, 0.25);
   border: 2px solid rgba(255, 255, 255, 0.25);
   border-radius: 22px;
   color: #111;
@@ -45,7 +45,6 @@
   justify-content: space-between;
 }
 
-/* Külső fényes gradient keret */
 .glass-inner::before {
   content: "";
   position: absolute;
@@ -54,7 +53,7 @@
   padding: 1px;
   background: linear-gradient(
     145deg,
-    rgba(255, 255, 255, 0.6),
+    rgba(255, 255, 255, 0.5),
     rgba(150, 150, 150, 0.1)
   );
   mask:
@@ -68,11 +67,11 @@
   pointer-events: none;
 }
 
-/* Hover effekt */
+/* Hover állapot */
 .glass-card:hover .glass-inner {
   transform: translateY(-5px) scale(1.02);
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
-  background: rgba(210, 210, 210, 0.18);
+  background: rgba(160, 160, 160, 0.3);
 }
 
 /* ========== KÉPEK ========== */
@@ -94,39 +93,92 @@
   transform: scale(1.08);
 }
 
-/* ========== ÜVEGBUBORÉKOK (Cím, szerző, leírás, tagek) ========== */
+/* ========== FEHÉR, ÜVEGHATÁSÚ BUBORÉKOK ========== */
 .info-bubble,
 .tag-bubble {
   display: inline-block;
-  background: rgba(255, 255, 255, 0.15); /* mint a .glass-comment */
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.85); /* 🌤️ világosabb fehér */
+  backdrop-filter: blur(12px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.6);
   border-radius: 16px;
   padding: 6px 12px;
   margin-bottom: 6px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-  color: #111; /* azonos a modal szövegével */
+  color: #222;
   font-weight: 500;
   width: fit-content;
   transition: all 0.25s ease;
 }
 
-.info-bubble:hover,
+/* ====== Tagek (világoskék, üveges gradient háttér) ====== */
+.tag-bubble {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #0a1f3f; /* sötétebb kékes szöveg, jól olvasható */
+  background: linear-gradient(
+    135deg,
+    rgba(200, 225, 255, 0.9) 0%,
+    rgba(240, 247, 255, 0.759) 100%
+  );
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 16px;
+  padding: 6px 12px;
+  margin-bottom: 6px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+  backdrop-filter: blur(10px) saturate(160%);
+  -webkit-backdrop-filter: blur(10px) saturate(160%);
+  transition: all 0.25s ease;
+}
+
+/* Hover: fényesebb, élénkebb átmenet */
 .tag-bubble:hover {
-  background: rgba(255, 255, 255, 0.25);
+  background: linear-gradient(
+    135deg,
+    rgba(180, 215, 255, 0.95) 0%,
+    rgba(130, 180, 255, 0.95) 100%
+  );
+  transform: translateY(-2px);
+  color: #001b44; /* kicsit sötétebb szöveg a kontraszthoz */
+}
+
+
+/* Hover: fényesebb, tisztább */
+.info-bubble:hover {
+  background: rgba(255, 255, 255, 0.8);
   transform: translateY(-2px);
 }
 
-/* Több soros leírás */
+/* ====== Cím (nagyobb, hangsúlyosabb) ====== */
+.info-bubble.title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #111;
+}
+
+/* ====== Szerző (kisebb, szürkés) ====== */
+.info-bubble.author {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #555;
+}
+
+/* ====== Leírás (fehéresebb, tágabb) ====== */
 .info-bubble.text {
   display: -webkit-box;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
   max-width: 90%;
-  color: #111;
-  background: rgba(255, 255, 255, 0.35); /* mint a .glass-description */
+  color: #333;
+  background: rgba(255, 255, 255, 0.8);
+}
+
+/* ====== Tagek (szürkés szöveg) ====== */
+.tag-bubble {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #333;
 }
 
 /* ========== LIKE GOMB ========== */

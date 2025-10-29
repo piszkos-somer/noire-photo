@@ -69,7 +69,7 @@ function ImageCard({ image, onLike, onOpen, likeLoading }) {
                   style={{ cursor: "pointer" }}
                   onClick={() => handleTagClick(tag)}
                 >
-                  #{tag}
+                  {tag}
                 </span>
               ))}
             </div>
@@ -82,7 +82,7 @@ function ImageCard({ image, onLike, onOpen, likeLoading }) {
                   style={{ cursor: "pointer" }}
                   onClick={() => handleTagClick(tag.trim())}
                 >
-                  #{tag.trim()}
+                  {tag.trim()}
                 </span>
               ))}
             </div>
