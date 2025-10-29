@@ -16,14 +16,14 @@
 }
 
 .glass-inner {
-  background: rgba(200, 200, 200, 0.1);
-  border: 5px solid rgba(255, 255, 255, 0.25);
-  backdrop-filter: blur(35px) saturate(160%);
-  -webkit-backdrop-filter: blur(35px) saturate(160%);
+  background: rgba(255, 255, 255, 0.3); /* enyhe áttetszőség */
+  border: 1px solid rgba(255, 255, 255, 0.25); /* finom fehér szegély */
   border-radius: 22px;
   color: #222;
   height: 100%;
-  box-shadow: 0 12px 45px rgba(0, 0, 0, 0.18);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08); /* lágy árnyék */
+  backdrop-filter: blur(8px) saturate(150%);
+  -webkit-backdrop-filter: blur(8px) saturate(150%);
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
@@ -31,6 +31,7 @@
   flex-direction: column;
   justify-content: space-between;
 }
+
 
 .glass-inner::before {
   content: "";
@@ -64,7 +65,7 @@
   flex-shrink: 0;
   height: 200px;
   overflow: hidden;
-  border-radius: 22px 22px 0 0;
+  border-radius: 22px;
 }
 
 .img-wrapper img {
