@@ -28,6 +28,30 @@ function ImageModal({
   useEffect(() => {
     setLocalImage(image);
   }, [image]);
+// ⬇️ Tedd ezt a többi függvény alá
+const handleDownload = async () => {
+  if (!localImage?.url) return;
+
+  const filename = localImage.url.split("/").pop() || "kep.jpg";
+
+  try {
+    const response = await fetch(`http://localhost:3001${localImage.url}`);
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.URL.revokeObjectURL(url);
+  } catch (error) {
+    console.error("Letöltés hiba:", error);
+  }
+};
+
+
 
   // ha a modal nem látható vagy nincs kép, ne renderelj semmit
   if (!show || !localImage) return null;
@@ -75,22 +99,60 @@ const handleUserClick = (userId) => {
 
         {/* INFO RÉSZ */}
         <div className="glass-info p-4">
-          <div className="glass-info-top">
-            <p
-              className="glass-author mb-0"
-              style={{ cursor: "pointer" }}
-              onClick={() => handleUserClick(localImage?.user_id)}
-            >
-              📷 {localImage?.author || "Ismeretlen szerző"}
-            </p>
+<div className="glass-info-top d-flex justify-content-between align-items-center flex-wrap gap-2">
 
-            <AnimatedHeart
-              isLiked={localImage?.isLiked}
-              likeCount={localImage?.likes || 0}
-              disabled={likeLoading === localImage?.id}
-              onClick={handleLikeClick}
-            />
-          </div>
+  {/* BAL OLDAL: név + letöltés buborékok */}
+  <div className="d-flex align-items-center gap-2">
+
+    {/* 📷 Feltöltő név buborék */}
+    <div
+      className="px-3 py-2 rounded-3 glass-bubble"
+      style={{
+        backdropFilter: "blur(10px)",
+        cursor: "pointer",
+        display: "inline-flex",
+        alignItems: "center",
+        boxShadow: "0 0 10px rgba(255,255,255,0.15)",
+      }}
+      onClick={() => handleUserClick(localImage?.user_id)}
+    >
+      📷 {localImage?.author || "Ismeretlen szerző"}
+    </div>
+
+    {/* ⬇️ Letöltés buborék */}
+    <div
+      className="px-3 py-2 rounded-3 glass-bubble"
+      style={{
+        backdropFilter: "blur(10px)",
+        display: "inline-flex",
+        alignItems: "center",
+        boxShadow: "0 0 10px rgba(255,255,255,0.15)",
+      }}
+    >
+      <Button
+        variant="outline-light"
+        size="sm"
+        onClick={(e) => {
+          e.stopPropagation();
+          handleDownload();
+        }}
+      >
+        Letöltés
+      </Button>
+    </div>
+  </div>
+
+  {/* JOBB OLDAL: like szív */}
+  <AnimatedHeart
+    isLiked={localImage?.isLiked}
+    likeCount={localImage?.likes || 0}
+    disabled={likeLoading === localImage?.id}
+    onClick={handleLikeClick}
+  />
+</div>
+
+
+
 
           <p className="glass-description mt-3 mb-0">
             {localImage?.description || "Nincs leírás."}
