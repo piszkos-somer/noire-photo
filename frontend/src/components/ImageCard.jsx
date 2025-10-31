@@ -5,6 +5,7 @@ import AnimatedHeart from "./AnimatedHeart";
 import "../css/ImageCard.css";
 import { MessageCircle } from "lucide-react";
 
+
 function ImageCard({ image, onLike, onOpen, likeLoading }) {
   const navigate = useNavigate();
   const [commentCount, setCommentCount] = useState(0);

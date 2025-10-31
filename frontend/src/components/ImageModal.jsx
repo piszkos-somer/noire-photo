@@ -6,7 +6,7 @@ import AnimatedCommentHeart from "../components/AnimatedCommentHeart";
 import AnimatedHeart from "./AnimatedHeart";
 import "../css/ImageModal.css";
 import { getToken, getAuthHeader, handleTokenError } from "../utils/auth";
-import { Share2 } from "lucide-react";
+import { Share2, MessageCircle } from "lucide-react";
 
 
 
@@ -177,10 +177,22 @@ const handleShare = async () => {
       size={22}
       className="cursor-pointer text-light"
       title="Megosztás"
+      color="black"
       onClick={() => handleShare()}
       style={{ opacity: 0.8 }}
     />
-
+<div className="d-flex align-items-center">
+    <MessageCircle
+      size={21}
+      color="black"
+      className="me-1"
+      strokeWidth={2}
+      title="Hozzászólások"
+    />
+    <span style={{ color: "black", fontWeight: 500 }}>
+      {comments?.length || 0}
+    </span>
+  </div>
     {/* ❤️ Like szív */}
     <AnimatedHeart
       isLiked={localImage?.isLiked}
