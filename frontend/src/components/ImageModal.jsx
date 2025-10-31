@@ -27,6 +27,7 @@ function ImageModal({
 
   // 🧠 Lokális másolat a képről — így tud frissülni helyben is
   const [localImage, setLocalImage] = useState(image);
+const [showToast, setShowToast] = useState(false);
 
   // Ha új képet kapunk, frissítjük a lokális állapotot
   useEffect(() => {
@@ -84,12 +85,17 @@ const handleShare = async () => {
 
   try {
     await navigator.clipboard.writeText(shareUrl);
-    alert("📋 Link másolva a vágólapra!");
+
+    // 🟢 Mutatjuk a toastot
+    setShowToast(true);
+
+    // 🔄 Eltüntetjük pár másodperc múlva
+    setTimeout(() => setShowToast(false), 2500);
   } catch (err) {
     console.error("Másolás hiba:", err);
-    alert("❌ Nem sikerült a link másolása.");
   }
 };
+
 
   // ❤️ Like gomb helyben is frissíti a szívet és a számot
   const handleLikeClick = async () => {
@@ -110,6 +116,12 @@ const handleShare = async () => {
 
   return (
     <Modal show={show} onHide={onClose} centered size="lg" className="glass-modal">
+      {showToast && (
+  <div className="share-toast glass-effect">
+    📋 Link másolva a vágólapra!
+  </div>
+)}
+
       <Modal.Body className="p-0">
         {/* HEADER */}
         <div className="glass-header">
