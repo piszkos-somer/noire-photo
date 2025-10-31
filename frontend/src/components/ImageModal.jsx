@@ -5,6 +5,10 @@ import { useNavigate } from "react-router-dom";
 import AnimatedCommentHeart from "../components/AnimatedCommentHeart";
 import AnimatedHeart from "./AnimatedHeart";
 import "../css/ImageModal.css";
+import { getToken, getAuthHeader, handleTokenError } from "../utils/auth";
+import { Share2 } from "lucide-react";
+
+
 
 function ImageModal({
   show,
@@ -30,15 +34,28 @@ function ImageModal({
   }, [image]);
 // ⬇️ Tedd ezt a többi függvény alá
 const handleDownload = async () => {
-  if (!localImage?.url) return;
+  const token = getToken();
 
-  const filename = localImage.url.split("/").pop() || "kep.jpg";
+  // 🚫 Ha nincs token, irány a regisztrációs oldal
+  if (!token) {
+    navigate("/Registration");
+    return;
+  }
 
   try {
-    const response = await fetch(`http://localhost:3001${localImage.url}`);
+    const response = await fetch(`http://localhost:3001${localImage.url}`, {
+      headers: getAuthHeader(),
+    });
+
+    if (!response.ok) {
+      handleTokenError(response.status, navigate);
+      return;
+    }
+
     const blob = await response.blob();
     const url = window.URL.createObjectURL(blob);
 
+    const filename = localImage.url.split("/").pop() || "kep.jpg";
     const link = document.createElement("a");
     link.href = url;
     link.download = filename;
@@ -51,8 +68,6 @@ const handleDownload = async () => {
   }
 };
 
-
-
   // ha a modal nem látható vagy nincs kép, ne renderelj semmit
   if (!show || !localImage) return null;
 
@@ -62,6 +77,19 @@ const handleUserClick = (userId) => {
   if (userId) navigate(`/viewprofile/${userId}`);
 };
 
+const handleShare = async () => {
+  if (!localImage?.id || !localImage?.user_id) return;
+
+  const shareUrl = `${window.location.origin}/viewprofile/${localImage.user_id}?image=${localImage.id}`;
+
+  try {
+    await navigator.clipboard.writeText(shareUrl);
+    alert("📋 Link másolva a vágólapra!");
+  } catch (err) {
+    console.error("Másolás hiba:", err);
+    alert("❌ Nem sikerült a link másolása.");
+  }
+};
 
   // ❤️ Like gomb helyben is frissíti a szívet és a számot
   const handleLikeClick = async () => {
@@ -101,7 +129,7 @@ const handleUserClick = (userId) => {
         <div className="glass-info p-4">
 <div className="glass-info-top d-flex justify-content-between align-items-center flex-wrap gap-2">
 
-  {/* BAL OLDAL: név + letöltés buborékok */}
+  {/* BAL OLDAL: név + letöltés buborék */}
   <div className="d-flex align-items-center gap-2">
 
     {/* 📷 Feltöltő név buborék */}
@@ -137,19 +165,32 @@ const handleUserClick = (userId) => {
           handleDownload();
         }}
       >
-        Letöltés
+        ⬇️ Letöltés
       </Button>
     </div>
   </div>
 
-  {/* JOBB OLDAL: like szív */}
-  <AnimatedHeart
-    isLiked={localImage?.isLiked}
-    likeCount={localImage?.likes || 0}
-    disabled={likeLoading === localImage?.id}
-    onClick={handleLikeClick}
-  />
+  {/* JOBB OLDAL: megosztás ikon + szív */}
+  <div className="d-flex align-items-center gap-3">
+    {/* 🔗 Megosztás ikon */}
+    <Share2
+      size={22}
+      className="cursor-pointer text-light"
+      title="Megosztás"
+      onClick={() => handleShare()}
+      style={{ opacity: 0.8 }}
+    />
+
+    {/* ❤️ Like szív */}
+    <AnimatedHeart
+      isLiked={localImage?.isLiked}
+      likeCount={localImage?.likes || 0}
+      disabled={likeLoading === localImage?.id}
+      onClick={handleLikeClick}
+    />
+  </div>
 </div>
+
 
 
 

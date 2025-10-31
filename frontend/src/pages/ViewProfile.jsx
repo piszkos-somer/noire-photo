@@ -1,6 +1,6 @@
 // src/pages/ViewProfile.jsx
 import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { Container, Row, Spinner } from "react-bootstrap";
 import ImageCard from "../components/ImageCard";
 import ImageModal from "../components/ImageModal";
@@ -10,16 +10,17 @@ import "../css/Home.css";
 function ViewProfile() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [profile, setProfile] = useState(null);
   const [images, setImages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState(null);
-
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
   const [likeLoading, setLikeLoading] = useState(null);
   const [commentLoading, setCommentLoading] = useState(false);
+  const [hasOpenedFromLink, setHasOpenedFromLink] = useState(false);
 
   const userData = localStorage.getItem("user");
   const token = userData ? JSON.parse(userData).token : null;
@@ -53,6 +54,26 @@ function ViewProfile() {
     fetchProfile();
     fetchImages();
   }, [id, token]);
+
+  // 🔹 URL paraméter alapján modal megnyitása (csak egyszer)
+  useEffect(() => {
+  const params = new URLSearchParams(location.search);
+  const imageId = params.get("image");
+
+  // Csak akkor nyissa meg, ha:
+  // - van image paraméter
+  // - betöltöttek a képek
+  // - még nem nyitottuk meg korábban
+  // - és jelenleg nincs nyitva modal
+  if (imageId && images.length > 0 && !hasOpenedFromLink && !selectedImage) {
+    const img = images.find((i) => i.id.toString() === imageId.toString());
+    if (img) {
+      openModal(img);
+      setHasOpenedFromLink(true);
+    }
+  }
+}, [location.search, images, hasOpenedFromLink, selectedImage]);
+
 
   // 🔹 Kommentek lekérése
   const fetchComments = async (imageId) => {
@@ -155,10 +176,23 @@ function ViewProfile() {
     setSelectedImage(image);
     fetchComments(image.id);
   };
+
   const closeModal = () => {
-    setSelectedImage(null);
-    setComments([]);
-  };
+  setSelectedImage(null);
+  setComments([]);
+
+  // ❗ Jelöld, hogy a linkes nyitás befejeződött
+  setHasOpenedFromLink(true);
+
+  // 🔹 Távolítsuk el a ?image paramétert az URL-ből
+  const params = new URLSearchParams(location.search);
+  if (params.has("image")) {
+    params.delete("image");
+    navigate(`${location.pathname}${params.toString() ? "?" + params.toString() : ""}`, {
+      replace: true,
+    });
+  }
+};
 
   if (loading)
     return (
