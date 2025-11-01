@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Gép: 127.0.0.1
--- Létrehozás ideje: 2025. Okt 27. 20:49
+-- Létrehozás ideje: 2025. Nov 01. 15:37
 -- Kiszolgáló verziója: 10.4.32-MariaDB
 -- PHP verzió: 8.0.30
 
@@ -35,6 +35,36 @@ CREATE TABLE `comments` (
   `upload_date` datetime NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- A tábla adatainak kiíratása `comments`
+--
+
+INSERT INTO `comments` (`id`, `user_id`, `image_id`, `comment`, `upload_date`) VALUES
+(1, 1, 5, 'Nagyon szép, és tetszik, hogy pont elkaptad benne a villámot!! 10/11', '2025-10-28 14:25:55'),
+(2, 2, 3, 'Az igen! Kezdőnek nem is rossz, bár egy kicsit feljebb vettem volna a szaturációt, mert illene az ilyen fényekkel dolgoz képnél. Ha leírod a kamerád típusát, szívesen segítek ebben.', '2025-10-28 15:49:22'),
+(3, 1, 5, 'Tényleg nagyon jó!', '2025-10-29 17:28:44');
+
+-- --------------------------------------------------------
+
+--
+-- Tábla szerkezet ehhez a táblához `comment_likes`
+--
+
+CREATE TABLE `comment_likes` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `user_id` int(10) UNSIGNED NOT NULL,
+  `comment_id` int(10) UNSIGNED NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- A tábla adatainak kiíratása `comment_likes`
+--
+
+INSERT INTO `comment_likes` (`id`, `user_id`, `comment_id`) VALUES
+(45, 1, 1),
+(46, 1, 2),
+(39, 2, 1);
+
 -- --------------------------------------------------------
 
 --
@@ -56,12 +86,12 @@ CREATE TABLE `images` (
 --
 
 INSERT INTO `images` (`id`, `user_id`, `title`, `description`, `upload_date`, `url`, `likes`) VALUES
-(1, 1, 'tigriske', 'ez egy szép tigris petzd', '2025-10-27 17:17:15', '/images/1761578235052.jpg', 0),
+(1, 1, 'tigriske', 'ez egy szép tigris petzd', '2025-10-27 17:17:15', '/images/1761578235052.jpg', 1),
 (2, 1, 'Mercedes', 'A legszebb merci amit valaha láttam!', '2025-10-27 17:43:22', '/images/1761579802620.jpg', 0),
-(3, 1, 'Tájkép', 'Ezt a képet egy másik országban készítettem, lenyűgöző volt a látvány!', '2025-10-27 19:02:33', '/images/1761584553646.jpg', 0),
-(4, 1, 'Bringás kép', 'Itt egy bringás kép rólam. Szerintetek jó szögből készült a kép? Vélemények?', '2025-10-27 19:03:49', '/images/1761584629316.jpg', 0),
-(5, 2, 'Tó az erdőben', 'Ezt a képet Kanadában készítettem, lenyűgöző látvánnyal.\r\n\r\nZáridő: kb. 10–30 másodperc\r\nRekesz: f/8 – f/1\r\nISO: 100\r\nGyújtótávolság: 18–24 mm ', '2025-10-27 19:13:21', '/images/1761585201828.jpg', 0),
-(6, 2, 'Izlandi hegység', 'Záridő: kb. 1/60 – 1/125 mp\r\nRekeszérték: f/8 – f/11\r\nISO érzékenység: 100 – 200\r\nGyújtótávolság: kb. 24–35 mm (nagylátószög)\r\nFehéregyensúly: napfény (kb. 5500 K)', '2025-10-27 19:41:21', '/images/1761586881317.jpg', 0);
+(3, 1, 'Tájkép', 'Ezt a képet egy másik országban készítettem, lenyűgöző volt a látvány!', '2025-10-27 19:02:33', '/images/1761584553646.jpg', 2),
+(4, 1, 'Bringás kép', 'Itt egy bringás kép rólam. Szerintetek jó szögből készült a kép? Vélemények?', '2025-10-27 19:03:49', '/images/1761584629316.jpg', 2),
+(5, 2, 'Tó az erdőben', 'Ezt a képet Kanadában készítettem, lenyűgöző látvánnyal.\r\n\r\nZáridő: kb. 10–30 másodperc\r\nRekesz: f/8 – f/1\r\nISO: 100\r\nGyújtótávolság: 18–24 mm ', '2025-10-27 19:13:21', '/images/1761585201828.jpg', 2),
+(6, 2, 'Izlandi hegység', 'Záridő: kb. 1/60 – 1/125 mp\r\nRekeszérték: f/8 – f/11\r\nISO érzékenység: 100 – 200\r\nGyújtótávolság: kb. 24–35 mm (nagylátószög)\r\nFehéregyensúly: napfény (kb. 5500 K)', '2025-10-27 19:41:21', '/images/1761586881317.jpg', 1);
 
 -- --------------------------------------------------------
 
@@ -74,6 +104,20 @@ CREATE TABLE `image_likes` (
   `user_id` int(10) UNSIGNED NOT NULL,
   `image_id` int(10) UNSIGNED NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- A tábla adatainak kiíratása `image_likes`
+--
+
+INSERT INTO `image_likes` (`id`, `user_id`, `image_id`) VALUES
+(78, 1, 1),
+(140, 1, 3),
+(129, 1, 4),
+(160, 1, 5),
+(72, 2, 3),
+(103, 2, 4),
+(158, 2, 5),
+(157, 2, 6);
 
 -- --------------------------------------------------------
 
@@ -194,6 +238,14 @@ ALTER TABLE `comments`
   ADD KEY `image_id` (`image_id`);
 
 --
+-- A tábla indexei `comment_likes`
+--
+ALTER TABLE `comment_likes`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `unique_comment_like` (`user_id`,`comment_id`),
+  ADD KEY `comment_id` (`comment_id`);
+
+--
 -- A tábla indexei `images`
 --
 ALTER TABLE `images`
@@ -206,6 +258,7 @@ ALTER TABLE `images`
 ALTER TABLE `image_likes`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `unique_like` (`user_id`,`image_id`),
+  ADD UNIQUE KEY `unique_user_image_like` (`user_id`,`image_id`),
   ADD KEY `image_id` (`image_id`);
 
 --
@@ -254,7 +307,13 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT a táblához `comments`
 --
 ALTER TABLE `comments`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
+-- AUTO_INCREMENT a táblához `comment_likes`
+--
+ALTER TABLE `comment_likes`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=51;
 
 --
 -- AUTO_INCREMENT a táblához `images`
@@ -266,7 +325,7 @@ ALTER TABLE `images`
 -- AUTO_INCREMENT a táblához `image_likes`
 --
 ALTER TABLE `image_likes`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=162;
 
 --
 -- AUTO_INCREMENT a táblához `image_reactions`
@@ -302,6 +361,13 @@ ALTER TABLE `users`
 ALTER TABLE `comments`
   ADD CONSTRAINT `comments_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `comments_ibfk_2` FOREIGN KEY (`image_id`) REFERENCES `images` (`id`) ON DELETE CASCADE;
+
+--
+-- Megkötések a táblához `comment_likes`
+--
+ALTER TABLE `comment_likes`
+  ADD CONSTRAINT `comment_likes_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `comment_likes_ibfk_2` FOREIGN KEY (`comment_id`) REFERENCES `comments` (`id`) ON DELETE CASCADE;
 
 --
 -- Megkötések a táblához `images`
