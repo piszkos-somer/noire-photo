@@ -15,6 +15,7 @@ import { UserContext } from "../context/UserContext";
 import EditModal from "../components/EditModal";
 import "../css/Profile.css";
 import "../css/Home.css"
+import { handleTokenError } from "../utils/auth";
 
 function Profile() {
   const [newUsername, setNewUsername] = useState("");
@@ -42,6 +43,10 @@ function Profile() {
         const res = await fetch("http://localhost:3001/api/me", {
           headers: { Authorization: `Bearer ${user.token}` },
         });
+        if (res.status === 401 || res.status === 403) {
+  handleTokenError(res.status, navigate);
+  return;
+}
         const data = await res.json();
         setBio(data.bio || "");
         if (data.profile_picture)
@@ -56,6 +61,10 @@ function Profile() {
         const res = await fetch("http://localhost:3001/api/my-images", {
           headers: { Authorization: `Bearer ${user.token}` },
         });
+        if (res.status === 401 || res.status === 403) {
+  handleTokenError(res.status, navigate);
+  return;
+}
         const data = await res.json();
         if (Array.isArray(data)) setImages(data);
       } catch (err) {
@@ -80,6 +89,10 @@ function Profile() {
         headers: { Authorization: `Bearer ${user.token}` },
         body: formData,
       });
+      if (res.status === 401 || res.status === 403) {
+  handleTokenError(res.status, navigate);
+  return;
+}
       const data = await res.json();
 
       if (res.ok) {
@@ -87,6 +100,10 @@ function Profile() {
         const refreshed = await fetch("http://localhost:3001/api/me", {
           headers: { Authorization: `Bearer ${user.token}` },
         });
+        if (res.status === 401 || res.status === 403) {
+  handleTokenError(res.status, navigate);
+  return;
+}
         const newData = await refreshed.json();
         setBio(newData.bio || "");
         if (newData.profile_picture)
@@ -116,6 +133,10 @@ function Profile() {
           password: newPassword,
         }),
       });
+      if (res.status === 401 || res.status === 403) {
+  handleTokenError(res.status, navigate);
+  return;
+}
 
       const data = await res.json();
       setMessage(data.message || "Adatok frissítve!");
@@ -169,7 +190,10 @@ function Profile() {
           }),
         }
       );
-
+if (res.status === 401 || res.status === 403) {
+  handleTokenError(res.status, navigate);
+  return;
+}
       const data = await res.json();
 
       if (res.ok) {
@@ -178,6 +202,10 @@ function Profile() {
         const refresh = await fetch("http://localhost:3001/api/my-images", {
           headers: { Authorization: `Bearer ${user.token}` },
         });
+        if (res.status === 401 || res.status === 403) {
+  handleTokenError(res.status, navigate);
+  return;
+}
         const newData = await refresh.json();
         if (Array.isArray(newData)) setImages(newData);
       } else {

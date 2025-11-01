@@ -6,6 +6,7 @@ import ImageCard from "../components/ImageCard";
 import ImageModal from "../components/ImageModal";
 import "../css/Profile.css";
 import "../css/Home.css";
+import { handleTokenError } from "../utils/auth";
 
 function ViewProfile() {
   const { id } = useParams();
@@ -30,6 +31,10 @@ function ViewProfile() {
     const fetchProfile = async () => {
       try {
         const res = await fetch(`http://localhost:3001/api/users/${id}`);
+        if (res.status === 401 || res.status === 403) {
+  handleTokenError(res.status, navigate);
+  return;
+}
         if (!res.ok) throw new Error("Profil nem található");
         const data = await res.json();
         setProfile(data);
@@ -42,6 +47,10 @@ function ViewProfile() {
       try {
         const headers = token ? { Authorization: `Bearer ${token}` } : {};
         const res = await fetch(`http://localhost:3001/api/user-images/${id}`, { headers });
+        if (res.status === 401 || res.status === 403) {
+  handleTokenError(res.status, navigate);
+  return;
+}
         const data = await res.json();
         setImages(Array.isArray(data) ? data : []);
       } catch (err) {
@@ -80,6 +89,10 @@ function ViewProfile() {
     try {
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
       const res = await fetch(`http://localhost:3001/api/images/${imageId}/comments`, { headers });
+      if (res.status === 401 || res.status === 403) {
+  handleTokenError(res.status, navigate);
+  return;
+}
       const data = await res.json();
       setComments(Array.isArray(data) ? data : []);
     } catch (err) {
@@ -96,7 +109,10 @@ function ViewProfile() {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
       });
-
+if (res.status === 401 || res.status === 403) {
+  handleTokenError(res.status, navigate);
+  return;
+}
       if (res.ok) {
         const updated = await res.json();
         setImages((prev) =>
@@ -137,6 +153,10 @@ function ViewProfile() {
           body: JSON.stringify({ comment: newComment }),
         }
       );
+      if (res.status === 401 || res.status === 403) {
+  handleTokenError(res.status, navigate);
+  return;
+}
       if (res.ok) {
         setNewComment("");
         fetchComments(selectedImage.id);
@@ -156,6 +176,10 @@ function ViewProfile() {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
       });
+      if (res.status === 401 || res.status === 403) {
+  handleTokenError(res.status, navigate);
+  return;
+}
       if (res.ok) {
         const updated = await res.json();
         setComments((prev) =>

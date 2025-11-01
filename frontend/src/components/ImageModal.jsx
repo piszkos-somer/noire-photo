@@ -47,7 +47,10 @@ const handleDownload = async () => {
     const response = await fetch(`http://localhost:3001${localImage.url}`, {
       headers: getAuthHeader(),
     });
-
+if (res.status === 401 || res.status === 403) {
+  handleTokenError(res.status, navigate);
+  return;
+}
     if (!response.ok) {
       handleTokenError(response.status, navigate);
       return;

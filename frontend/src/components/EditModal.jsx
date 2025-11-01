@@ -50,7 +50,10 @@ function EditModal({ show, onHide, image, onSave }) {
           `http://localhost:3001/api/tags/search?q=${encodeURIComponent(newTag)}`,
           { headers: getAuthHeader() }
         );
-
+if (res.status === 401 || res.status === 403) {
+  handleTokenError(res.status, navigate);
+  return;
+}
         if (!res.ok) {
           handleTokenError(res.status, navigate);
           return;

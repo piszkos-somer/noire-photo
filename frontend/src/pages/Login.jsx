@@ -3,6 +3,7 @@ import React, { useState, useContext } from "react";
 import { Form, Button, Container, Alert } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { UserContext } from "../context/UserContext";
+import { handleTokenError } from "../utils/auth";
 
 function Login() {
   const [email, setEmail] = useState("");
@@ -21,7 +22,10 @@ function Login() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
-
+if (res.status === 401 || res.status === 403) {
+  handleTokenError(res.status, navigate);
+  return;
+}
       const data = await res.json();
 
       if (res.ok) {

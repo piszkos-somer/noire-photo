@@ -5,6 +5,7 @@ import { useNavigate, useParams, useLocation } from "react-router-dom";
 import ImageCard from "../components/ImageCard";
 import ImageModal from "../components/ImageModal";
 import "../css/Home.css";
+import { handleTokenError } from "../utils/auth";
 
 function Browse() {
   const [images, setImages] = useState([]);
@@ -52,6 +53,10 @@ function Browse() {
         `http://localhost:3001/api/images/search?q=${encodeURIComponent(q)}&filter=${f}`,
         { headers }
       );
+      if (res.status === 401 || res.status === 403) {
+  handleTokenError(res.status, navigate);
+  return;
+}
       const data = await res.json();
       setImages(Array.isArray(data) ? data : []);
     } catch (err) {
@@ -70,6 +75,10 @@ function Browse() {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
       });
+      if (res.status === 401 || res.status === 403) {
+  handleTokenError(res.status, navigate);
+  return;
+}
       if (res.ok) {
         const updated = await res.json();
         setImages((prev) =>
@@ -90,6 +99,10 @@ function Browse() {
     try {
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
       const res = await fetch(`http://localhost:3001/api/images/${imageId}/comments`, { headers });
+      if (res.status === 401 || res.status === 403) {
+  handleTokenError(res.status, navigate);
+  return;
+}
       const data = await res.json();
       setComments(Array.isArray(data) ? data : []);
     } catch (err) {
@@ -113,6 +126,10 @@ function Browse() {
           body: JSON.stringify({ comment: newComment }),
         }
       );
+      if (res.status === 401 || res.status === 403) {
+  handleTokenError(res.status, navigate);
+  return;
+}
       if (res.ok) {
         setNewComment("");
         fetchComments(selectedImage.id);
@@ -131,6 +148,10 @@ function Browse() {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
       });
+      if (res.status === 401 || res.status === 403) {
+  handleTokenError(res.status, navigate);
+  return;
+}
       if (res.ok) {
         const updated = await res.json();
         setComments((prev) =>

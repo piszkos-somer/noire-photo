@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import AnimatedHeart from "./AnimatedHeart";
 import "../css/ImageCard.css";
 import { MessageCircle } from "lucide-react";
-
+import { handleTokenError } from "../utils/auth";
 
 function ImageCard({ image, onLike, onOpen, likeLoading }) {
   const navigate = useNavigate();
@@ -23,7 +23,9 @@ function ImageCard({ image, onLike, onOpen, likeLoading }) {
       .then((res) => res.json())
       .then((data) => setCommentCount(data.count))
       .catch((err) => console.error("Komment szám lekérése sikertelen:", err));
-  }, [image.id]);
+  }, [image.id]
+
+);
 
   // 🔹 Tagre kattintás → Browse oldal
   const handleTagClick = (tag) => {

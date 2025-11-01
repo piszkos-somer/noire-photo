@@ -6,12 +6,15 @@ import ImageModal from "../components/ImageModal";
 import { motion, AnimatePresence } from "framer-motion";
 import "../css/Home.css";
 import { Heart } from "lucide-react";
+import { handleTokenError } from "../utils/auth";
+
 
 export const AnimatedHeart = ({ isLiked, onClick, disabled, likeCount }) => {
   const [animate, setAnimate] = useState(false);
   const [showSparkle, setShowSparkle] = useState(false);
   const prevLiked = useRef(isLiked);
 
+  
   const handleClick = () => {
     setAnimate(true);
     if (!isLiked) {
@@ -109,6 +112,10 @@ function Home() {
       try {
         const headers = token ? { Authorization: `Bearer ${token}` } : {};
         const res = await fetch("http://localhost:3001/api/latest-images", { headers });
+        if (res.status === 401 || res.status === 403) {
+  handleTokenError(res.status, navigate);
+  return;
+}
         const data = await res.json();
         setImages(Array.isArray(data) ? data : []);
       } catch (err) {
@@ -128,6 +135,10 @@ function Home() {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
       });
+      if (res.status === 401 || res.status === 403) {
+  handleTokenError(res.status, navigate);
+  return;
+}
       if (res.ok) {
         const updated = await res.json();
         setImages((prev) =>
@@ -147,6 +158,10 @@ function Home() {
     try {
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
       const res = await fetch(`http://localhost:3001/api/images/${imageId}/comments`, { headers });
+      if (res.status === 401 || res.status === 403) {
+  handleTokenError(res.status, navigate);
+  return;
+}
       const data = await res.json();
       setComments(Array.isArray(data) ? data : []);
     } catch (err) {
@@ -170,6 +185,10 @@ function Home() {
           body: JSON.stringify({ comment: newComment }),
         }
       );
+      if (res.status === 401 || res.status === 403) {
+  handleTokenError(res.status, navigate);
+  return;
+}
       if (res.ok) {
         setNewComment("");
         fetchComments(selectedImage.id);
@@ -188,6 +207,10 @@ function Home() {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
       });
+      if (res.status === 401 || res.status === 403) {
+  handleTokenError(res.status, navigate);
+  return;
+}
       if (res.ok) {
         const updated = await res.json();
         setComments((prev) =>

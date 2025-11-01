@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Container, Form, Button, ListGroup } from "react-bootstrap";
 import "../css/Upload.css";
 import { useNavigate } from "react-router-dom";
+import { handleTokenError } from "../utils/auth";
 
 // 🔐 Token segédfüggvények
 const getToken = () => {
@@ -24,13 +25,7 @@ const getAuthHeader = () => {
   return token ? { Authorization: `Bearer ${token}` } : {};
 };
 
-const handleTokenError = (status, navigate) => {
-  if (status === 401 || status === 403) {
-    console.warn("⚠️ Token érvénytelen vagy lejárt, kijelentkeztetés...");
-    localStorage.removeItem("user");
-    navigate("/Registration");
-  }
-};
+
 
 function Upload() {
   const navigate = useNavigate();
@@ -75,7 +70,10 @@ function Upload() {
           `http://localhost:3001/api/tags/search?q=${encodeURIComponent(newTag)}`,
           { headers: getAuthHeader() }
         );
-
+if (res.status === 401 || res.status === 403) {
+  handleTokenError(res.status, navigate);
+  return;
+}
         if (!res.ok) {
           handleTokenError(res.status, navigate);
           return;
@@ -157,7 +155,10 @@ function Upload() {
         headers: getAuthHeader(),
         body: formData,
       });
-
+if (res.status === 401 || res.status === 403) {
+  handleTokenError(res.status, navigate);
+  return;
+}
       if (!response.ok) {
         handleTokenError(response.status, navigate);
       }

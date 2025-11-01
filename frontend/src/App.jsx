@@ -1,6 +1,6 @@
 // src/App.jsx
-import React from "react";
-import { Routes, Route } from "react-router-dom";
+import {React, useEffect} from "react";
+import { Routes, Route, useNavigate } from "react-router-dom";
 import { UserProvider } from "./context/UserContext";
 import NavbarNoire from "./components/Navbar";
 import About from "./pages/About";
@@ -12,8 +12,20 @@ import Login from "./pages/Login";
 import Profile from "./pages/Profile";
 import ViewProfile from "./pages/ViewProfile";
 import Browse from "./pages/Browse";
+import { logoutIfExpired } from "../src/utils/auth";
 
 function App() {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // Ellenőrizzük, hogy lejárt-e a token
+    logoutIfExpired(navigate);
+
+    // 1 percenként újraellenőrizzük
+    const interval = setInterval(() => logoutIfExpired(navigate), 60000);
+    return () => clearInterval(interval);
+  }, [navigate]);
+
   return (
     <UserProvider>
       <NavbarNoire />
