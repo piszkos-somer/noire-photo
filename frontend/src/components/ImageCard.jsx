@@ -17,18 +17,17 @@ function ImageCard({ image, onLike, onOpen, likeLoading }) {
     }
   };
 
-  // 🔹 kommentek számának lekérése
+  // 🔹 Kommentek számának lekérése
   useEffect(() => {
     fetch(`http://localhost:3001/api/images/${image.id}/comment-count`)
       .then((res) => res.json())
       .then((data) => setCommentCount(data.count))
       .catch((err) => console.error("Komment szám lekérése sikertelen:", err));
-  }, [image.id]
+  }, [image.id]);
 
-);
-
-  // 🔹 Tagre kattintás → Browse oldal
-  const handleTagClick = (tag) => {
+  // 🔹 Tagre kattintás → Browse oldal (tag szerinti szűrés)
+  const handleTagClick = (e, tag) => {
+    e.stopPropagation(); // ⛔ ne nyissa meg a modalt
     navigate(`/browse/${encodeURIComponent(tag)}`);
   };
 
@@ -36,7 +35,7 @@ function ImageCard({ image, onLike, onOpen, likeLoading }) {
     <div className="glass-card">
       <Card className="glass-inner">
         {/* 📸 Kép */}
-        <div className="img-wrapper">
+        <div className="img-wrapper" onClick={() => onOpen(image)} style={{ cursor: "pointer" }}>
           <Card.Img
             variant="top"
             src={`http://localhost:3001${image.url}`}
@@ -45,7 +44,7 @@ function ImageCard({ image, onLike, onOpen, likeLoading }) {
         </div>
 
         <Card.Body>
-          {/* 🔹 Cím + Like gomb (jobb oldalon, alatta komment számláló) */}
+          {/* 🔹 Cím + Like gomb + komment számláló */}
           <div className="d-flex justify-content-between align-items-start mb-2">
             <h5 className="info-bubble img-title">{image.title}</h5>
             <div className="text-end">
@@ -86,7 +85,7 @@ function ImageCard({ image, onLike, onOpen, likeLoading }) {
                   key={i}
                   className="tag-bubble"
                   style={{ cursor: "pointer" }}
-                  onClick={() => handleTagClick(tag)}
+                  onClick={(e) => handleTagClick(e, tag)}
                 >
                   {tag}
                 </span>
@@ -99,7 +98,7 @@ function ImageCard({ image, onLike, onOpen, likeLoading }) {
                   key={i}
                   className="tag-bubble"
                   style={{ cursor: "pointer" }}
-                  onClick={() => handleTagClick(tag.trim())}
+                  onClick={(e) => handleTagClick(e, tag.trim())}
                 >
                   {tag.trim()}
                 </span>

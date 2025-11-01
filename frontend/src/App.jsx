@@ -39,7 +39,8 @@ function App() {
         <Route path="/profile/:id" element={<ViewProfile />} />
         <Route path="/viewprofile/:id" element={<ViewProfile />} />
         <Route path="/browse" element={<Browse />} />
-        <Route path="/browse/:title" element={<Browse />} />
+        <Route path="/browse/:tag" element={<Browse />} />
+        
 
       </Routes>
       <Footer />
