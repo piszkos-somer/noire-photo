@@ -1,0 +1,39 @@
+/* 🌤️ Világos, hideg háttér */
+body {
+  background: linear-gradient(135deg, #d8e2eb, #e9f0f6, #f4f7fa);
+  font-family: "Poppins", sans-serif;
+  color: #222;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+}
+
+/* Oldal elrendezés */
+.home-page {
+  min-height: 100vh;
+  backdrop-filter: blur(12px);
+}
+
+/* Színátmenetes cím */
+.szinatmenet {
+  background: linear-gradient(90deg, #2a6cff, #00bcd4, #00acc1);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 800;
+}
+
+/* Finom árnyék az egész oldal mögé */
+.image-grid::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(
+    circle at top left,
+    rgba(255, 255, 255, 0.35),
+    transparent
+  );
+  z-index: -1;
+}

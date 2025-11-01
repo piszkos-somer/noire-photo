@@ -4,7 +4,7 @@ import { Container, Form, Button, Row, Col } from "react-bootstrap";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import ImageCard from "../components/ImageCard";
 import ImageModal from "../components/ImageModal";
-import "../css/Home.css";
+import "../css/Browse.css";
 import { handleTokenError } from "../utils/auth";
 
 function Browse() {
@@ -25,6 +25,25 @@ function Browse() {
   const userData = localStorage.getItem("user");
   const token = userData ? JSON.parse(userData).token : null;
 
+const fetchLatestImages = async () => {
+  setLoading(true);
+  try {
+    const headers = token ? { Authorization: `Bearer ${token}` } : {};
+    const res = await fetch("http://localhost:3001/api/latest-images", { headers });
+    if (res.status === 401 || res.status === 403) {
+      handleTokenError(res.status, navigate);
+      return;
+    }
+    const data = await res.json();
+    setImages(Array.isArray(data) ? data : []);
+  } catch (err) {
+    console.error("❌ Képek lekérési hiba:", err);
+  } finally {
+    setLoading(false);
+  }
+};
+
+
   // Ha URL-ből jön egy tag
   useEffect(() => {
   const urlParams = new URLSearchParams(location.search);
@@ -40,6 +59,9 @@ function Browse() {
     setQuery(qParam);
     setFilter("title");
     handleSearch(qParam, "title");
+  }else {
+    // ⬇️ Ha nincs semmi paraméter, töltsük be az utolsó képeket
+    fetchLatestImages();
   }
 }, [tag, location.search]);
 
@@ -209,6 +231,7 @@ function Browse() {
 
       {/* 🔹 Találatok */}
       <Container className="image-grid">
+        
         {loading ? (
           <h4 className="text-center text-light py-5">Keresés folyamatban...</h4>
         ) : images.length === 0 ? (
