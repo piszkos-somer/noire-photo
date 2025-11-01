@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Gép: 127.0.0.1
--- Létrehozás ideje: 2025. Nov 01. 15:37
+-- Létrehozás ideje: 2025. Nov 01. 17:50
 -- Kiszolgáló verziója: 10.4.32-MariaDB
--- PHP verzió: 8.0.30
+-- PHP verzió: 8.2.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -113,7 +113,7 @@ INSERT INTO `image_likes` (`id`, `user_id`, `image_id`) VALUES
 (78, 1, 1),
 (140, 1, 3),
 (129, 1, 4),
-(160, 1, 5),
+(171, 1, 5),
 (72, 2, 3),
 (103, 2, 4),
 (158, 2, 5),
@@ -151,9 +151,9 @@ INSERT INTO `image_tags` (`image_id`, `tag_id`) VALUES
 (1, 2),
 (2, 4),
 (2, 5),
-(3, 9),
-(3, 10),
 (3, 11),
+(3, 15),
+(3, 16),
 (4, 12),
 (4, 13),
 (4, 14),
@@ -196,8 +196,6 @@ INSERT INTO `tags` (`id`, `tag`) VALUES
 (17, 'Hegység'),
 (13, 'Kerékpár'),
 (4, 'Mercedes'),
-(10, 'Mező'),
-(9, 'Tájkép'),
 (11, 'Természet'),
 (2, 'tigris'),
 (16, 'Tó');
@@ -222,7 +220,7 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `username`, `email`, `password`, `bio`, `profile_picture`) VALUES
-(1, 'somer fatera', 'perakattis@gmail.com', '$2b$10$vBS.xhlLasGMI3DPjjr6r.8MlEsnH5wFVAr/V64MXllFI4gaMS76O', 'Sziasztok! Kezdő fotós vagyok, és szeretnék ügyesebb lenni a szakmában. Köszönök minden építő kritikát!', '/profile-pictures/1761583927591.jpg'),
+(1, 'somer fatera', 'perakattis@gmail.com', '$2b$10$vBS.xhlLasGMI3DPjjr6r.8MlEsnH5wFVAr/V64MXllFI4gaMS76O', 'Sziasztok! Kezdő fotós vagyok, és szeretnék ügyesebb lenni a szakmában. Köszönök minden építő kritikát! aa', '/profile-pictures/1761583927591.jpg'),
 (2, 'Papp Sándor', 'pappsanyi@gmail.com', '$2b$10$9/iX2OKNISqPmBo13Svi/OtdCjPTxgSYNoZ7MUcLP0NwLZ7YlTrr2', 'Sziasztok! Sanyi vagyok és 4 éve foglalkozom fotózással. Szívesen megosztom veletek a munkáimat és bármikor fordulhattok hozzám segítségért. Versenyre való felkészítést is vállalok!', '/profile-pictures/1761584967721.jpg');
 
 --
@@ -325,7 +323,7 @@ ALTER TABLE `images`
 -- AUTO_INCREMENT a táblához `image_likes`
 --
 ALTER TABLE `image_likes`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=162;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=172;
 
 --
 -- AUTO_INCREMENT a táblához `image_reactions`
