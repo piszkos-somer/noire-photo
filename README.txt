@@ -8,3 +8,4 @@ Frontend:
     npm i vite react-bootstrap react-router-dom
     npm run dev
     Új gépnél: npm i vite
+	       npm i framer-motion
