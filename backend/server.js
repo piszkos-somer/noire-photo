@@ -161,7 +161,7 @@ app.post("/api/login", async (req, res) => {
       const token = jwt.sign(
         { id: user.id, username: user.username },
         process.env.JWT_SECRET,
-        { expiresIn: "10s" }
+        { expiresIn: "1h" }
       );
 
       res.json({ token, username: user.username });
@@ -326,6 +326,52 @@ app.put(
     }
   }
 );
+// 🔹 KÉP ADATOK FRISSÍTÉSE
+app.put("/api/update-image/:id", verifyToken, async (req, res) => {
+  const imageId = req.params.id;
+  const { title, description, tags } = req.body;
+  const conn = await pool.getConnection();
+
+  try {
+    await conn.beginTransaction();
+
+    // alapadatok frissítése
+    await conn.execute(
+      "UPDATE images SET title = ?, description = ? WHERE id = ? AND user_id = ?",
+      [title, description, imageId, req.user.id]
+    );
+
+    // régi tagek törlése
+    await conn.execute("DELETE FROM image_tags WHERE image_id = ?", [imageId]);
+
+    // új tagek beszúrása
+    if (Array.isArray(tags)) {
+      for (const tag of tags) {
+        const [existing] = await conn.execute("SELECT id FROM tags WHERE tag = ?", [tag]);
+        let tagId;
+        if (existing.length > 0) {
+          tagId = existing[0].id;
+        } else {
+          const [tagRes] = await conn.execute("INSERT INTO tags (tag) VALUES (?)", [tag]);
+          tagId = tagRes.insertId;
+        }
+        await conn.execute("INSERT INTO image_tags (image_id, tag_id) VALUES (?, ?)", [
+          imageId,
+          tagId,
+        ]);
+      }
+    }
+
+    await conn.commit();
+    res.json({ success: true, message: "Kép frissítve!" });
+  } catch (err) {
+    await conn.rollback();
+    console.error("❌ Képfrissítési hiba:", err);
+    res.status(500).json({ error: "Szerverhiba képfrissítés közben." });
+  } finally {
+    conn.release();
+  }
+});
 
 // -----------------------------
 // 🔹 TAG KERESÉS
