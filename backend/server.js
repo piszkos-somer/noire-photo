@@ -329,32 +329,42 @@ app.put(
 // 🔹 KÉP ADATOK FRISSÍTÉSE
 app.put("/api/update-image/:id", verifyToken, async (req, res) => {
   const imageId = req.params.id;
-  const { title, description, tags } = req.body;
+  let { title, description, tags } = req.body;
+
+  // 🔹 Ha tags string, alakítsuk tömbbé
+  if (typeof tags === "string") {
+    try {
+      tags = JSON.parse(tags);
+    } catch {
+      tags = [];
+    }
+  }
+
   const conn = await pool.getConnection();
 
   try {
     await conn.beginTransaction();
-
-    // alapadatok frissítése
     await conn.execute(
       "UPDATE images SET title = ?, description = ? WHERE id = ? AND user_id = ?",
       [title, description, imageId, req.user.id]
     );
 
-    // régi tagek törlése
     await conn.execute("DELETE FROM image_tags WHERE image_id = ?", [imageId]);
 
-    // új tagek beszúrása
     if (Array.isArray(tags)) {
       for (const tag of tags) {
-        const [existing] = await conn.execute("SELECT id FROM tags WHERE tag = ?", [tag]);
+        const trimmed = tag.trim();
+        if (!trimmed) continue;
+
+        const [existing] = await conn.execute("SELECT id FROM tags WHERE tag = ?", [trimmed]);
         let tagId;
         if (existing.length > 0) {
           tagId = existing[0].id;
         } else {
-          const [tagRes] = await conn.execute("INSERT INTO tags (tag) VALUES (?)", [tag]);
+          const [tagRes] = await conn.execute("INSERT INTO tags (tag) VALUES (?)", [trimmed]);
           tagId = tagRes.insertId;
         }
+
         await conn.execute("INSERT INTO image_tags (image_id, tag_id) VALUES (?, ?)", [
           imageId,
           tagId,
@@ -363,7 +373,7 @@ app.put("/api/update-image/:id", verifyToken, async (req, res) => {
     }
 
     await conn.commit();
-    res.json({ success: true, message: "Kép frissítve!" });
+    res.json({ success: true, message: "✅ Kép és tagek frissítve!" });
   } catch (err) {
     await conn.rollback();
     console.error("❌ Képfrissítési hiba:", err);
@@ -372,6 +382,7 @@ app.put("/api/update-image/:id", verifyToken, async (req, res) => {
     conn.release();
   }
 });
+
 
 // -----------------------------
 // 🔹 TAG KERESÉS
