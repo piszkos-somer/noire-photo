@@ -2,10 +2,10 @@
 -- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- Host: 127.0.0.1:3306
--- Generation Time: Nov 03, 2025 at 03:43 PM
--- Server version: 10.4.28-MariaDB
--- PHP Version: 8.2.4
+-- Gép: 127.0.0.1:3307
+-- Létrehozás ideje: 2025. Nov 04. 09:34
+-- Kiszolgáló verziója: 10.4.28-MariaDB
+-- PHP verzió: 8.2.4
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -18,13 +18,13 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `noire`
+-- Adatbázis: `noire`
 --
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `comments`
+-- Tábla szerkezet ehhez a táblához `comments`
 --
 
 CREATE TABLE `comments` (
@@ -36,7 +36,7 @@ CREATE TABLE `comments` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `comments`
+-- A tábla adatainak kiíratása `comments`
 --
 
 INSERT INTO `comments` (`id`, `user_id`, `image_id`, `comment`, `upload_date`) VALUES
@@ -51,7 +51,7 @@ INSERT INTO `comments` (`id`, `user_id`, `image_id`, `comment`, `upload_date`) V
 -- --------------------------------------------------------
 
 --
--- Table structure for table `comment_likes`
+-- Tábla szerkezet ehhez a táblához `comment_likes`
 --
 
 CREATE TABLE `comment_likes` (
@@ -61,7 +61,7 @@ CREATE TABLE `comment_likes` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `comment_likes`
+-- A tábla adatainak kiíratása `comment_likes`
 --
 
 INSERT INTO `comment_likes` (`id`, `user_id`, `comment_id`) VALUES
@@ -73,7 +73,7 @@ INSERT INTO `comment_likes` (`id`, `user_id`, `comment_id`) VALUES
 -- --------------------------------------------------------
 
 --
--- Table structure for table `images`
+-- Tábla szerkezet ehhez a táblához `images`
 --
 
 CREATE TABLE `images` (
@@ -87,7 +87,7 @@ CREATE TABLE `images` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `images`
+-- A tábla adatainak kiíratása `images`
 --
 
 INSERT INTO `images` (`id`, `user_id`, `title`, `description`, `upload_date`, `url`, `likes`) VALUES
@@ -104,7 +104,7 @@ INSERT INTO `images` (`id`, `user_id`, `title`, `description`, `upload_date`, `u
 -- --------------------------------------------------------
 
 --
--- Table structure for table `image_likes`
+-- Tábla szerkezet ehhez a táblához `image_likes`
 --
 
 CREATE TABLE `image_likes` (
@@ -114,7 +114,7 @@ CREATE TABLE `image_likes` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `image_likes`
+-- A tábla adatainak kiíratása `image_likes`
 --
 
 INSERT INTO `image_likes` (`id`, `user_id`, `image_id`) VALUES
@@ -138,7 +138,7 @@ INSERT INTO `image_likes` (`id`, `user_id`, `image_id`) VALUES
 -- --------------------------------------------------------
 
 --
--- Table structure for table `image_reactions`
+-- Tábla szerkezet ehhez a táblához `image_reactions`
 --
 
 CREATE TABLE `image_reactions` (
@@ -151,7 +151,7 @@ CREATE TABLE `image_reactions` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `image_tags`
+-- Tábla szerkezet ehhez a táblához `image_tags`
 --
 
 CREATE TABLE `image_tags` (
@@ -160,7 +160,7 @@ CREATE TABLE `image_tags` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `image_tags`
+-- A tábla adatainak kiíratása `image_tags`
 --
 
 INSERT INTO `image_tags` (`image_id`, `tag_id`) VALUES
@@ -185,7 +185,7 @@ INSERT INTO `image_tags` (`image_id`, `tag_id`) VALUES
 -- --------------------------------------------------------
 
 --
--- Table structure for table `reactions`
+-- Tábla szerkezet ehhez a táblához `reactions`
 --
 
 CREATE TABLE `reactions` (
@@ -196,7 +196,7 @@ CREATE TABLE `reactions` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `tags`
+-- Tábla szerkezet ehhez a táblához `tags`
 --
 
 CREATE TABLE `tags` (
@@ -205,7 +205,7 @@ CREATE TABLE `tags` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `tags`
+-- A tábla adatainak kiíratása `tags`
 --
 
 INSERT INTO `tags` (`id`, `tag`) VALUES
@@ -223,7 +223,7 @@ INSERT INTO `tags` (`id`, `tag`) VALUES
 -- --------------------------------------------------------
 
 --
--- Table structure for table `users`
+-- Tábla szerkezet ehhez a táblához `users`
 --
 
 CREATE TABLE `users` (
@@ -236,21 +236,22 @@ CREATE TABLE `users` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `users`
+-- A tábla adatainak kiíratása `users`
 --
 
 INSERT INTO `users` (`id`, `username`, `email`, `password`, `bio`, `profile_picture`) VALUES
 (1, 'somer fatera', 'perakattis@gmail.com', '$2b$10$vBS.xhlLasGMI3DPjjr6r.8MlEsnH5wFVAr/V64MXllFI4gaMS76O', 'Sziasztok! Kezdő fotós vagyok, és szeretnék ügyesebb lenni a szakmában. Köszönök minden építő kritikát! aa', '/profile-pictures/1761583927591.jpg'),
 (2, 'Papp Sándor', 'pappsanyi@gmail.com', '$2b$10$9/iX2OKNISqPmBo13Svi/OtdCjPTxgSYNoZ7MUcLP0NwLZ7YlTrr2', 'Sziasztok! Sanyi vagyok és 4 éve foglalkozom fotózással. Szívesen megosztom veletek a munkáimat és bármikor fordulhattok hozzám segítségért. Versenyre való felkészítést is vállalok!', '/profile-pictures/1761584967721.jpg'),
 (3, 'Dávid', 'kabzso820@hengersor.hu', '$2b$10$77rO1/wis8plfrsb8ooWhuFVRhr3D8oH34ZRF13qH/plHpzArhft.', 'Sziasztok Dávid vagyok. Mizu? Tapasztalt, de egyáltalán nem profi fotós vagyok. Csak egy átlagos srác aki a fotózás szerelmese.', '/profile-pictures/1762092187007.png'),
-(4, 'Kabai Zsombor', 'kabai.zsombi@gmail.com', '$2b$10$3NiUroXsfKSnwSa6SxQ6Pu9fJhX/9dNH9r/DYTjDq9e4VNW4hjYVq', 'Sziasztok az én nevem Zsombor. Kezdő fotósnak tartom magam. A telefonommal szoktam fotózni és abból próbálom kihozni a legtöbbett.', '/profile-pictures/1762093987308.jpg');
+(4, 'Kabai Zsombor', 'kabai.zsombi@gmail.com', '$2b$10$3NiUroXsfKSnwSa6SxQ6Pu9fJhX/9dNH9r/DYTjDq9e4VNW4hjYVq', 'Sziasztok az én nevem Zsombor. Kezdő fotósnak tartom magam. A telefonommal szoktam fotózni és abból próbálom kihozni a legtöbbett.', '/profile-pictures/1762093987308.jpg'),
+(5, 'Nagy Ernő', 'habtam963@hengersor.hu', '$2b$10$xMtP8sNLogakmRQ4cfSr/uqJT3TUOTwvbEOpk5SfqAfEYBpSX0Toa', 'Sziasztok, Ernő vagyok. Kezdőként most vettem egy Nikon D3500-at. Nagyon szeretek fotózni, és várom, hogy fejlődjek benne.', '/profile-pictures/1762245188727.jpg');
 
 --
--- Indexes for dumped tables
+-- Indexek a kiírt táblákhoz
 --
 
 --
--- Indexes for table `comments`
+-- A tábla indexei `comments`
 --
 ALTER TABLE `comments`
   ADD PRIMARY KEY (`id`),
@@ -258,7 +259,7 @@ ALTER TABLE `comments`
   ADD KEY `image_id` (`image_id`);
 
 --
--- Indexes for table `comment_likes`
+-- A tábla indexei `comment_likes`
 --
 ALTER TABLE `comment_likes`
   ADD PRIMARY KEY (`id`),
@@ -266,14 +267,14 @@ ALTER TABLE `comment_likes`
   ADD KEY `comment_id` (`comment_id`);
 
 --
--- Indexes for table `images`
+-- A tábla indexei `images`
 --
 ALTER TABLE `images`
   ADD PRIMARY KEY (`id`),
   ADD KEY `user_id` (`user_id`);
 
 --
--- Indexes for table `image_likes`
+-- A tábla indexei `image_likes`
 --
 ALTER TABLE `image_likes`
   ADD PRIMARY KEY (`id`),
@@ -282,7 +283,7 @@ ALTER TABLE `image_likes`
   ADD KEY `image_id` (`image_id`);
 
 --
--- Indexes for table `image_reactions`
+-- A tábla indexei `image_reactions`
 --
 ALTER TABLE `image_reactions`
   ADD PRIMARY KEY (`id`),
@@ -291,28 +292,28 @@ ALTER TABLE `image_reactions`
   ADD KEY `reaction_id` (`reaction_id`);
 
 --
--- Indexes for table `image_tags`
+-- A tábla indexei `image_tags`
 --
 ALTER TABLE `image_tags`
   ADD PRIMARY KEY (`image_id`,`tag_id`),
   ADD KEY `tag_id` (`tag_id`);
 
 --
--- Indexes for table `reactions`
+-- A tábla indexei `reactions`
 --
 ALTER TABLE `reactions`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `reaction_type` (`reaction_type`);
 
 --
--- Indexes for table `tags`
+-- A tábla indexei `tags`
 --
 ALTER TABLE `tags`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `tag` (`tag`);
 
 --
--- Indexes for table `users`
+-- A tábla indexei `users`
 --
 ALTER TABLE `users`
   ADD PRIMARY KEY (`id`),
@@ -320,90 +321,90 @@ ALTER TABLE `users`
   ADD UNIQUE KEY `email` (`email`);
 
 --
--- AUTO_INCREMENT for dumped tables
+-- A kiírt táblák AUTO_INCREMENT értéke
 --
 
 --
--- AUTO_INCREMENT for table `comments`
+-- AUTO_INCREMENT a táblához `comments`
 --
 ALTER TABLE `comments`
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
--- AUTO_INCREMENT for table `comment_likes`
+-- AUTO_INCREMENT a táblához `comment_likes`
 --
 ALTER TABLE `comment_likes`
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=52;
 
 --
--- AUTO_INCREMENT for table `images`
+-- AUTO_INCREMENT a táblához `images`
 --
 ALTER TABLE `images`
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
--- AUTO_INCREMENT for table `image_likes`
+-- AUTO_INCREMENT a táblához `image_likes`
 --
 ALTER TABLE `image_likes`
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=180;
 
 --
--- AUTO_INCREMENT for table `image_reactions`
+-- AUTO_INCREMENT a táblához `image_reactions`
 --
 ALTER TABLE `image_reactions`
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `reactions`
+-- AUTO_INCREMENT a táblához `reactions`
 --
 ALTER TABLE `reactions`
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `tags`
+-- AUTO_INCREMENT a táblához `tags`
 --
 ALTER TABLE `tags`
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
--- AUTO_INCREMENT for table `users`
+-- AUTO_INCREMENT a táblához `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
--- Constraints for dumped tables
+-- Megkötések a kiírt táblákhoz
 --
 
 --
--- Constraints for table `comments`
+-- Megkötések a táblához `comments`
 --
 ALTER TABLE `comments`
   ADD CONSTRAINT `comments_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `comments_ibfk_2` FOREIGN KEY (`image_id`) REFERENCES `images` (`id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `comment_likes`
+-- Megkötések a táblához `comment_likes`
 --
 ALTER TABLE `comment_likes`
   ADD CONSTRAINT `comment_likes_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `comment_likes_ibfk_2` FOREIGN KEY (`comment_id`) REFERENCES `comments` (`id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `images`
+-- Megkötések a táblához `images`
 --
 ALTER TABLE `images`
   ADD CONSTRAINT `images_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `image_likes`
+-- Megkötések a táblához `image_likes`
 --
 ALTER TABLE `image_likes`
   ADD CONSTRAINT `image_likes_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `image_likes_ibfk_2` FOREIGN KEY (`image_id`) REFERENCES `images` (`id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `image_reactions`
+-- Megkötések a táblához `image_reactions`
 --
 ALTER TABLE `image_reactions`
   ADD CONSTRAINT `image_reactions_ibfk_1` FOREIGN KEY (`image_id`) REFERENCES `images` (`id`) ON DELETE CASCADE,
@@ -411,7 +412,7 @@ ALTER TABLE `image_reactions`
   ADD CONSTRAINT `image_reactions_ibfk_3` FOREIGN KEY (`reaction_id`) REFERENCES `reactions` (`id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `image_tags`
+-- Megkötések a táblához `image_tags`
 --
 ALTER TABLE `image_tags`
   ADD CONSTRAINT `image_tags_ibfk_1` FOREIGN KEY (`image_id`) REFERENCES `images` (`id`) ON DELETE CASCADE,
