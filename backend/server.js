@@ -1,7 +1,3 @@
-// =======================================
-// ✅ FOTO FELTÖLTŐ BACKEND – JAVÍTOTT VERZIÓ
-// =======================================
-
 const express = require("express");
 const multer = require("multer");
 const mysql = require("mysql2/promise");
@@ -14,23 +10,16 @@ require("dotenv").config();
 
 const app = express();
 
-// -----------------------------
-// 🔹 Alap beállítások
-// -----------------------------
 app.use(cors());
 app.use(express.json());
 app.use("/images", express.static(path.join(__dirname, "images")));
 app.use("/profile-pictures", express.static(path.join(__dirname, "profile-pictures")));
 
-// Ellenőrzés: legyen JWT_SECRET
 if (!process.env.JWT_SECRET) {
   console.error("❌ HIBA: JWT_SECRET nincs megadva az .env fájlban!");
   process.exit(1);
 }
 
-// -----------------------------
-// 🔹 Multer konfiguráció
-// -----------------------------
 const ensureDir = (dirPath) => {
   if (!fs.existsSync(dirPath)) fs.mkdirSync(dirPath);
 };
@@ -61,9 +50,6 @@ const profilePicStorage = multer.diskStorage({
 });
 const uploadProfilePic = multer({ storage: profilePicStorage });
 
-// -----------------------------
-// 🔹 MySQL kapcsolat (pool)
-// -----------------------------
 const pool = mysql.createPool({
   host: process.env.DB_HOST || "localhost",
   user: process.env.DB_USER || "root",
@@ -84,9 +70,6 @@ const pool = mysql.createPool({
   }
 })();
 
-// -----------------------------
-// 🔹 JWT Middleware
-// -----------------------------
 function verifyToken(req, res, next) {
   const authHeader = req.headers.authorization;
   if (!authHeader)
@@ -107,10 +90,6 @@ function verifyToken(req, res, next) {
   }
 }
 
-
-// -----------------------------
-// 🔹 REGISZTRÁCIÓ
-// -----------------------------
 app.post("/api/register", async (req, res) => {
   const { username, email, password } = req.body;
   if (!username || !email || !password)
@@ -139,9 +118,6 @@ app.post("/api/register", async (req, res) => {
   }
 });
 
-// -----------------------------
-// 🔹 BEJELENTKEZÉS
-// -----------------------------
 app.post("/api/login", async (req, res) => {
   const { email, password } = req.body;
   if (!email || !password)
@@ -174,9 +150,6 @@ app.post("/api/login", async (req, res) => {
   }
 });
 
-// -----------------------------
-// 🔹 KÉPFELTÖLTÉS
-// -----------------------------
 app.post("/api/upload", verifyToken, upload.single("image"), async (req, res) => {
   const { title, description } = req.body;
   const tags = JSON.parse(req.body.tags || "[]");
@@ -222,9 +195,6 @@ app.post("/api/upload", verifyToken, upload.single("image"), async (req, res) =>
   }
 });
 
-// -----------------------------
-// 🔹 SAJÁT KÉPEK LEKÉRÉSE
-// -----------------------------
 app.get("/api/my-images", verifyToken, async (req, res) => {
   const conn = await pool.getConnection();
   try {
@@ -252,9 +222,6 @@ app.get("/api/my-images", verifyToken, async (req, res) => {
   }
 });
 
-// -----------------------------
-// 🔹 PROFIL FRISSÍTÉS
-// -----------------------------
 app.put("/api/update-profile", verifyToken, async (req, res) => {
   const { username, email, password } = req.body;
   const updates = [];
@@ -291,9 +258,6 @@ app.put("/api/update-profile", verifyToken, async (req, res) => {
   }
 });
 
-// -----------------------------
-// 🔹 PROFIL BIO + KÉP FRISSÍTÉS
-// -----------------------------
 app.put(
   "/api/update-profile-extended",
   verifyToken,
@@ -326,12 +290,11 @@ app.put(
     }
   }
 );
-// 🔹 KÉP ADATOK FRISSÍTÉSE
+
 app.put("/api/update-image/:id", verifyToken, async (req, res) => {
   const imageId = req.params.id;
   let { title, description, tags } = req.body;
 
-  // 🔹 Ha tags string, alakítsuk tömbbé
   if (typeof tags === "string") {
     try {
       tags = JSON.parse(tags);
@@ -384,9 +347,6 @@ app.put("/api/update-image/:id", verifyToken, async (req, res) => {
 });
 
 
-// -----------------------------
-// 🔹 TAG KERESÉS
-// -----------------------------
 app.get("/api/tags/search", verifyToken, async (req, res) => {
   const query = req.query.q;
   if (!query || query.trim().length < 1) return res.json([]);
@@ -406,9 +366,6 @@ app.get("/api/tags/search", verifyToken, async (req, res) => {
   }
 });
 
-// -----------------------------
-// 🔹 Árva tagek automatikus törlése
-// -----------------------------
 async function cleanupUnusedTags() {
   const conn = await pool.getConnection();
   try {
@@ -428,9 +385,6 @@ async function cleanupUnusedTags() {
 cleanupUnusedTags();
 setInterval(cleanupUnusedTags, 60 * 60 * 1000);
 
-// -----------------------------
-// 🔹 Saját profil lekérése
-// -----------------------------
 app.get("/api/me", verifyToken, async (req, res) => {
   const conn = await pool.getConnection();
   try {
@@ -449,14 +403,9 @@ app.get("/api/me", verifyToken, async (req, res) => {
   }
 });
 
-// -----------------------------
-// 🔹 Szerver indítás
-// -----------------------------
-
 app.get("/api/latest-images", async (req, res) => {
   let userId = null;
 
-  // Ha van token, próbáljuk dekódolni
   const authHeader = req.headers.authorization;
   if (authHeader && authHeader.startsWith("Bearer ")) {
     try {
@@ -464,13 +413,11 @@ app.get("/api/latest-images", async (req, res) => {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
       userId = decoded.id;
     } catch (err) {
-      // Token hibát nem logolunk hangosan – nem kötelező a token
     }
   }
 
   const conn = await pool.getConnection();
   try {
-    // 🔹 Mostantól visszaadjuk az i.user_id-t is
     const [rows] = await conn.query(
       `
       SELECT 
@@ -492,7 +439,6 @@ app.get("/api/latest-images", async (req, res) => {
       `
     );
 
-    // 🔹 Like státusz beállítása
     if (userId) {
       const [likedRows] = await conn.query(
         "SELECT image_id FROM image_likes WHERE user_id = ?",
@@ -506,7 +452,6 @@ app.get("/api/latest-images", async (req, res) => {
       rows.forEach((img) => (img.isLiked = false));
     }
 
-    // 🔹 A tageket alakítsuk tömbbé a frontend kényelméért
     rows.forEach((img) => {
       img.tags = img.tags ? img.tags.split(",").filter((t) => t.trim() !== "") : [];
     });
@@ -520,9 +465,6 @@ app.get("/api/latest-images", async (req, res) => {
   }
 });
 
-
-// controllers/imageController.js
-// ❤️ KÉP LIKE / UNLIKE
 app.post("/api/images/:id/like", verifyToken, async (req, res) => {
   const imageId = req.params.id;
   const userId = req.user.id;
@@ -533,14 +475,12 @@ app.post("/api/images/:id/like", verifyToken, async (req, res) => {
 
   const conn = await pool.getConnection();
   try {
-    // Ellenőrizzük, hogy már likeolta-e
     const [existing] = await conn.query(
       "SELECT * FROM image_likes WHERE user_id = ? AND image_id = ?",
       [userId, imageId]
     );
 
     if (existing.length > 0) {
-      // 🔁 Ha már likeolta → unlike
       await conn.query("DELETE FROM image_likes WHERE user_id = ? AND image_id = ?", [
         userId,
         imageId,
@@ -554,7 +494,6 @@ app.post("/api/images/:id/like", verifyToken, async (req, res) => {
 
       return res.json({ likes: updatedImage.likes, isLiked: false });
     } else {
-      // ❤️ Ha még nem → like
       await conn.query("INSERT INTO image_likes (user_id, image_id) VALUES (?, ?)", [
         userId,
         imageId,
@@ -586,13 +525,6 @@ app.post("/api/refresh-token", verifyToken, (req, res) => {
   res.json({ token: newToken });
 });
 
-// ===============================================
-// 💬 KOMMENTEK + LIKE RENDSZER
-// ===============================================
-
-// 🔹 Képhez tartozó kommentek lekérése (publikus)
-// 💬 Kommentek lekérése adott képhez
-// 💬 Kommentek lekérése adott képhez (like státuszokkal)
 app.get("/api/images/:id/comments", async (req, res) => {
   const imageId = req.params.id;
   const authHeader = req.headers.authorization;
@@ -604,7 +536,6 @@ app.get("/api/images/:id/comments", async (req, res) => {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
       userId = decoded.id;
     } catch (err) {
-      // Token hiba nem kritikus itt
     }
   }
 
@@ -645,10 +576,6 @@ app.get("/api/images/:id/comments", async (req, res) => {
   }
 });
 
-
-
-// 🔹 Új komment létrehozása (csak bejelentkezve)
-// 💬 Új komment létrehozása
 app.post("/api/images/:id/comments", verifyToken, async (req, res) => {
   const imageId = req.params.id;
   const userId = req.user.id;
@@ -673,8 +600,6 @@ app.post("/api/images/:id/comments", verifyToken, async (req, res) => {
   }
 });
 
-
-// ❤️ Komment like / unlike
 app.post("/api/comments/:id/like", verifyToken, async (req, res) => {
   const commentId = req.params.id;
   const userId = req.user.id;
@@ -716,7 +641,6 @@ app.post("/api/comments/:id/like", verifyToken, async (req, res) => {
   }
 });
 
-// 🔓 Publikus: felhasználó adatainak lekérése
 app.get("/api/users/:id", async (req, res) => {
   const userId = req.params.id;
   const conn = await pool.getConnection();
@@ -736,28 +660,22 @@ app.get("/api/users/:id", async (req, res) => {
   }
 });
 
-// 🔓 Publikus: adott user képei
-// 🔓 Publikus: adott user képei (tagekkel és like adatokkal)
-// 🔓 Publikus: adott user képei (szerző névvel, tagekkel és like adatokkal)
 app.get("/api/user-images/:id", async (req, res) => {
   const userId = req.params.id;
   const authHeader = req.headers.authorization;
   let viewerId = null;
 
-  // Ha van token, próbáljuk dekódolni
   if (authHeader && authHeader.startsWith("Bearer ")) {
     try {
       const token = authHeader.split(" ")[1];
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
       viewerId = decoded.id;
     } catch (err) {
-      // ha nincs érvényes token, nem baj
     }
   }
 
   const conn = await pool.getConnection();
   try {
-    // 🔹 Itt is visszaadjuk az i.user_id-t és a szerző nevét
     const [rows] = await conn.query(
       `
       SELECT 
@@ -780,7 +698,6 @@ app.get("/api/user-images/:id", async (req, res) => {
       [userId]
     );
 
-    // Like státusz megjelölése (ha be van jelentkezve a néző)
     if (viewerId) {
       const [likedRows] = await conn.query(
         "SELECT image_id FROM image_likes WHERE user_id = ?",
@@ -792,7 +709,6 @@ app.get("/api/user-images/:id", async (req, res) => {
       rows.forEach((img) => (img.isLiked = false));
     }
 
-    // 🔹 A tageket alakítsuk tömbbé a frontend kényelméért
     rows.forEach((img) => {
       img.tags = img.tags ? img.tags.split(",").filter((t) => t.trim() !== "") : [];
     });
@@ -806,7 +722,6 @@ app.get("/api/user-images/:id", async (req, res) => {
   }
 });
 
-// 🔓 Publikus: képek lekérdezése adott tag alapján
 app.get("/api/images/by-tag/:tag", async (req, res) => {
   const { tag } = req.params;
   const authHeader = req.headers.authorization;
@@ -818,7 +733,6 @@ app.get("/api/images/by-tag/:tag", async (req, res) => {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
       userId = decoded.id;
     } catch (err) {
-      // nem baj ha nincs token
     }
   }
 
@@ -846,7 +760,6 @@ app.get("/api/images/by-tag/:tag", async (req, res) => {
       [tag]
     );
 
-    // like státusz (ha van user)
     if (userId) {
       const [likedRows] = await conn.query(
         "SELECT image_id FROM image_likes WHERE user_id = ?",
@@ -858,7 +771,6 @@ app.get("/api/images/by-tag/:tag", async (req, res) => {
       rows.forEach((img) => (img.isLiked = false));
     }
 
-    // tagek tömbbé alakítása
     rows.forEach((img) => {
       img.tags = img.tags ? img.tags.split(",").filter((t) => t.trim() !== "") : [];
     });
@@ -872,7 +784,6 @@ app.get("/api/images/by-tag/:tag", async (req, res) => {
   }
 });
 
-// 🔍 Kép keresés (cím, leírás, szerző vagy tag alapján)
 app.get("/api/images/search", async (req, res) => {
   const { q, filter } = req.query;
   const search = q ? `%${q}%` : "%";
@@ -895,13 +806,11 @@ app.get("/api/images/search", async (req, res) => {
       LEFT JOIN tags t ON it.tag_id = t.id
     `;
 
-    // Szűrés típus szerint
     if (filter === "author") {
       query += " WHERE u.username LIKE ?";
     } else if (filter === "tag") {
       query += " WHERE t.tag LIKE ?";
     } else {
-      // Alapértelmezett: cím + leírás
       query += " WHERE i.title LIKE ? OR i.description LIKE ?";
     }
 
