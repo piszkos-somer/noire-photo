@@ -1,51 +1,97 @@
 .about-container {
-    text-align: center;
-  }
-  
+  text-align: center;
+}
+
+/* Rács elrendezés */
+.about-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 3rem;
+  justify-items: center;
+  align-items: stretch;
+  margin-top: 3rem;
+  margin-bottom: 3rem;
+}
+
+/* Alapdoboz minden elemnek */
+.about-item {
+  border-radius: 1rem;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  padding: 1.5rem;
+  text-align: center;
+  font-size: 1.05rem;
+  background: white;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.about-item:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 14px rgba(0,0,0,0.25);
+}
+
+/* Képdoboz */
+.image-box {
+  background: linear-gradient(145deg, #8ab4f8, #2b57e2);
+  width: 500px;
+  height: 500px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 1rem;
+  overflow: hidden;
+}
+
+/* A képek beillesztése a dobozba */
+.image-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 1rem;
+  transition: transform 0.3s ease;
+}
+
+.image-box img:hover {
+  transform: scale(1.05);
+}
+
+/* Szövegdoboz */
+.text-box {
+  background: #fff;
+  border: 1px solid #000;
+  border-radius: 1rem;
+  width: 500px;
+  min-height: 180px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1.5rem;
+  line-height: 1.6;
+  text-align: justify;
+}
+
+/* Mobil nézet */
+@media (max-width: 768px) {
   .about-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 3rem;
-    justify-items: center;
-    align-items: center;
-    margin-top: 3rem;
-    margin-bottom: 3rem;
+    grid-template-columns: 1fr;
   }
-  
-  
-  .about-item {
-    border-radius: 1rem;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.2);
-    padding: 2rem;
-    text-align: center;
-    font-size: 1.1rem;
-    transition: transform 0.3s ease;
-  }
-  
-  .about-item:hover {
-    transform: translateY(-5px);
-  }
-  
-  
-  .image-box {
-    background: linear-gradient(145deg, #8ab4f8, #2b57e2);
-    color: white;
-    width: 220px;
-    height: 220px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-weight: 500;
-  }
-  
-  
+
+  .image-box,
   .text-box {
-    background: white;
-    border: 1px solid #000;
-    width: 350px;
-    height: 150px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    width: 90%;
+    height: auto;
   }
-  
+
+  .text-box {
+    min-height: 150px;
+    text-align: center;
+  }
+}
+
+.about-name {
+  font-size: 1.4rem;
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 0.8rem;
+  color: #2b57e2;
+}
+
