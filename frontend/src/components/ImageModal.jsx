@@ -47,10 +47,13 @@ const handleDownload = async () => {
     const response = await fetch(`http://localhost:3001${localImage.url}`, {
       headers: getAuthHeader(),
     });
-if (res.status === 401 || res.status === 403) {
-  handleTokenError(res.status, navigate);
-  return;
-}
+
+    // 🔧 Itt volt a hiba: 'res' helyett 'response'
+    if (response.status === 401 || response.status === 403) {
+      handleTokenError(response.status, navigate);
+      return;
+    }
+
     if (!response.ok) {
       handleTokenError(response.status, navigate);
       return;
@@ -71,6 +74,7 @@ if (res.status === 401 || res.status === 403) {
     console.error("Letöltés hiba:", error);
   }
 };
+
 
   // ha a modal nem látható vagy nincs kép, ne renderelj semmit
   if (!show || !localImage) return null;
