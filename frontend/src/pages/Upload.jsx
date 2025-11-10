@@ -251,9 +251,15 @@ if (res.status === 401 || res.status === 403) {
               onChange={(e) => setNewTag(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleAddTag()}
             />
-            <Button variant="success" onClick={handleAddTag} className="add-btn">
-              ✓
-            </Button>
+            <Button
+  variant="success"
+  onClick={() => handleAddTag(newTag.trim())}
+  className="add-btn"
+  disabled={!newTag.trim()} // opcionális, hogy üresen ne lehessen kattintani
+>
+  ✓
+</Button>
+
 
             {showSuggestions && suggestions.length > 0 && (
               <ListGroup className="tag-suggestion-box shadow-sm">
