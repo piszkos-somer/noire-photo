@@ -91,14 +91,16 @@ if (res.status === 401 || res.status === 403) {
   }, [newTag, navigate]);
 
   const handleAddTag = (tagValue) => {
-    const value = tagValue || newTag.trim();
-    if (value !== "" && !tags.includes(value)) {
-      setTags([...tags, value]);
-      setNewTag("");
-      setSuggestions([]);
-      setShowSuggestions(false);
+    const value = (tagValue || newTag).trim();
+    if (!value) return; // üresen ne adjon hozzá
+    if (!tags.includes(value)) {
+      setTags((prev) => [...prev, value]);
     }
+    setNewTag("");
+    setSuggestions([]);
+    setShowSuggestions(false);
   };
+  
 
   const handleDeleteTag = (index) => {
     setTags(tags.filter((_, i) => i !== index));
@@ -155,13 +157,18 @@ if (res.status === 401 || res.status === 403) {
         headers: getAuthHeader(),
         body: formData,
       });
-if (res.status === 401 || res.status === 403) {
-  handleTokenError(res.status, navigate);
-  return;
-}
+      
+      // helyesen: 'response', nem 'res'
+      if (response.status === 401 || response.status === 403) {
+        handleTokenError(response.status, navigate);
+        return;
+      }
+      
       if (!response.ok) {
         handleTokenError(response.status, navigate);
+        return;
       }
+      
 
       const data = await response.json();
 
