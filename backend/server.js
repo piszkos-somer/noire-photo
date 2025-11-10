@@ -849,5 +849,38 @@ app.get("/api/images/:id/comment-count", async (req, res) => {
   }
 });
 
+app.delete("/api/images/:id", verifyToken, async (req, res) => {
+  const imageId = req.params.id;
+  const userId = req.user.id;
+
+  const conn = await pool.getConnection();
+  try {
+    // Ellenőrizzük, hogy a kép tényleg az adott useré
+    const [rows] = await conn.query("SELECT url FROM images WHERE id = ? AND user_id = ?", [
+      imageId,
+      userId,
+    ]);
+    if (rows.length === 0)
+      return res.status(403).json({ error: "Nincs jogosultság a kép törléséhez." });
+
+    // Fájl törlése a szerverről
+    const imagePath = path.join(__dirname, rows[0].url);
+    if (fs.existsSync(imagePath)) {
+      fs.unlinkSync(imagePath);
+    }
+
+    // Kép törlése az adatbázisból (cascade törli a kommenteket és like-okat is)
+    await conn.query("DELETE FROM images WHERE id = ? AND user_id = ?", [imageId, userId]);
+
+    res.json({ success: true, message: "✅ A kép sikeresen törölve lett." });
+  } catch (err) {
+    console.error("❌ Kép törlési hiba:", err);
+    res.status(500).json({ error: "Szerverhiba a törlés közben." });
+  } finally {
+    conn.release();
+  }
+});
+
+
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => console.log(`✅ Szerver fut a ${PORT} porton!`));
