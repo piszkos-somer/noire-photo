@@ -881,6 +881,64 @@ app.delete("/api/images/:id", verifyToken, async (req, res) => {
   }
 });
 
+// --- 👥 KÖVETÉS RENDSZER --- //
+app.post("/api/follow/:id", verifyToken, async (req, res) => {
+  const followingId = parseInt(req.params.id);
+  const followerId = req.user.id;
+
+  if (followerId === followingId)
+    return res.status(400).json({ message: "Nem követheted saját magad." });
+
+  const conn = await pool.getConnection();
+  try {
+    const [existing] = await conn.query(
+      "SELECT * FROM follows WHERE follower_id = ? AND following_id = ?",
+      [followerId, followingId]
+    );
+
+    if (existing.length > 0) {
+      // ha már követi -> töröljük (unfollow)
+      await conn.query(
+        "DELETE FROM follows WHERE follower_id = ? AND following_id = ?",
+        [followerId, followingId]
+      );
+      return res.json({ following: false });
+    } else {
+      // ha nem követi -> követés
+      await conn.query(
+        "INSERT INTO follows (follower_id, following_id) VALUES (?, ?)",
+        [followerId, followingId]
+      );
+      return res.json({ following: true });
+    }
+  } catch (err) {
+    console.error("❌ Követés hiba:", err);
+    res.status(500).json({ message: "Szerverhiba a követés műveletnél." });
+  } finally {
+    conn.release();
+  }
+});
+
+// Lekérdezi, hogy az adott user követi-e a másikat
+app.get("/api/follow/status/:id", verifyToken, async (req, res) => {
+  const targetId = parseInt(req.params.id);
+  const followerId = req.user.id;
+
+  const conn = await pool.getConnection();
+  try {
+    const [rows] = await conn.query(
+      "SELECT 1 FROM follows WHERE follower_id = ? AND following_id = ?",
+      [followerId, targetId]
+    );
+    res.json({ following: rows.length > 0 });
+  } catch (err) {
+    console.error("❌ Követés státusz hiba:", err);
+    res.status(500).json({ message: "Szerverhiba a státusz lekéréskor." });
+  } finally {
+    conn.release();
+  }
+});
+
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => console.log(`✅ Szerver fut a ${PORT} porton!`));

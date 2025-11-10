@@ -28,7 +28,7 @@ function ImageModal({
   // 🧠 Lokális másolat a képről — így tud frissülni helyben is
   const [localImage, setLocalImage] = useState(image);
 const [showToast, setShowToast] = useState(false);
-
+const [isFollowing, setIsFollowing] = useState(false);
   // Ha új képet kapunk, frissítjük a lokális állapotot
   useEffect(() => {
     setLocalImage(image);
@@ -153,18 +153,41 @@ const handleShare = async () => {
 
     {/* 📷 Feltöltő név buborék */}
     <div
-      className="px-3 py-2 rounded-3 glass-bubble"
-      style={{
-        backdropFilter: "blur(10px)",
-        cursor: "pointer",
-        display: "inline-flex",
-        alignItems: "center",
-        boxShadow: "0 0 10px rgba(255,255,255,0.15)",
-      }}
-      onClick={() => handleUserClick(localImage?.user_id)}
-    >
-      📷 {localImage?.author || "Ismeretlen szerző"}
-    </div>
+  className="px-3 py-2 rounded-3 glass-bubble"
+  style={{
+    backdropFilter: "blur(10px)",
+    cursor: "pointer",
+    display: "inline-flex",
+    alignItems: "center",
+    boxShadow: "0 0 10px rgba(255,255,255,0.15)",
+  }}
+  onClick={() => handleUserClick(localImage?.user_id)}
+>
+  📷 {localImage?.author || "Ismeretlen szerző"}
+</div>
+
+{localImage?.user_id && (
+  <Button
+    variant="outline-dark"
+    size="sm"
+    className="ms-2"
+    onClick={async (e) => {
+      e.stopPropagation();
+      const token = getToken();
+      if (!token) return navigate("/Login");
+
+      const res = await fetch(
+        `http://localhost:3001/api/follow/${localImage.user_id}`,
+        { method: "POST", headers: getAuthHeader() }
+      );
+      const data = await res.json();
+      setIsFollowing(data.following);
+    }}
+  >
+    {isFollowing ? "Követem" : "Követés"}
+  </Button>
+)}
+
 
     {/* ⬇️ Letöltés buborék */}
     <div

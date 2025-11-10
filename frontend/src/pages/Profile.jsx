@@ -31,6 +31,7 @@ function Profile() {
   const { user, updateUsername } = useContext(UserContext);
   const navigate = useNavigate();
 
+
   // 🔹 Betöltéskor lekérjük a profil adatokat
   useEffect(() => {
     if (!user?.token) {

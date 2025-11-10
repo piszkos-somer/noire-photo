@@ -1,18 +1,21 @@
 // src/pages/ViewProfile.jsx
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
-import { Container, Row, Spinner } from "react-bootstrap";
+import { Container, Row, Spinner, Button } from "react-bootstrap";
 import ImageCard from "../components/ImageCard";
 import ImageModal from "../components/ImageModal";
 import "../css/Profile.css";
 import "../css/Home.css";
 import { handleTokenError } from "../utils/auth";
+import { UserContext } from "../context/UserContext";
 
 function ViewProfile() {
+  const { user } = useContext(UserContext);
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
-
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [viewedUser, setViewedUser] = useState(null);
   const [profile, setProfile] = useState(null);
   const [images, setImages] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -26,6 +29,25 @@ function ViewProfile() {
   const userData = localStorage.getItem("user");
   const token = userData ? JSON.parse(userData).token : null;
 
+  useEffect(() => {
+    const url = window.location.pathname;
+    const match = url.match(/viewprofile\/(\d+)/);
+    const viewedId = match ? parseInt(match[1]) : null;
+  
+    if (viewedId && user?.token) {
+      fetch(`http://localhost:3001/api/follow/status/${viewedId}`, {
+        headers: { Authorization: `Bearer ${user.token}` },
+      })
+        .then(res => res.json())
+        .then(data => setIsFollowing(data.following))
+        .catch(console.error);
+  
+      fetch(`http://localhost:3001/api/users/${viewedId}`)
+        .then(res => res.json())
+        .then(data => setViewedUser(data));
+    }
+  }, [user]);
+  
   // 🔹 Profil és képek betöltése
   useEffect(() => {
     const fetchProfile = async () => {
@@ -244,6 +266,24 @@ if (res.status === 401 || res.status === 403) {
           <p className="text-muted">{profile.bio || "Nincs bio megadva."}</p>
         </div>
       )}
+{viewedUser && (
+  <div className="text-center mb-3">
+    <h3>{viewedUser.username}</h3>
+    <Button
+      variant={isFollowing ? "secondary" : "primary"}
+      onClick={async () => {
+        const res = await fetch(
+          `http://localhost:3001/api/follow/${viewedUser.id}`,
+          { method: "POST", headers: { Authorization: `Bearer ${user.token}` } }
+        );
+        const data = await res.json();
+        setIsFollowing(data.following);
+      }}
+    >
+      {isFollowing ? "Követem" : "Követés"}
+    </Button>
+  </div>
+)}
 
       <h3 className="text-center mb-4">📸 {profile?.username} képei</h3>
 
