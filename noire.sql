@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Gép: 127.0.0.1:3307
--- Létrehozás ideje: 2025. Nov 04. 09:34
+-- Létrehozás ideje: 2025. Nov 10. 11:14
 -- Kiszolgáló verziója: 10.4.28-MariaDB
 -- PHP verzió: 8.2.4
 
@@ -68,7 +68,8 @@ INSERT INTO `comment_likes` (`id`, `user_id`, `comment_id`) VALUES
 (45, 1, 1),
 (46, 1, 2),
 (39, 2, 1),
-(51, 4, 1);
+(51, 4, 1),
+(52, 4, 3);
 
 -- --------------------------------------------------------
 
@@ -99,7 +100,9 @@ INSERT INTO `images` (`id`, `user_id`, `title`, `description`, `upload_date`, `u
 (6, 2, 'Izlandi hegység', 'Záridő: kb. 1/60 – 1/125 mp\r\nRekeszérték: f/8 – f/11\r\nISO érzékenység: 100 – 200\r\nGyújtótávolság: kb. 24–35 mm (nagylátószög)\r\nFehéregyensúly: napfény (kb. 5500 K)', '2025-10-27 19:41:21', '/images/1761586881317.jpg', 3),
 (7, 3, 'Nissan GTR R35', 'Szerintetek megpályázhatok egy versenyt ezzel a képpel?\r\nFényképezőgép: Sony A7R IV (Full Frame)\r\nObjektív: Sony FE 24–70mm f/2.8 GM\r\nGyújtótávolság: 35 mm\r\nRekesz (Aperture): f/5.6 — hogy az autó teljes élességben maradjon, de a háttér enyhén elmosódjon\r\nZáridő: 1/125 s — épp elég ahhoz, hogy kézből is éles legyen, miközben megőrzi a természetes fényeket\r\nISO: 200 — alacsony zaj, tiszta tónusok érdekében\r\nFehéregyensúly: Naplemente előbeállítás (kb. 6000K), hogy melegebb árnyalatokat kapjak\r\nUtómunka:\r\nEnyhe kontrasztnövelés és szaturáció az autó kiemelésére\r\nÁrnyékok világosítása, hogy a részletek ne vesszenek el\r\nÉgbolt enyhe színkiemelése a naplemente hangulatának fokozására', '2025-11-02 15:13:48', '/images/1762092828512.jpg', 2),
 (8, 3, 'Görögország', 'Telefonnal csináltam Görög nyaraláson során. Semmi extra beállítás csak egy jól elkapott pillanat.\nTelefonom: Samsung Galaxy S25', '2025-11-02 15:25:26', '/images/1762093526424.jpg', 2),
-(9, 4, 'Naplementés Balaton', 'Tavaly nyáron készítettem ezt a naplementés képet a Balatonról a telefonommal.\r\nTelefon: Samsung Galaxy S22', '2025-11-02 15:40:36', '/images/1762094436028.jpg', 1);
+(9, 4, 'Naplementés Balaton', 'Tavaly nyáron készítettem ezt a naplementés képet a Balatonról a telefonommal.\r\nTelefon: Samsung Galaxy S22', '2025-11-02 15:40:36', '/images/1762094436028.jpg', 1),
+(10, 4, 'Teknős', 'Egyik nyaraláson csináltam ezt a képet erről az aranyos teknősről. Remélem tetszik nektek. A Samsung Galaxy S22-es telefonnal készítettem ezt a képet.', '2025-11-10 11:09:03', '/images/1762769343370.jfif', 1),
+(11, 4, 'Vérhold', '2025 szeptember 7-én látható volt Magyarországon vérhold és ezt próbáltam lencse végre kapni, kisebb nagyobb sikerrel. Ezt a képet egy Iphone 14-el csináltam.', '2025-11-10 11:13:33', '/images/1762769613542.jfif', 1);
 
 -- --------------------------------------------------------
 
@@ -133,7 +136,9 @@ INSERT INTO `image_likes` (`id`, `user_id`, `image_id`) VALUES
 (177, 4, 6),
 (178, 4, 7),
 (179, 4, 8),
-(176, 4, 9);
+(176, 4, 9),
+(181, 4, 10),
+(180, 4, 11);
 
 -- --------------------------------------------------------
 
@@ -180,7 +185,12 @@ INSERT INTO `image_tags` (`image_id`, `tag_id`) VALUES
 (7, 5),
 (8, 11),
 (9, 11),
-(9, 16);
+(9, 16),
+(10, 11),
+(10, 18),
+(10, 19),
+(10, 20),
+(11, 21);
 
 -- --------------------------------------------------------
 
@@ -212,10 +222,14 @@ INSERT INTO `tags` (`id`, `tag`) VALUES
 (12, 'Bike'),
 (14, 'Bringa'),
 (5, 'Car'),
+(19, 'Cuki'),
 (15, 'Erdő'),
 (17, 'Hegység'),
+(21, 'Hold'),
 (13, 'Kerékpár'),
 (4, 'Mercedes'),
+(18, 'Teknős'),
+(20, 'Tenger'),
 (11, 'Természet'),
 (2, 'tigris'),
 (16, 'Tó');
@@ -334,19 +348,19 @@ ALTER TABLE `comments`
 -- AUTO_INCREMENT a táblához `comment_likes`
 --
 ALTER TABLE `comment_likes`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=52;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=53;
 
 --
 -- AUTO_INCREMENT a táblához `images`
 --
 ALTER TABLE `images`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT a táblához `image_likes`
 --
 ALTER TABLE `image_likes`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=180;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=182;
 
 --
 -- AUTO_INCREMENT a táblához `image_reactions`
@@ -364,7 +378,7 @@ ALTER TABLE `reactions`
 -- AUTO_INCREMENT a táblához `tags`
 --
 ALTER TABLE `tags`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
 
 --
 -- AUTO_INCREMENT a táblához `users`
