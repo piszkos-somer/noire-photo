@@ -102,19 +102,41 @@ function Home() {
   const [commentLoading, setCommentLoading] = useState(false);
   const [query, setQuery] = useState("");
 
-  // 🔥 NEW: feed type
+  // Feed type
   const [feedType, setFeedType] = useState("foryou");
+
+  // 🔥 Animációk sebessége
+  const INITIAL_ANIMATION_DURATION = 1; // lassú
+  const FEED_SWITCH_DURATION = 0.2;       // gyors
+
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
+
+  const transitionSpeed = isInitialLoad
+    ? INITIAL_ANIMATION_DURATION
+    : FEED_SWITCH_DURATION;
 
   const navigate = useNavigate();
   const userData = localStorage.getItem("user");
   const token = userData ? JSON.parse(userData).token : null;
 
-  // 🔹 FOR YOU & FOLLOWING képek lekérése
+  // 🔥 KÉSLELTETETT INITIAL LOAD RESET
+  useEffect(() => {
+    if (!loading) {
+      const t = setTimeout(() => {
+        setIsInitialLoad(false);
+      }, 50);
+      return () => clearTimeout(t);
+    }
+  }, [loading]);
+
+  // Load képek
   useEffect(() => {
     const fetchForYou = async () => {
       try {
         const headers = token ? { Authorization: `Bearer ${token}` } : {};
-        const res = await fetch("http://localhost:3001/api/latest-images", { headers });
+        const res = await fetch("http://localhost:3001/api/latest-images", {
+          headers,
+        });
 
         if (res.status === 401 || res.status === 403) {
           handleTokenError(res.status, navigate);
@@ -189,9 +211,10 @@ function Home() {
   const fetchComments = async (imageId) => {
     try {
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
-      const res = await fetch(`http://localhost:3001/api/images/${imageId}/comments`, {
-        headers,
-      });
+      const res = await fetch(
+        `http://localhost:3001/api/images/${imageId}/comments`,
+        { headers }
+      );
 
       if (res.status === 401 || res.status === 403) {
         handleTokenError(res.status, navigate);
@@ -244,10 +267,13 @@ function Home() {
     if (!token) return navigate("/Registration");
 
     try {
-      const res = await fetch(`http://localhost:3001/api/comments/${commentId}/like`, {
-        method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await fetch(
+        `http://localhost:3001/api/comments/${commentId}/like`,
+        {
+          method: "POST",
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
 
       if (res.status === 401 || res.status === 403) {
         handleTokenError(res.status, navigate);
@@ -291,117 +317,131 @@ function Home() {
       </Container>
     );
 
-    return (
-      <div className="home-page py-5">
-    
-        {/* 🔹 Cím animáció */}
-        <motion.h1
-          className="text-center text-light mb-4 szinatmenet"
-          initial={{ opacity: 0, y: -50 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
-        >
-          Noire Photo Collection
-        </motion.h1>
-    
-        {/* 💎 Üveg buborék + kereső */}
+  return (
+    <div className="home-page py-5">
+      {/* Cím */}
+      <motion.h1
+        className="text-center text-light mb-4 szinatmenet"
+        initial={{ opacity: 0, y: -50 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: transitionSpeed }}
+      >
+        Noire Photo Collection
+      </motion.h1>
+
+      {/* Kereső */}
+      <motion.div
+        className="glass-bubble text-center mx-auto mb-4 p-4 rounded-4 shadow-lg"
+        initial={{ opacity: 0, y: 40, scale: 0.95 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ duration: transitionSpeed }}
+        style={{
+          maxWidth: "600px",
+          background: "rgba(255, 255, 255, 0.15)",
+          backdropFilter: "blur(10px)",
+          color: "black",
+        }}
+      >
+        <h5 className="mb-3">Az inspiráló fotós közösség</h5>
+        <Form onSubmit={handleSearch}>
+          <Row className="justify-content-center">
+            <Col xs={10}>
+              <div className="d-flex">
+                <Form.Control
+                  type="text"
+                  placeholder="Keresés cím vagy leírás alapján..."
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  className="me-2"
+                />
+                <Button variant="outline-light" type="submit">
+                  Keresés
+                </Button>
+              </div>
+            </Col>
+          </Row>
+        </Form>
+      </motion.div>
+
+      {/* Feed váltó */}
+      <motion.div
+        className="feed-switch-container mx-auto mt-5 mb-5 p-3 rounded-4 glass-switch"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: transitionSpeed }}
+        style={{ maxWidth: "500px" }}
+      >
+        <div className="d-flex justify-content-center gap-3">
+          <button
+            className={`feed-btn ${feedType === "foryou" ? "active" : ""}`}
+            onClick={() => {
+              setIsInitialLoad(false);
+              setFeedType("foryou");
+            }}
+          >
+            Neked
+          </button>
+
+          <button
+            className={`feed-btn ${feedType === "following" ? "active" : ""}`}
+            onClick={() => {
+              setIsInitialLoad(false);
+              setFeedType("following");
+            }}
+            disabled={!token}
+          >
+            Követések
+          </button>
+        </div>
+      </motion.div>
+
+      {/* Képek */}
+      <AnimatePresence mode="wait">
         <motion.div
-          className="glass-bubble text-center mx-auto mb-4 p-4 rounded-4 shadow-lg"
-          initial={{ opacity: 0, y: 40, scale: 0.95, filter: "blur(8px)" }}
-          animate={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
-          transition={{ duration: 1, ease: "easeOut" }}
-          style={{
-            maxWidth: "600px",
-            background: "rgba(255, 255, 255, 0.15)",
-            backdropFilter: "blur(10px)",
-            color: "black",
-          }}
+          key={feedType}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: transitionSpeed }}
         >
-          <h5 className="mb-3">Az inspiráló fotós közösség</h5>
-    
-          <Form onSubmit={handleSearch}>
-            <Row className="justify-content-center">
-              <Col xs={10}>
-                <div className="d-flex">
-                  <Form.Control
-                    type="text"
-                    placeholder="Keresés cím vagy leírás alapján..."
-                    value={query}
-                    onChange={(e) => setQuery(e.target.value)}
-                    className="me-2"
-                  />
-                  <Button variant="outline-light" type="submit">
-                    Keresés
-                  </Button>
-                </div>
-              </Col>
-            </Row>
-          </Form>
+          <Container className="image-grid">
+            {images.map((img, index) => (
+              <motion.div
+                key={img.id + "-" + feedType}
+                initial={{ opacity: 0, y: 40 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{
+                  delay: index * 0.07,
+                  duration: transitionSpeed,
+                }}
+              >
+                <ImageCard
+                  image={img}
+                  onLike={handleLike}
+                  onOpen={openModal}
+                  likeLoading={likeLoading}
+                />
+              </motion.div>
+            ))}
+          </Container>
         </motion.div>
-    
-        {/* ⭐ Üveg design feed-váltó */}
-        <motion.div
-          className="feed-switch-container mx-auto mb-5 p-3 rounded-4 glass-switch"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          style={{ maxWidth: "500px" }}
-        >
-          <div className="d-flex justify-content-center gap-3">
-    
-            <button
-              className={`feed-btn ${feedType === "foryou" ? "active" : ""}`}
-              onClick={() => setFeedType("foryou")}
-            >
-              For You
-            </button>
-    
-            <button
-              className={`feed-btn ${feedType === "following" ? "active" : ""}`}
-              onClick={() => setFeedType("following")}
-              disabled={!token}
-            >
-              Following
-            </button>
-    
-          </div>
-        </motion.div>
-    
-        {/* 🔹 Kártyák */}
-        <Container className="image-grid">
-          {images.map((img, index) => (
-            <motion.div
-              key={img.id}
-              initial={{ opacity: 0, y: 40 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 + 0.3, duration: 0.6 }}
-            >
-              <ImageCard
-                image={img}
-                onLike={handleLike}
-                onOpen={openModal}
-                likeLoading={likeLoading}
-              />
-            </motion.div>
-          ))}
-        </Container>
-    
-        <ImageModal
-          show={!!selectedImage}
-          image={selectedImage}
-          onClose={closeModal}
-          onLike={handleLike}
-          likeLoading={likeLoading}
-          comments={comments}
-          newComment={newComment}
-          onCommentChange={(e) => setNewComment(e.target.value)}
-          onCommentSubmit={handleCommentSubmit}
-          commentLoading={commentLoading}
-          onCommentLike={handleCommentLike}
-        />
-      </div>
-    );
-    
+      </AnimatePresence>
+
+      <ImageModal
+        show={!!selectedImage}
+        image={selectedImage}
+        onClose={closeModal}
+        onLike={handleLike}
+        likeLoading={likeLoading}
+        comments={comments}
+        newComment={newComment}
+        onCommentChange={(e) => setNewComment(e.target.value)}
+        onCommentSubmit={handleCommentSubmit}
+        commentLoading={commentLoading}
+        onCommentLike={handleCommentLike}
+      />
+    </div>
+  );
 }
 
 export default Home;

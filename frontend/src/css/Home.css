@@ -67,7 +67,7 @@ body {
 
 /* ░░ ACTIVE STATE ░░ */
 .feed-btn.active {
-  background: rgba(255, 255, 255, 0.45);
+  background: rgba(216, 216, 216, 0.45);
   color: #111;
   font-weight: 600;
   box-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
