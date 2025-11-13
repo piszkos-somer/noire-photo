@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Gép: 127.0.0.1:3307
--- Létrehozás ideje: 2025. Nov 13. 12:43
+-- Létrehozás ideje: 2025. Nov 13. 13:37
 -- Kiszolgáló verziója: 10.4.28-MariaDB
 -- PHP verzió: 8.2.4
 
@@ -50,7 +50,8 @@ INSERT INTO `comments` (`id`, `user_id`, `image_id`, `comment`, `upload_date`) V
 (9, 4, 12, 'Nagyon szép ügyes vagy!!', '2025-11-13 11:57:32'),
 (10, 4, 8, 'Uhhh. De komoly kép lett.', '2025-11-13 12:00:17'),
 (11, 3, 10, 'Nagyon aranyos😍', '2025-11-13 12:01:34'),
-(12, 3, 9, 'Kezdőként nagyon jó kép. Így tovább. Remélem láthatunk még tőled képeket.', '2025-11-13 12:02:44');
+(12, 3, 9, 'Kezdőként nagyon jó kép. Így tovább. Remélem láthatunk még tőled képeket.', '2025-11-13 12:02:44'),
+(13, 1, 13, 'Szerintem a rekeszérték túl kicsi, egy ilyen képhez illene ha nagyobb lenne, de maga a kép nagyon jó lett, 10/9.5!', '2025-11-13 12:48:50');
 
 -- --------------------------------------------------------
 
@@ -89,6 +90,13 @@ CREATE TABLE `follows` (
   `following_id` int(10) UNSIGNED NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- A tábla adatainak kiíratása `follows`
+--
+
+INSERT INTO `follows` (`id`, `follower_id`, `following_id`) VALUES
+(19, 1, 3);
+
 -- --------------------------------------------------------
 
 --
@@ -121,8 +129,8 @@ INSERT INTO `images` (`id`, `user_id`, `title`, `description`, `upload_date`, `u
 (10, 4, 'Teknős', 'Egyik nyaraláson csináltam ezt a képet erről az aranyos teknősről. Remélem tetszik nektek. A Samsung Galaxy S22-es telefonnal készítettem ezt a képet.', '2025-11-10 11:09:03', '/images/1762769343370.jfif', 3),
 (11, 4, 'Vérhold', '2025 szeptember 7-én látható volt Magyarországon vérhold és ezt próbáltam lencse végre kapni, kisebb nagyobb sikerrel. Ezt a képet egy Iphone 14-el csináltam.', '2025-11-10 11:13:33', '/images/1762769613542.jfif', 2),
 (12, 1, 'Lánchíd', 'Ezt a képet tegnap este készítettem, hosszú expozícióval az Iphone 13 telefonommal :)', '2025-11-10 12:07:48', '/images/1762772868073.jpg', 2),
-(13, 3, 'Kékes', 'Smash or Pass?\nBeállítások:\nFényképezőgép: Canon EOS R6.\nObjektív: RF 24–105mm f/4 L IS USM.\nGyújtótávolság: 35 mm.\nRekesz: f/8 – részletgazdag, mély élességtartomány.\nZáridő: 1/100 s.\nISO: 200.\nFehéregyensúly: Árnyék / Naplemente mód (~6000K).\nUtómunka:\nMeleg színtónus kiemelése a naplemente hangulatához.', '2025-11-13 12:09:02', '/images/1763032142632.webp', 1),
-(14, 3, 'Vaddisznó', 'Nem rég egy barátommal vadászni jártam. Ő vadász én pedig egy fotós és ez lett a legjobb kép. Beállítások:\r\nFényképezőgép: Nikon D750.\r\nObjektív: Nikkor 70–200mm f/2.8.\r\nGyújtótávolság: 150 mm.\r\nRekesz: f/3.5 — sekély mélységélesség, hogy az állat kiemelkedjen a háttérből.\r\nZáridő: 1/500 s — az esetleges mozgás befagyasztásához. Fókusz: állat szemein.', '2025-11-13 12:14:38', '/images/1763032478390.webp', 1);
+(13, 3, 'Kékes', 'Smash or Pass?\nBeállítások:\nFényképezőgép: Canon EOS R6.\nObjektív: RF 24–105mm f/4 L IS USM.\nGyújtótávolság: 35 mm.\nRekesz: f/8 – részletgazdag, mély élességtartomány.\nZáridő: 1/100 s.\nISO: 200.\nFehéregyensúly: Árnyék / Naplemente mód (~6000K).\nUtómunka:\nMeleg színtónus kiemelése a naplemente hangulatához.', '2025-11-13 12:09:02', '/images/1763032142632.webp', 2),
+(14, 3, 'Vaddisznó', 'Nem rég egy barátommal vadászni jártam. Ő vadász én pedig egy fotós és ez lett a legjobb kép. Beállítások:\r\nFényképezőgép: Nikon D750.\r\nObjektív: Nikkor 70–200mm f/2.8.\r\nGyújtótávolság: 150 mm.\r\nRekesz: f/3.5 — sekély mélységélesség, hogy az állat kiemelkedjen a háttérből.\r\nZáridő: 1/500 s — az esetleges mozgás befagyasztásához. Fókusz: állat szemein.', '2025-11-13 12:14:38', '/images/1763032478390.webp', 2);
 
 -- --------------------------------------------------------
 
@@ -147,6 +155,8 @@ INSERT INTO `image_likes` (`id`, `user_id`, `image_id`) VALUES
 (182, 1, 6),
 (183, 1, 10),
 (186, 1, 11),
+(194, 1, 13),
+(195, 1, 14),
 (72, 2, 3),
 (103, 2, 4),
 (158, 2, 5),
@@ -409,7 +419,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT a táblához `comments`
 --
 ALTER TABLE `comments`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- AUTO_INCREMENT a táblához `comment_likes`
@@ -421,7 +431,7 @@ ALTER TABLE `comment_likes`
 -- AUTO_INCREMENT a táblához `follows`
 --
 ALTER TABLE `follows`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 
 --
 -- AUTO_INCREMENT a táblához `images`
@@ -433,7 +443,7 @@ ALTER TABLE `images`
 -- AUTO_INCREMENT a táblához `image_likes`
 --
 ALTER TABLE `image_likes`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=194;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=196;
 
 --
 -- AUTO_INCREMENT a táblához `image_reactions`
