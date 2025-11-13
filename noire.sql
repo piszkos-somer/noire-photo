@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Gép: 127.0.0.1:3307
--- Létrehozás ideje: 2025. Nov 10. 12:14
+-- Létrehozás ideje: 2025. Nov 13. 11:53
 -- Kiszolgáló verziója: 10.4.28-MariaDB
 -- PHP verzió: 8.2.4
 
@@ -74,6 +74,18 @@ INSERT INTO `comment_likes` (`id`, `user_id`, `comment_id`) VALUES
 -- --------------------------------------------------------
 
 --
+-- Tábla szerkezet ehhez a táblához `follows`
+--
+
+CREATE TABLE `follows` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `follower_id` int(10) UNSIGNED NOT NULL,
+  `following_id` int(10) UNSIGNED NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Tábla szerkezet ehhez a táblához `images`
 --
 
@@ -126,7 +138,7 @@ INSERT INTO `image_likes` (`id`, `user_id`, `image_id`) VALUES
 (171, 1, 5),
 (182, 1, 6),
 (183, 1, 10),
-(184, 1, 11),
+(186, 1, 11),
 (72, 2, 3),
 (103, 2, 4),
 (158, 2, 5),
@@ -239,7 +251,6 @@ INSERT INTO `tags` (`id`, `tag`) VALUES
 (18, 'Teknős'),
 (20, 'Tenger'),
 (11, 'Természet'),
-(2, 'tigris'),
 (16, 'Tó'),
 (25, 'Város');
 
@@ -288,6 +299,14 @@ ALTER TABLE `comment_likes`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `unique_comment_like` (`user_id`,`comment_id`),
   ADD KEY `comment_id` (`comment_id`);
+
+--
+-- A tábla indexei `follows`
+--
+ALTER TABLE `follows`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `unique_follow` (`follower_id`,`following_id`),
+  ADD KEY `following_id` (`following_id`);
 
 --
 -- A tábla indexei `images`
@@ -360,6 +379,12 @@ ALTER TABLE `comment_likes`
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=53;
 
 --
+-- AUTO_INCREMENT a táblához `follows`
+--
+ALTER TABLE `follows`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+
+--
 -- AUTO_INCREMENT a táblához `images`
 --
 ALTER TABLE `images`
@@ -369,7 +394,7 @@ ALTER TABLE `images`
 -- AUTO_INCREMENT a táblához `image_likes`
 --
 ALTER TABLE `image_likes`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=185;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=187;
 
 --
 -- AUTO_INCREMENT a táblához `image_reactions`
@@ -412,6 +437,13 @@ ALTER TABLE `comments`
 ALTER TABLE `comment_likes`
   ADD CONSTRAINT `comment_likes_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `comment_likes_ibfk_2` FOREIGN KEY (`comment_id`) REFERENCES `comments` (`id`) ON DELETE CASCADE;
+
+--
+-- Megkötések a táblához `follows`
+--
+ALTER TABLE `follows`
+  ADD CONSTRAINT `follows_ibfk_1` FOREIGN KEY (`follower_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `follows_ibfk_2` FOREIGN KEY (`following_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 
 --
 -- Megkötések a táblához `images`
