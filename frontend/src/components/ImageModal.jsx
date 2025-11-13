@@ -24,7 +24,11 @@ function ImageModal({
   onCommentLike,
 }) {
   const navigate = useNavigate();
-
+  const tokenUser = JSON.parse(localStorage.getItem("user"));
+  const decoded = tokenUser?.token
+    ? JSON.parse(atob(tokenUser.token.split(".")[1]))
+    : null;
+  const loggedInId = decoded?.id;
   // 🧠 Lokális másolat a képről — így tud frissülni helyben is
   const [localImage, setLocalImage] = useState(image);
 const [showToast, setShowToast] = useState(false);
@@ -75,6 +79,43 @@ const handleDownload = async () => {
   }
 };
 
+// 🔍 Követés státusz lekérdezése minden modal-nyitáskor
+useEffect(() => {
+  if (!show || !localImage) return;
+
+  const token = getToken();
+  if (!token) {
+    setIsFollowing(false);
+    return;
+  }
+
+  // Ha saját képet nézi → ne lehessen saját magát követni
+  if (localImage.user_id == JSON.parse(localStorage.getItem("user"))?.id) {
+    setIsFollowing(false);
+    return;
+  }
+
+  const fetchFollowStatus = async () => {
+    try {
+      const res = await fetch(
+        `http://localhost:3001/api/follow/status/${localImage.user_id}`,
+        { headers: getAuthHeader() }
+      );
+
+      if (res.status === 401 || res.status === 403) {
+        handleTokenError(res.status);
+        return;
+      }
+
+      const data = await res.json();
+      setIsFollowing(data.following);
+    } catch (err) {
+      console.error("Követés státusz hiba:", err);
+    }
+  };
+
+  fetchFollowStatus();
+}, [show, localImage]);
 
   // ha a modal nem látható vagy nincs kép, ne renderelj semmit
   if (!show || !localImage) return null;
@@ -166,7 +207,10 @@ const handleShare = async () => {
   📷 {localImage?.author || "Ismeretlen szerző"}
 </div>
 
-{localImage?.user_id && (
+
+
+
+{localImage?.user_id !== loggedInId && (
   <Button
     variant="outline-dark"
     size="sm"
@@ -187,6 +231,7 @@ const handleShare = async () => {
     {isFollowing ? "Követem" : "Követés"}
   </Button>
 )}
+
 
 
     {/* ⬇️ Letöltés buborék */}
