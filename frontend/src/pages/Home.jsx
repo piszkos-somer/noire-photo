@@ -8,13 +8,11 @@ import "../css/Home.css";
 import { Heart } from "lucide-react";
 import { handleTokenError } from "../utils/auth";
 
-
 export const AnimatedHeart = ({ isLiked, onClick, disabled, likeCount }) => {
   const [animate, setAnimate] = useState(false);
   const [showSparkle, setShowSparkle] = useState(false);
   const prevLiked = useRef(isLiked);
 
-  
   const handleClick = () => {
     setAnimate(true);
     if (!isLiked) {
@@ -61,6 +59,7 @@ export const AnimatedHeart = ({ isLiked, onClick, disabled, likeCount }) => {
           style={{ transition: "fill 0.25s ease" }}
         />
       </motion.div>
+
       <AnimatePresence>
         {showSparkle && (
           <motion.span
@@ -87,6 +86,7 @@ export const AnimatedHeart = ({ isLiked, onClick, disabled, likeCount }) => {
           </motion.span>
         )}
       </AnimatePresence>
+
       <span className="ms-1">{likeCount}</span>
     </motion.button>
   );
@@ -101,21 +101,26 @@ function Home() {
   const [newComment, setNewComment] = useState("");
   const [commentLoading, setCommentLoading] = useState(false);
   const [query, setQuery] = useState("");
-  const navigate = useNavigate();
 
+  // 🔥 NEW: feed type
+  const [feedType, setFeedType] = useState("foryou");
+
+  const navigate = useNavigate();
   const userData = localStorage.getItem("user");
   const token = userData ? JSON.parse(userData).token : null;
 
-  // 🔹 Képek lekérése
+  // 🔹 FOR YOU & FOLLOWING képek lekérése
   useEffect(() => {
-    const fetchImages = async () => {
+    const fetchForYou = async () => {
       try {
         const headers = token ? { Authorization: `Bearer ${token}` } : {};
         const res = await fetch("http://localhost:3001/api/latest-images", { headers });
+
         if (res.status === 401 || res.status === 403) {
-  handleTokenError(res.status, navigate);
-  return;
-}
+          handleTokenError(res.status, navigate);
+          return;
+        }
+
         const data = await res.json();
         setImages(Array.isArray(data) ? data : []);
       } catch (err) {
@@ -124,26 +129,53 @@ function Home() {
         setLoading(false);
       }
     };
-    fetchImages();
-  }, [token]);
+
+    const fetchFollowing = async () => {
+      try {
+        const res = await fetch("http://localhost:3001/api/following-images", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (res.status === 401 || res.status === 403) {
+          handleTokenError(res.status, navigate);
+          return;
+        }
+
+        const data = await res.json();
+        setImages(Array.isArray(data) ? data : []);
+      } catch (err) {
+        console.error("❌ Követett képek lekérése hiba:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (feedType === "foryou") fetchForYou();
+    else if (token) fetchFollowing();
+  }, [token, feedType, navigate]);
 
   const handleLike = async (imageId) => {
     if (!token) return navigate("/Registration");
     setLikeLoading(imageId);
+
     try {
       const res = await fetch(`http://localhost:3001/api/images/${imageId}/like`, {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
       });
+
       if (res.status === 401 || res.status === 403) {
-  handleTokenError(res.status, navigate);
-  return;
-}
+        handleTokenError(res.status, navigate);
+        return;
+      }
+
       if (res.ok) {
         const updated = await res.json();
         setImages((prev) =>
           prev.map((img) =>
-            img.id === imageId ? { ...img, likes: updated.likes, isLiked: updated.isLiked } : img
+            img.id === imageId
+              ? { ...img, likes: updated.likes, isLiked: updated.isLiked }
+              : img
           )
         );
       }
@@ -157,11 +189,15 @@ function Home() {
   const fetchComments = async (imageId) => {
     try {
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
-      const res = await fetch(`http://localhost:3001/api/images/${imageId}/comments`, { headers });
+      const res = await fetch(`http://localhost:3001/api/images/${imageId}/comments`, {
+        headers,
+      });
+
       if (res.status === 401 || res.status === 403) {
-  handleTokenError(res.status, navigate);
-  return;
-}
+        handleTokenError(res.status, navigate);
+        return;
+      }
+
       const data = await res.json();
       setComments(Array.isArray(data) ? data : []);
     } catch (err) {
@@ -172,7 +208,9 @@ function Home() {
   const handleCommentSubmit = async () => {
     if (!token) return navigate("/Registration");
     if (!newComment.trim()) return;
+
     setCommentLoading(true);
+
     try {
       const res = await fetch(
         `http://localhost:3001/api/images/${selectedImage.id}/comments`,
@@ -185,10 +223,12 @@ function Home() {
           body: JSON.stringify({ comment: newComment }),
         }
       );
+
       if (res.status === 401 || res.status === 403) {
-  handleTokenError(res.status, navigate);
-  return;
-}
+        handleTokenError(res.status, navigate);
+        return;
+      }
+
       if (res.ok) {
         setNewComment("");
         fetchComments(selectedImage.id);
@@ -202,15 +242,18 @@ function Home() {
 
   const handleCommentLike = async (commentId) => {
     if (!token) return navigate("/Registration");
+
     try {
       const res = await fetch(`http://localhost:3001/api/comments/${commentId}/like`, {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
       });
+
       if (res.status === 401 || res.status === 403) {
-  handleTokenError(res.status, navigate);
-  return;
-}
+        handleTokenError(res.status, navigate);
+        return;
+      }
+
       if (res.ok) {
         const updated = await res.json();
         setComments((prev) =>
@@ -248,87 +291,117 @@ function Home() {
       </Container>
     );
 
-  return (
-    <div className="home-page py-5">
-      {/* 🔹 Cím animáció */}
-      <motion.h1
-        className="text-center text-light mb-4 szinatmenet"
-        initial={{ opacity: 0, y: -50 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, ease: "easeOut" }}
-      >
-        Noire Photo Collection
-      </motion.h1>
-
-      {/* 💎 Üveg buborék + kereső (MINDIG animálva) */}
-      <motion.div
-        className="glass-bubble text-center mx-auto mb-5 p-4 rounded-4 shadow-lg"
-        initial={{ opacity: 0, y: 40, scale: 0.95, filter: "blur(8px)" }}
-        animate={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
-        transition={{ duration: 1, ease: "easeOut" }}
-        style={{
-          maxWidth: "600px",
-          background: "rgba(255, 255, 255, 0.15)",
-          backdropFilter: "blur(10px)",
-          color: "black",
-        }}
-      >
-        <h5 className="mb-3">Az inspiráló fotós közösség</h5>
-
-        <Form onSubmit={handleSearch}>
-          <Row className="justify-content-center">
-            <Col xs={10}>
-              <div className="d-flex">
-                <Form.Control
-                  type="text"
-                  placeholder="Keresés cím vagy leírás alapján..."
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  className="me-2"
-                />
-                <Button variant="outline-light" type="submit">
-                  Keresés
-                </Button>
-              </div>
-            </Col>
-          </Row>
-        </Form>
-      </motion.div>
-
-      {/* 🔹 Kártyák */}
-      <Container className="image-grid">
-        {images.map((img, index) => (
-          <motion.div
-            key={img.id}
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.1 + 0.3, duration: 0.6 }}
-          >
-            <ImageCard
-              image={img}
-              onLike={handleLike}
-              onOpen={openModal}
-              likeLoading={likeLoading}
-            />
-          </motion.div>
-        ))}
-      </Container>
-
-      <ImageModal
-        show={!!selectedImage}
-        image={selectedImage}
-        onClose={closeModal}
-        onLike={handleLike}
-        likeLoading={likeLoading}
-        comments={comments}
-        newComment={newComment}
-        onCommentChange={(e) => setNewComment(e.target.value)}
-        onCommentSubmit={handleCommentSubmit}
-        commentLoading={commentLoading}
-        onCommentLike={handleCommentLike}
-      />
-    </div>
-  );
+    return (
+      <div className="home-page py-5">
+    
+        {/* 🔹 Cím animáció */}
+        <motion.h1
+          className="text-center text-light mb-4 szinatmenet"
+          initial={{ opacity: 0, y: -50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+        >
+          Noire Photo Collection
+        </motion.h1>
+    
+        {/* 💎 Üveg buborék + kereső */}
+        <motion.div
+          className="glass-bubble text-center mx-auto mb-4 p-4 rounded-4 shadow-lg"
+          initial={{ opacity: 0, y: 40, scale: 0.95, filter: "blur(8px)" }}
+          animate={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
+          transition={{ duration: 1, ease: "easeOut" }}
+          style={{
+            maxWidth: "600px",
+            background: "rgba(255, 255, 255, 0.15)",
+            backdropFilter: "blur(10px)",
+            color: "black",
+          }}
+        >
+          <h5 className="mb-3">Az inspiráló fotós közösség</h5>
+    
+          <Form onSubmit={handleSearch}>
+            <Row className="justify-content-center">
+              <Col xs={10}>
+                <div className="d-flex">
+                  <Form.Control
+                    type="text"
+                    placeholder="Keresés cím vagy leírás alapján..."
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    className="me-2"
+                  />
+                  <Button variant="outline-light" type="submit">
+                    Keresés
+                  </Button>
+                </div>
+              </Col>
+            </Row>
+          </Form>
+        </motion.div>
+    
+        {/* ⭐ Üveg design feed-váltó */}
+        <motion.div
+          className="feed-switch-container mx-auto mb-5 p-3 rounded-4 glass-switch"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          style={{ maxWidth: "500px" }}
+        >
+          <div className="d-flex justify-content-center gap-3">
+    
+            <button
+              className={`feed-btn ${feedType === "foryou" ? "active" : ""}`}
+              onClick={() => setFeedType("foryou")}
+            >
+              For You
+            </button>
+    
+            <button
+              className={`feed-btn ${feedType === "following" ? "active" : ""}`}
+              onClick={() => setFeedType("following")}
+              disabled={!token}
+            >
+              Following
+            </button>
+    
+          </div>
+        </motion.div>
+    
+        {/* 🔹 Kártyák */}
+        <Container className="image-grid">
+          {images.map((img, index) => (
+            <motion.div
+              key={img.id}
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.1 + 0.3, duration: 0.6 }}
+            >
+              <ImageCard
+                image={img}
+                onLike={handleLike}
+                onOpen={openModal}
+                likeLoading={likeLoading}
+              />
+            </motion.div>
+          ))}
+        </Container>
+    
+        <ImageModal
+          show={!!selectedImage}
+          image={selectedImage}
+          onClose={closeModal}
+          onLike={handleLike}
+          likeLoading={likeLoading}
+          comments={comments}
+          newComment={newComment}
+          onCommentChange={(e) => setNewComment(e.target.value)}
+          onCommentSubmit={handleCommentSubmit}
+          commentLoading={commentLoading}
+          onCommentLike={handleCommentLike}
+        />
+      </div>
+    );
+    
 }
 
 export default Home;

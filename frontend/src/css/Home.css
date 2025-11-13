@@ -37,3 +37,49 @@ body {
   );
   z-index: -1;
 }
+/* ░░ GLASS FEED SWITCH CONTAINER ░░ */
+.glass-switch {
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+}
+
+/* ░░ BUTTON BASE ░░ */
+.feed-btn {
+  padding: 10px 22px;
+  font-size: 1rem;
+  border: none;
+  border-radius: 12px;
+  color: grey;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(8px);
+  transition: 0.25s ease;
+  cursor: pointer;
+}
+
+/* ░░ HOVER ░░ */
+.feed-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.05);
+}
+
+/* ░░ ACTIVE STATE ░░ */
+.feed-btn.active {
+  background: rgba(255, 255, 255, 0.45);
+  color: #111;
+  font-weight: 600;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
+}
+
+/* ░░ DISABLED ░░ */
+/* ░░ DISABLED – olvasható, de látszik hogy nem aktív ░░ */
+.feed-btn:disabled {
+  cursor: not-allowed;
+  background: rgba(255, 255, 255, 0.25);
+  color: rgba(255, 255, 255, 0.85);
+  opacity: 1; /* FONTOS: ne halványítsuk le! */
+  border: 1px solid rgba(255, 255, 255, 0.25);
+}
+

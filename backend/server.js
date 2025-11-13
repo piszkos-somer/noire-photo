@@ -939,6 +939,58 @@ app.get("/api/follow/status/:id", verifyToken, async (req, res) => {
   }
 });
 
+app.get("/api/following-images", verifyToken, async (req, res) => {
+  const userId = req.user.id;
+
+  const conn = await pool.getConnection();
+  try {
+    const [rows] = await conn.query(
+      `
+      SELECT 
+        i.id,
+        i.user_id,
+        i.title,
+        i.description,
+        i.url,
+        i.likes,
+        u.username AS author,
+        COALESCE(GROUP_CONCAT(t.tag SEPARATOR ','), '') AS tags
+      FROM images i
+      JOIN users u ON i.user_id = u.id
+      LEFT JOIN image_tags it ON i.id = it.image_id
+      LEFT JOIN tags t ON it.tag_id = t.id
+      WHERE i.user_id IN (
+        SELECT following_id FROM follows WHERE follower_id = ?
+      )
+      GROUP BY i.id
+      ORDER BY i.id DESC
+      LIMIT 12
+      `,
+      [userId]
+    );
+
+    const [likedRows] = await conn.query(
+      "SELECT image_id FROM image_likes WHERE user_id = ?",
+      [userId]
+    );
+    const likedSet = new Set(likedRows.map((r) => r.image_id));
+
+    rows.forEach((img) => {
+      img.isLiked = likedSet.has(img.id);
+      img.tags =
+        img.tags && img.tags.length > 0
+          ? img.tags.split(",").filter((t) => t.trim() !== "")
+          : [];
+    });
+
+    res.json(rows);
+  } catch (err) {
+    console.error("❌ Követett felhasználók képeinek lekérési hiba:", err);
+    res.status(500).json({ error: "Szerverhiba." });
+  } finally {
+    conn.release();
+  }
+});
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => console.log(`✅ Szerver fut a ${PORT} porton!`));
