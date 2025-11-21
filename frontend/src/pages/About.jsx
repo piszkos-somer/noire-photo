@@ -57,9 +57,10 @@ function About() {
         <div className="about-item text-box">
           <div className="about-name">Haberle Tamás</div>
           <div>
-            Szenvedélyem a programozás, és örömmel vettem részt ebben a közös mestermunka projektben. 
-            A célom, hogy a projekt során megszerzett tapasztalatokat a következő munkáimban is hasznosítsam. 
-            A csapatmunkában új tapasztalatokat szereztem, és remélem, hogy az elkészült weboldal elnyeri az emberek tetszését.
+          Szenvedélyem a programozás, és örömmel vettem részt ebben a közös mestermunka projektben, amely lehetőséget adott elméleti tudásom gyakorlati alkalmazására. Célom, hogy a szerzett tapasztalatokat a jövőbeni munkáimban is kamatoztassam, különösen a modern webes technológiák és problémamegoldó készségek terén.
+A csapatmunkában új tapasztalatokat szereztem, megtanultam a hatékony kommunikációt és a feladatok megosztását, melyek elengedhetetlenek egy közös projekt sikeréhez. Bízom benne, hogy az elkészült weboldal tetszeni fog a felhasználóknak, és a visszajelzések alapján tovább fejleszthetem szakmai tudásomat.
+ 
+            
           </div>
         </div>
         <div className="about-item image-box">
