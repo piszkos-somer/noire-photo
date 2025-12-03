@@ -404,16 +404,15 @@ app.get("/api/me", verifyToken, async (req, res) => {
 });
 
 app.get("/api/latest-images", async (req, res) => {
+  const authHeader = req.headers.authorization;
   let userId = null;
 
-  const authHeader = req.headers.authorization;
   if (authHeader && authHeader.startsWith("Bearer ")) {
     try {
       const token = authHeader.split(" ")[1];
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
       userId = decoded.id;
-    } catch (err) {
-    }
+    } catch (err) {}
   }
 
   const conn = await pool.getConnection();
@@ -426,34 +425,38 @@ app.get("/api/latest-images", async (req, res) => {
         i.title,
         i.description,
         i.url,
-        i.likes,
+        COALESCE(SUM(CASE WHEN iv.vote = 1 THEN 1 ELSE 0 END), 0) AS upvotes,
+        COALESCE(SUM(CASE WHEN iv.vote = -1 THEN 1 ELSE 0 END), 0) AS downvotes,
+        CASE
+          WHEN ? IS NOT NULL THEN (
+            SELECT vote FROM image_votes 
+            WHERE image_id = i.id AND user_id = ? LIMIT 1
+          )
+          ELSE 0
+        END AS userVote,
         u.username AS author,
         COALESCE(GROUP_CONCAT(t.tag SEPARATOR ','), '') AS tags
       FROM images i
       JOIN users u ON i.user_id = u.id
       LEFT JOIN image_tags it ON i.id = it.image_id
       LEFT JOIN tags t ON it.tag_id = t.id
+      LEFT JOIN image_votes iv ON i.id = iv.image_id
       GROUP BY i.id
       ORDER BY i.id DESC
       LIMIT 12
-      `
+      `,
+      [userId, userId]
     );
 
-    if (userId) {
-      const [likedRows] = await conn.query(
-        "SELECT image_id FROM image_likes WHERE user_id = ?",
-        [userId]
-      );
-      const likedSet = new Set(likedRows.map((r) => r.image_id));
-      rows.forEach((img) => {
-        img.isLiked = likedSet.has(img.id);
-      });
-    } else {
-      rows.forEach((img) => (img.isLiked = false));
-    }
-
     rows.forEach((img) => {
-      img.tags = img.tags ? img.tags.split(",").filter((t) => t.trim() !== "") : [];
+      img.upvotes = Number(img.upvotes) || 0;
+      img.downvotes = Number(img.downvotes) || 0;
+      img.userVote = img.userVote || 0;
+      img.likes = img.upvotes;
+      img.isLiked = img.userVote === 1;
+      img.tags = img.tags
+        ? img.tags.split(",").filter((t) => t.trim() !== "")
+        : [];
     });
 
     res.json(rows);
@@ -465,9 +468,11 @@ app.get("/api/latest-images", async (req, res) => {
   }
 });
 
+
 app.post("/api/images/:id/like", verifyToken, async (req, res) => {
   const imageId = req.params.id;
   const userId = req.user.id;
+  const bodyVote = req.body?.vote; // 1 | -1 | 0 vagy undefined (régi kód)
 
   if (!userId) {
     return res.status(401).json({ error: "Felhasználó nincs bejelentkezve." });
@@ -475,45 +480,68 @@ app.post("/api/images/:id/like", verifyToken, async (req, res) => {
 
   const conn = await pool.getConnection();
   try {
-    const [existing] = await conn.query(
-      "SELECT * FROM image_likes WHERE user_id = ? AND image_id = ?",
+    const [existingRows] = await conn.query(
+      "SELECT id, vote FROM image_votes WHERE user_id = ? AND image_id = ?",
       [userId, imageId]
     );
+    const existing = existingRows[0] || null;
 
-    if (existing.length > 0) {
-      await conn.query("DELETE FROM image_likes WHERE user_id = ? AND image_id = ?", [
-        userId,
-        imageId,
-      ]);
-      await conn.query("UPDATE images SET likes = likes - 1 WHERE id = ?", [imageId]);
+    let newVote;
 
-      const [[updatedImage]] = await conn.query(
-        "SELECT likes FROM images WHERE id = ?",
-        [imageId]
-      );
-
-      return res.json({ likes: updatedImage.likes, isLiked: false });
+    if (bodyVote === 1 || bodyVote === -1 || bodyVote === 0) {
+      // új up/down API – explicit szavazat
+      newVote = bodyVote;
     } else {
-      await conn.query("INSERT INTO image_likes (user_id, image_id) VALUES (?, ?)", [
-        userId,
-        imageId,
-      ]);
-      await conn.query("UPDATE images SET likes = likes + 1 WHERE id = ?", [imageId]);
-
-      const [[updatedImage]] = await conn.query(
-        "SELECT likes FROM images WHERE id = ?",
-        [imageId]
-      );
-
-      return res.json({ likes: updatedImage.likes, isLiked: true });
+      // kompat: régi toggle like (ha nincs vote a body-ban)
+      if (existing) {
+        newVote = 0; // törlés
+      } else {
+        newVote = 1; // upvote
+      }
     }
+
+    if (existing) {
+      if (newVote === 0) {
+        await conn.query("DELETE FROM image_votes WHERE id = ?", [existing.id]);
+      } else if (newVote !== existing.vote) {
+        await conn.query("UPDATE image_votes SET vote = ? WHERE id = ?", [
+          newVote,
+          existing.id,
+        ]);
+      }
+    } else if (newVote !== 0) {
+      await conn.query(
+        "INSERT INTO image_votes (user_id, image_id, vote) VALUES (?, ?, ?)",
+        [userId, imageId, newVote]
+      );
+    }
+
+    const [[agg]] = await conn.query(
+      `
+      SELECT
+        COALESCE(SUM(CASE WHEN vote = 1 THEN 1 ELSE 0 END), 0) AS upvotes,
+        COALESCE(SUM(CASE WHEN vote = -1 THEN 1 ELSE 0 END), 0) AS downvotes
+      FROM image_votes
+      WHERE image_id = ?
+      `,
+      [imageId]
+    );
+
+    const response = {
+      upvotes: Number(agg.upvotes) || 0,
+      downvotes: Number(agg.downvotes) || 0,
+      userVote: newVote,
+    };
+
+    res.json(response);
   } catch (err) {
-    console.error("❌ Like művelet hiba:", err);
-    res.status(500).json({ error: "Adatbázis hiba a like művelet közben." });
+    console.error("❌ Kép szavazás hiba:", err);
+    res.status(500).json({ error: "Adatbázis hiba a szavazat művelet közben." });
   } finally {
     conn.release();
   }
 });
+
 
 
 app.post("/api/refresh-token", verifyToken, (req, res) => {
@@ -535,8 +563,7 @@ app.get("/api/images/:id/comments", async (req, res) => {
       const token = authHeader.split(" ")[1];
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
       userId = decoded.id;
-    } catch (err) {
-    }
+    } catch (err) {}
   }
 
   const conn = await pool.getConnection();
@@ -551,21 +578,32 @@ app.get("/api/images/:id/comments", async (req, res) => {
         u.username,
         u.profile_picture,
         c.image_id,
-        (SELECT COUNT(*) FROM comment_likes WHERE comment_id = c.id) AS likes,
+        COALESCE(SUM(CASE WHEN cv.vote = 1 THEN 1 ELSE 0 END), 0) AS upvotes,
+        COALESCE(SUM(CASE WHEN cv.vote = -1 THEN 1 ELSE 0 END), 0) AS downvotes,
         CASE
-          WHEN ? IS NOT NULL AND EXISTS (
-            SELECT 1 FROM comment_likes WHERE comment_id = c.id AND user_id = ?
+          WHEN ? IS NOT NULL THEN (
+            SELECT vote FROM comment_votes 
+            WHERE comment_id = c.id AND user_id = ? LIMIT 1
           )
-          THEN TRUE
-          ELSE FALSE
-        END AS isLiked
+          ELSE 0
+        END AS userVote
       FROM comments c
       JOIN users u ON c.user_id = u.id
+      LEFT JOIN comment_votes cv ON c.id = cv.comment_id
       WHERE c.image_id = ?
+      GROUP BY c.id
       ORDER BY c.upload_date DESC
       `,
       [userId, userId, imageId]
     );
+
+    rows.forEach((c) => {
+      c.upvotes = Number(c.upvotes) || 0;
+      c.downvotes = Number(c.downvotes) || 0;
+      c.userVote = c.userVote || 0;
+      c.likes = c.upvotes;
+      c.isLiked = c.userVote === 1;
+    });
 
     res.json(rows);
   } catch (err) {
@@ -575,6 +613,7 @@ app.get("/api/images/:id/comments", async (req, res) => {
     conn.release();
   }
 });
+
 
 app.post("/api/images/:id/comments", verifyToken, async (req, res) => {
   const imageId = req.params.id;
@@ -603,43 +642,70 @@ app.post("/api/images/:id/comments", verifyToken, async (req, res) => {
 app.post("/api/comments/:id/like", verifyToken, async (req, res) => {
   const commentId = req.params.id;
   const userId = req.user.id;
+  const bodyVote = req.body?.vote; // 1 | -1 | 0 vagy undefined
 
   const conn = await pool.getConnection();
   try {
-    const [existing] = await conn.query(
-      "SELECT * FROM comment_likes WHERE user_id = ? AND comment_id = ?",
+    const [existingRows] = await conn.query(
+      "SELECT id, vote FROM comment_votes WHERE user_id = ? AND comment_id = ?",
       [userId, commentId]
     );
+    const existing = existingRows[0] || null;
 
-    let isLiked;
+    let newVote;
 
-    if (existing.length > 0) {
-      await conn.query("DELETE FROM comment_likes WHERE user_id = ? AND comment_id = ?", [
-        userId,
-        commentId,
-      ]);
-      isLiked = false;
+    if (bodyVote === 1 || bodyVote === -1 || bodyVote === 0) {
+      newVote = bodyVote;
     } else {
-      await conn.query("INSERT INTO comment_likes (user_id, comment_id) VALUES (?, ?)", [
-        userId,
-        commentId,
-      ]);
-      isLiked = true;
+      if (existing) {
+        newVote = 0;
+      } else {
+        newVote = 1;
+      }
     }
 
-    const [[updated]] = await conn.query(
-      "SELECT COUNT(*) AS likes FROM comment_likes WHERE comment_id = ?",
+    if (existing) {
+      if (newVote === 0) {
+        await conn.query("DELETE FROM comment_votes WHERE id = ?", [existing.id]);
+      } else if (newVote !== existing.vote) {
+        await conn.query("UPDATE comment_votes SET vote = ? WHERE id = ?", [
+          newVote,
+          existing.id,
+        ]);
+      }
+    } else if (newVote !== 0) {
+      await conn.query(
+        "INSERT INTO comment_votes (user_id, comment_id, vote) VALUES (?, ?, ?)",
+        [userId, commentId, newVote]
+      );
+    }
+
+    const [[agg]] = await conn.query(
+      `
+      SELECT
+        COALESCE(SUM(CASE WHEN vote = 1 THEN 1 ELSE 0 END), 0) AS upvotes,
+        COALESCE(SUM(CASE WHEN vote = -1 THEN 1 ELSE 0 END), 0) AS downvotes
+      FROM comment_votes
+      WHERE comment_id = ?
+      `,
       [commentId]
     );
 
-    res.json({ likes: updated.likes, isLiked });
+    const response = {
+      upvotes: Number(agg.upvotes) || 0,
+      downvotes: Number(agg.downvotes) || 0,
+      userVote: newVote,
+    };
+
+    res.json(response);
   } catch (err) {
-    console.error("❌ Komment like hiba:", err);
-    res.status(500).json({ error: "Szerverhiba a komment like műveletnél." });
+    console.error("❌ Komment szavazás hiba:", err);
+    res.status(500).json({ error: "Szerverhiba a komment szavazásnál." });
   } finally {
     conn.release();
   }
 });
+
 
 app.get("/api/users/:id", async (req, res) => {
   const userId = req.params.id;
@@ -684,7 +750,6 @@ app.get("/api/user-images/:id", async (req, res) => {
         i.title,
         i.description,
         i.url,
-        i.likes,
         u.username AS author,
         COALESCE(GROUP_CONCAT(t.tag SEPARATOR ','), '') AS tags
       FROM images i
@@ -700,7 +765,7 @@ app.get("/api/user-images/:id", async (req, res) => {
 
     if (viewerId) {
       const [likedRows] = await conn.query(
-        "SELECT image_id FROM image_likes WHERE user_id = ?",
+        "SELECT image_id FROM image_votes WHERE user_id = ? AND vote = 1",
         [viewerId]
       );
       const likedSet = new Set(likedRows.map((r) => r.image_id));
@@ -716,68 +781,6 @@ app.get("/api/user-images/:id", async (req, res) => {
     res.json(rows);
   } catch (err) {
     console.error("❌ Felhasználó képeinek lekérési hiba:", err);
-    res.status(500).json({ error: "Szerverhiba." });
-  } finally {
-    conn.release();
-  }
-});
-
-app.get("/api/images/by-tag/:tag", async (req, res) => {
-  const { tag } = req.params;
-  const authHeader = req.headers.authorization;
-  let userId = null;
-
-  if (authHeader && authHeader.startsWith("Bearer ")) {
-    try {
-      const token = authHeader.split(" ")[1];
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      userId = decoded.id;
-    } catch (err) {
-    }
-  }
-
-  const conn = await pool.getConnection();
-  try {
-    const [rows] = await conn.query(
-      `
-      SELECT 
-        i.id,
-        i.user_id,
-        i.title,
-        i.description,
-        i.url,
-        i.likes,
-        u.username AS author,
-        COALESCE(GROUP_CONCAT(t.tag SEPARATOR ','), '') AS tags
-      FROM images i
-      JOIN users u ON i.user_id = u.id
-      JOIN image_tags it ON i.id = it.image_id
-      JOIN tags t ON it.tag_id = t.id
-      WHERE t.tag = ?
-      GROUP BY i.id
-      ORDER BY i.id DESC
-      `,
-      [tag]
-    );
-
-    if (userId) {
-      const [likedRows] = await conn.query(
-        "SELECT image_id FROM image_likes WHERE user_id = ?",
-        [userId]
-      );
-      const likedSet = new Set(likedRows.map((r) => r.image_id));
-      rows.forEach((img) => (img.isLiked = likedSet.has(img.id)));
-    } else {
-      rows.forEach((img) => (img.isLiked = false));
-    }
-
-    rows.forEach((img) => {
-      img.tags = img.tags ? img.tags.split(",").filter((t) => t.trim() !== "") : [];
-    });
-
-    res.json(rows);
-  } catch (err) {
-    console.error("❌ Tag szerinti képlekérdezés hiba:", err);
     res.status(500).json({ error: "Szerverhiba." });
   } finally {
     conn.release();
@@ -919,7 +922,6 @@ app.post("/api/follow/:id", verifyToken, async (req, res) => {
   }
 });
 
-// Lekérdezi, hogy az adott user követi-e a másikat
 app.get("/api/follow/status/:id", verifyToken, async (req, res) => {
   const targetId = parseInt(req.params.id);
   const followerId = req.user.id;
@@ -952,13 +954,22 @@ app.get("/api/following-images", verifyToken, async (req, res) => {
         i.title,
         i.description,
         i.url,
-        i.likes,
+        COALESCE(SUM(CASE WHEN iv.vote = 1 THEN 1 ELSE 0 END), 0) AS upvotes,
+        COALESCE(SUM(CASE WHEN iv.vote = -1 THEN 1 ELSE 0 END), 0) AS downvotes,
+        CASE
+          WHEN ? IS NOT NULL THEN (
+            SELECT vote FROM image_votes 
+            WHERE image_id = i.id AND user_id = ? LIMIT 1
+          )
+          ELSE 0
+        END AS userVote,
         u.username AS author,
         COALESCE(GROUP_CONCAT(t.tag SEPARATOR ','), '') AS tags
       FROM images i
       JOIN users u ON i.user_id = u.id
       LEFT JOIN image_tags it ON i.id = it.image_id
       LEFT JOIN tags t ON it.tag_id = t.id
+      LEFT JOIN image_votes iv ON i.id = iv.image_id
       WHERE i.user_id IN (
         SELECT following_id FROM follows WHERE follower_id = ?
       )
@@ -966,21 +977,18 @@ app.get("/api/following-images", verifyToken, async (req, res) => {
       ORDER BY i.id DESC
       LIMIT 12
       `,
-      [userId]
+      [userId, userId, userId]
     );
-
-    const [likedRows] = await conn.query(
-      "SELECT image_id FROM image_likes WHERE user_id = ?",
-      [userId]
-    );
-    const likedSet = new Set(likedRows.map((r) => r.image_id));
 
     rows.forEach((img) => {
-      img.isLiked = likedSet.has(img.id);
-      img.tags =
-        img.tags && img.tags.length > 0
-          ? img.tags.split(",").filter((t) => t.trim() !== "")
-          : [];
+      img.upvotes = Number(img.upvotes) || 0;
+      img.downvotes = Number(img.downvotes) || 0;
+      img.userVote = img.userVote || 0;
+      img.likes = img.upvotes;
+      img.isLiked = img.userVote === 1;
+      img.tags = img.tags
+        ? img.tags.split(",").filter((t) => t.trim() !== "")
+        : [];
     });
 
     res.json(rows);

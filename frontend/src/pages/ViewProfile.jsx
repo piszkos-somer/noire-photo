@@ -83,8 +83,8 @@ function ViewProfile() {
     };
 
     fetchProfile();
-    fetchImages();
-  }, [id, token]);
+  fetchImages();
+}, []); 
 
   // 🔹 URL paraméter alapján modal megnyitása (csak egyszer)
   useEffect(() => {
@@ -190,7 +190,6 @@ if (res.status === 401 || res.status === 403) {
     }
   };
 
-  // 🔹 Komment like
   const handleCommentLike = async (commentId) => {
     if (!token) return navigate("/Registration");
     try {
@@ -217,7 +216,6 @@ if (res.status === 401 || res.status === 403) {
     }
   };
 
-  // 🔹 Modal kezelése
   const openModal = (image) => {
     setSelectedImage(image);
     fetchComments(image.id);
@@ -227,10 +225,8 @@ if (res.status === 401 || res.status === 403) {
   setSelectedImage(null);
   setComments([]);
 
-  // ❗ Jelöld, hogy a linkes nyitás befejeződött
   setHasOpenedFromLink(true);
 
-  // 🔹 Távolítsuk el a ?image paramétert az URL-ből
   const params = new URLSearchParams(location.search);
   if (params.has("image")) {
     params.delete("image");

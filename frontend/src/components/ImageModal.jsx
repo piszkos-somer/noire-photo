@@ -6,7 +6,7 @@ import AnimatedCommentHeart from "../components/AnimatedCommentHeart";
 import AnimatedHeart from "./AnimatedHeart";
 import "../css/ImageModal.css";
 import { getToken, getAuthHeader, handleTokenError } from "../utils/auth";
-import { Share2, MessageCircle } from "lucide-react";
+import { Share2, MessageCircle, ArrowUp, ArrowDown } from "lucide-react";
 
 
 
@@ -14,34 +14,31 @@ function ImageModal({
   show,
   image,
   onClose,
-  onLike,
+  onImageVote,
   likeLoading,
   comments,
   newComment,
   onCommentChange,
   onCommentSubmit,
   commentLoading,
-  onCommentLike,
+  onCommentVote,
 }) {
+
   const navigate = useNavigate();
   const tokenUser = JSON.parse(localStorage.getItem("user"));
   const decoded = tokenUser?.token
     ? JSON.parse(atob(tokenUser.token.split(".")[1]))
     : null;
   const loggedInId = decoded?.id;
-  // 🧠 Lokális másolat a képről — így tud frissülni helyben is
   const [localImage, setLocalImage] = useState(image);
 const [showToast, setShowToast] = useState(false);
 const [isFollowing, setIsFollowing] = useState(false);
-  // Ha új képet kapunk, frissítjük a lokális állapotot
   useEffect(() => {
     setLocalImage(image);
   }, [image]);
-// ⬇️ Tedd ezt a többi függvény alá
 const handleDownload = async () => {
   const token = getToken();
 
-  // 🚫 Ha nincs token, irány a regisztrációs oldal
   if (!token) {
     navigate("/Registration");
     return;
@@ -52,7 +49,6 @@ const handleDownload = async () => {
       headers: getAuthHeader(),
     });
 
-    // 🔧 Itt volt a hiba: 'res' helyett 'response'
     if (response.status === 401 || response.status === 403) {
       handleTokenError(response.status, navigate);
       return;
@@ -79,7 +75,6 @@ const handleDownload = async () => {
   }
 };
 
-// 🔍 Követés státusz lekérdezése minden modal-nyitáskor
 useEffect(() => {
   if (!show || !localImage) return;
 
@@ -89,7 +84,6 @@ useEffect(() => {
     return;
   }
 
-  // Ha saját képet nézi → ne lehessen saját magát követni
   if (localImage.user_id == JSON.parse(localStorage.getItem("user"))?.id) {
     setIsFollowing(false);
     return;
@@ -116,12 +110,8 @@ useEffect(() => {
 
   fetchFollowStatus();
 }, [show, localImage]);
-
-  // ha a modal nem látható vagy nincs kép, ne renderelj semmit
   if (!show || !localImage) return null;
 
-  // 🔹 Kattintáskor profiloldalra irányítás
- // 🔹 Kattintáskor profiloldalra irányítás
 const handleUserClick = (userId) => {
   if (userId) navigate(`/viewprofile/${userId}`);
 };
@@ -134,23 +124,18 @@ const handleShare = async () => {
   try {
     await navigator.clipboard.writeText(shareUrl);
 
-    // 🟢 Mutatjuk a toastot
     setShowToast(true);
 
-    // 🔄 Eltüntetjük pár másodperc múlva
     setTimeout(() => setShowToast(false), 2500);
   } catch (err) {
     console.error("Másolás hiba:", err);
   }
 };
 
-
-  // ❤️ Like gomb helyben is frissíti a szívet és a számot
   const handleLikeClick = async () => {
     if (!localImage) return;
     await onLike(localImage.id);
 
-    // azonnali vizuális frissítés
     setLocalImage((prev) =>
       prev
         ? {
@@ -171,12 +156,10 @@ const handleShare = async () => {
 )}
 
       <Modal.Body className="p-0">
-        {/* HEADER */}
         <div className="glass-header">
           <h3 className="glass-title m-0">{localImage?.title || "Kép megtekintése"}</h3>
         </div>
 
-        {/* KÉP */}
         {localImage?.url && (
           <img
             src={`http://localhost:3001${localImage.url}`}
@@ -185,14 +168,11 @@ const handleShare = async () => {
           />
         )}
 
-        {/* INFO RÉSZ */}
         <div className="glass-info p-4">
 <div className="glass-info-top d-flex justify-content-between align-items-center flex-wrap gap-2">
 
-  {/* BAL OLDAL: név + letöltés buborék */}
   <div className="d-flex align-items-center gap-2">
 
-    {/* 📷 Feltöltő név buborék */}
     <div
   className="px-3 py-2 rounded-3 glass-bubble"
   style={{
@@ -234,7 +214,6 @@ const handleShare = async () => {
 
 
 
-    {/* ⬇️ Letöltés buborék */}
     <div
       className="px-3 py-2 rounded-3 glass-bubble"
       style={{
@@ -257,9 +236,7 @@ const handleShare = async () => {
     </div>
   </div>
 
-  {/* JOBB OLDAL: megosztás ikon + szív */}
   <div className="d-flex align-items-center gap-3">
-    {/* 🔗 Megosztás ikon */}
     <Share2
       size={22}
       className="cursor-pointer text-light"
@@ -280,13 +257,55 @@ const handleShare = async () => {
       {comments?.length || 0}
     </span>
   </div>
-    {/* ❤️ Like szív */}
-    <AnimatedHeart
-      isLiked={localImage?.isLiked}
-      likeCount={localImage?.likes || 0}
-      disabled={likeLoading === localImage?.id}
-      onClick={handleLikeClick}
-    />
+  {(() => {
+  const up = localImage?.upvotes || localImage?.likes || 0;
+  const down = localImage?.downvotes || 0;
+  const total = up + down;
+  const upPercent = total ? Math.round((up / total) * 100) : 0;
+  const downPercent = total ? 100 - upPercent : 0;
+  const userVote = localImage?.userVote || (localImage?.isLiked ? 1 : 0);
+
+  return (
+    <div className="d-flex align-items-center gap-1">
+      <button
+        type="button"
+        className="btn btn-sm p-0 mx-1"
+        disabled={likeLoading === localImage?.id}
+        onClick={(e) => {
+          e.stopPropagation();
+          const nextVote = userVote === 1 ? 0 : 1;
+          onImageVote(localImage.id, nextVote);
+        }}
+      >
+        <ArrowUp
+          size={22}
+          color={userVote === 1 ? "#16a34a" : "#555"}
+          fill={userVote === 1 ? "#16a34a" : "none"}
+        />
+      </button>
+      <span className="small me-1">{upPercent}%</span>
+
+      <button
+        type="button"
+        className="btn btn-sm p-0 mx-1"
+        disabled={likeLoading === localImage?.id}
+        onClick={(e) => {
+          e.stopPropagation();
+          const nextVote = userVote === -1 ? 0 : -1;
+          onImageVote(localImage.id, nextVote);
+        }}
+      >
+        <ArrowDown
+          size={22}
+          color={userVote === -1 ? "#dc2626" : "#555"}
+          fill={userVote === -1 ? "#dc2626" : "none"}
+        />
+      </button>
+      <span className="small">{downPercent}%</span>
+    </div>
+  );
+})()}
+
   </div>
 </div>
 
@@ -298,11 +317,9 @@ const handleShare = async () => {
             {localImage?.description || "Nincs leírás."}
           </p>
 
-          {/* 💬 Komment szekció */}
           <div className="comment-section mt-5 px-4 pb-4">
             <h5 className="mb-3">Hozzászólások</h5>
 
-            {/* Új komment írása */}
             <div className="d-flex mb-3">
               <input
                 type="text"
@@ -320,7 +337,6 @@ const handleShare = async () => {
               </Button>
             </div>
 
-            {/* Komment lista */}
             {!comments || comments.length === 0 ? (
               <p className="text-muted">Még nincs komment ehhez a képhez.</p>
             ) : (
@@ -353,15 +369,55 @@ const handleShare = async () => {
                       </div>
                       <p className="mb-1">{c.comment}</p>
 
-                      {/* ❤️ Komment like gomb */}
-                      <div className="comment-like">
-                        <AnimatedCommentHeart
-                          isLiked={c.isLiked}
-                          likeCount={c.likes}
-                          disabled={likeLoading === c.id}
-                          onClick={() => onCommentLike(c.id)}
-                        />
-                      </div>
+                      <div className="comment-like d-flex align-items-center gap-1 mt-1">
+  {(() => {
+    const up = c.upvotes || c.likes || 0;
+    const down = c.downvotes || 0;
+    const total = up + down;
+    const upPercent = total ? Math.round((up / total) * 100) : 0;
+    const downPercent = total ? 100 - upPercent : 0;
+    const userVote = c.userVote || (c.isLiked ? 1 : 0);
+
+    return (
+      <>
+        <button
+          type="button"
+          className="btn btn-sm p-0"
+          disabled={likeLoading === c.id}
+          onClick={() => {
+            const nextVote = userVote === 1 ? 0 : 1;
+            onCommentVote(c.id, nextVote);
+          }}
+        >
+          <ArrowUp
+            size={18}
+            color={userVote === 1 ? "#16a34a" : "#555"}
+            fill={userVote === 1 ? "#16a34a" : "none"}
+          />
+        </button>
+        <span className="small me-1">{upPercent}%</span>
+
+        <button
+          type="button"
+          className="btn btn-sm p-0"
+          disabled={likeLoading === c.id}
+          onClick={() => {
+            const nextVote = userVote === -1 ? 0 : -1;
+            onCommentVote(c.id, nextVote);
+          }}
+        >
+          <ArrowDown
+            size={18}
+            color={userVote === -1 ? "#dc2626" : "#555"}
+            fill={userVote === -1 ? "#dc2626" : "none"}
+          />
+        </button>
+        <span className="small">{downPercent}%</span>
+      </>
+    );
+  })()}
+</div>
+
                     </div>
                   </div>
                 </div>

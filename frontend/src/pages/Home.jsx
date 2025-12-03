@@ -176,37 +176,63 @@ function Home() {
     else if (token) fetchFollowing();
   }, [token, feedType, navigate]);
 
-  const handleLike = async (imageId) => {
-    if (!token) return navigate("/Registration");
-    setLikeLoading(imageId);
+  // Like helyett: upvote/downvote képekre
+const handleImageVote = async (imageId, vote) => {
+  if (!token) return navigate("/Registration");
+  setLikeLoading(imageId);
 
-    try {
-      const res = await fetch(`http://localhost:3001/api/images/${imageId}/like`, {
-        method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
-      });
+  try {
+    const res = await fetch(`http://localhost:3001/api/images/${imageId}/like`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ vote }), // 1 | -1 | 0
+    });
 
-      if (res.status === 401 || res.status === 403) {
-        handleTokenError(res.status, navigate);
-        return;
-      }
-
-      if (res.ok) {
-        const updated = await res.json();
-        setImages((prev) =>
-          prev.map((img) =>
-            img.id === imageId
-              ? { ...img, likes: updated.likes, isLiked: updated.isLiked }
-              : img
-          )
-        );
-      }
-    } catch (err) {
-      console.error("❌ Like fetch hiba:", err);
-    } finally {
-      setLikeLoading(null);
+    if (res.status === 401 || res.status === 403) {
+      handleTokenError(res.status, navigate);
+      return;
     }
-  };
+
+    if (res.ok) {
+      const updated = await res.json(); 
+      setImages((prev) =>
+        prev.map((img) =>
+          img.id === imageId
+            ? {
+                ...img,
+                upvotes: updated.upvotes,
+                downvotes: updated.downvotes,
+                userVote: updated.userVote,
+                likes: updated.upvotes,
+                isLiked: updated.userVote === 1,
+              }
+            : img
+        )
+      );
+
+      setSelectedImage((prev) =>
+        prev && prev.id === imageId
+          ? {
+              ...prev,
+              upvotes: updated.upvotes,
+              downvotes: updated.downvotes,
+              userVote: updated.userVote,
+              likes: updated.upvotes,
+              isLiked: updated.userVote === 1,
+            }
+          : prev
+      );
+    }
+  } catch (err) {
+    console.error("❌ Kép szavazás hiba:", err);
+  } finally {
+    setLikeLoading(null);
+  }
+};
+
 
   const fetchComments = async (imageId) => {
     try {
@@ -263,35 +289,46 @@ function Home() {
     }
   };
 
-  const handleCommentLike = async (commentId) => {
+  const handleCommentVote = async (commentId, vote) => {
     if (!token) return navigate("/Registration");
-
+  
     try {
-      const res = await fetch(
-        `http://localhost:3001/api/comments/${commentId}/like`,
-        {
-          method: "POST",
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-
+      const res = await fetch(`http://localhost:3001/api/comments/${commentId}/like`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ vote }),
+      });
+  
       if (res.status === 401 || res.status === 403) {
         handleTokenError(res.status, navigate);
         return;
       }
-
+  
       if (res.ok) {
         const updated = await res.json();
         setComments((prev) =>
           prev.map((c) =>
-            c.id === commentId ? { ...c, likes: updated.likes, isLiked: updated.isLiked } : c
+            c.id === commentId
+              ? {
+                  ...c,
+                  upvotes: updated.upvotes,
+                  downvotes: updated.downvotes,
+                  userVote: updated.userVote,
+                  likes: updated.upvotes,
+                  isLiked: updated.userVote === 1,
+                }
+              : c
           )
         );
       }
     } catch (err) {
-      console.error("❌ Komment like hiba:", err);
+      console.error("❌ Komment szavazás hiba:", err);
     }
   };
+  
 
   const openModal = (image) => {
     setSelectedImage(image);
@@ -416,11 +453,12 @@ function Home() {
                 }}
               >
                 <ImageCard
-                  image={img}
-                  onLike={handleLike}
+                 image={img}
+                  onVote={handleImageVote}          
                   onOpen={openModal}
                   likeLoading={likeLoading}
                 />
+
               </motion.div>
             ))}
           </Container>
@@ -431,14 +469,14 @@ function Home() {
         show={!!selectedImage}
         image={selectedImage}
         onClose={closeModal}
-        onLike={handleLike}
+        onImageVote={handleImageVote}
         likeLoading={likeLoading}
         comments={comments}
         newComment={newComment}
         onCommentChange={(e) => setNewComment(e.target.value)}
         onCommentSubmit={handleCommentSubmit}
         commentLoading={commentLoading}
-        onCommentLike={handleCommentLike}
+        onCommentVote={handleCommentVote}
       />
     </div>
   );

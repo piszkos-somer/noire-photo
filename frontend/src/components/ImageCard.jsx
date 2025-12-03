@@ -1,23 +1,20 @@
 import React, { useEffect, useState } from "react";
 import { Card, Button } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
-import AnimatedHeart from "./AnimatedHeart";
+import { MessageCircle, ArrowUp, ArrowDown } from "lucide-react";
 import "../css/ImageCard.css";
-import { MessageCircle } from "lucide-react";
-import { handleTokenError } from "../utils/auth";
 
-function ImageCard({ image, onLike, onOpen, likeLoading }) {
+function ImageCard({ image, onVote, onOpen, likeLoading }) {
+
   const navigate = useNavigate();
   const [commentCount, setCommentCount] = useState(0);
 
-  // 🔹 Szerző nevére kattintás → ViewProfile oldal
   const handleAuthorClick = () => {
     if (image.user_id) {
       navigate(`/profile/${image.user_id}`);
     }
   };
 
-  // 🔹 Kommentek számának lekérése
   useEffect(() => {
     fetch(`http://localhost:3001/api/images/${image.id}/comment-count`)
       .then((res) => res.json())
@@ -25,16 +22,14 @@ function ImageCard({ image, onLike, onOpen, likeLoading }) {
       .catch((err) => console.error("Komment szám lekérése sikertelen:", err));
   }, [image.id]);
 
-  // 🔹 Tagre kattintás → Browse oldal (tag szerinti szűrés)
   const handleTagClick = (e, tag) => {
-    e.stopPropagation(); // ⛔ ne nyissa meg a modalt
+    e.stopPropagation();
     navigate(`/browse/${encodeURIComponent(tag)}`);
   };
 
   return (
     <div className="glass-card">
       <Card className="glass-inner">
-        {/* 📸 Kép */}
         <div className="img-wrapper" onClick={() => onOpen(image)} style={{ cursor: "pointer" }}>
           <Card.Img
             variant="top"
@@ -44,24 +39,69 @@ function ImageCard({ image, onLike, onOpen, likeLoading }) {
         </div>
 
         <Card.Body>
-          {/* 🔹 Cím + Like gomb + komment számláló */}
-          <div className="d-flex justify-content-between align-items-start mb-2">
-            <h5 className="info-bubble img-title">{image.title}</h5>
-            <div className="text-end">
-              <AnimatedHeart
-                isLiked={image.isLiked}
-                likeCount={image.likes}
-                disabled={likeLoading === image.id}
-                onClick={() => onLike(image.id)}
-              />
-              <div className="comment-counter mt-1">
-                <MessageCircle size={18} className="comment-icon" />
-                <span>{commentCount}</span>
-              </div>
-            </div>
-          </div>
+<div className="d-flex justify-content-between align-items-start mb-2">
+  <h5 className="info-bubble img-title">{image.title}</h5>
 
-          {/* 🔹 Feltöltő neve */}
+  <div className="text-end">
+    <div className="d-flex align-items-center justify-content-end gap-1">
+      {(() => {
+        const up = image.upvotes || image.likes || 0;
+        const down = image.downvotes || 0;
+        const total = up + down;
+        const upPercent = total ? Math.round((up / total) * 100) : 0;
+        const downPercent = total ? 100 - upPercent : 0;
+        const userVote = image.userVote || (image.isLiked ? 1 : 0);
+
+        return (
+          <>
+            <button
+              type="button"
+              className="btn btn-sm p-0 mx-1"
+              disabled={likeLoading === image.id}
+              onClick={(e) => {
+                e.stopPropagation();
+                const nextVote = userVote === 1 ? 0 : 1;
+                onVote(image.id, nextVote);
+              }}
+            >
+              <ArrowUp
+                size={20}
+                color={userVote === 1 ? "#16a34a" : "#555"}
+                fill={userVote === 1 ? "#16a34a" : "none"}
+              />
+            </button>
+            <span className="small me-1">{upPercent}%</span>
+
+            <button
+              type="button"
+              className="btn btn-sm p-0 mx-1"
+              disabled={likeLoading === image.id}
+              onClick={(e) => {
+                e.stopPropagation();
+                const nextVote = userVote === -1 ? 0 : -1;
+                onVote(image.id, nextVote);
+              }}
+            >
+              <ArrowDown
+                size={20}
+                color={userVote === -1 ? "#dc2626" : "#555"}
+                fill={userVote === -1 ? "#dc2626" : "none"}
+              />
+            </button>
+            <span className="small">{downPercent}%</span>
+          </>
+        );
+      })()}
+    </div>
+
+    <div className="comment-counter mt-1">
+      <MessageCircle size={18} className="comment-icon" />
+      <span>{commentCount}</span>
+    </div>
+  </div>
+</div>
+
+
           {image.author && (
             <div
               className="info-bubble author"
@@ -72,12 +112,10 @@ function ImageCard({ image, onLike, onOpen, likeLoading }) {
             </div>
           )}
 
-          {/* 🔹 Leírás */}
           {image.description && (
             <div className="info-bubble text">{image.description}</div>
           )}
 
-          {/* 🔹 Tagek */}
           {Array.isArray(image.tags) && image.tags.length > 0 ? (
             <div className="d-flex flex-wrap gap-2 mb-3">
               {image.tags.map((tag, i) => (
@@ -106,7 +144,6 @@ function ImageCard({ image, onLike, onOpen, likeLoading }) {
             </div>
           ) : null}
 
-          {/* 🔹 Bővebben gomb */}
           <Button variant="outline-light" onClick={() => onOpen(image)}>
             Bővebben
           </Button>
