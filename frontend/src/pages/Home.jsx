@@ -102,12 +102,10 @@ function Home() {
   const [commentLoading, setCommentLoading] = useState(false);
   const [query, setQuery] = useState("");
 
-  // Feed type
   const [feedType, setFeedType] = useState("foryou");
 
-  // 🔥 Animációk sebessége
-  const INITIAL_ANIMATION_DURATION = 1; // lassú
-  const FEED_SWITCH_DURATION = 0.2;       // gyors
+  const INITIAL_ANIMATION_DURATION = 1; 
+  const FEED_SWITCH_DURATION = 0.2; 
 
   const [isInitialLoad, setIsInitialLoad] = useState(true);
 
@@ -119,7 +117,6 @@ function Home() {
   const userData = localStorage.getItem("user");
   const token = userData ? JSON.parse(userData).token : null;
 
-  // 🔥 KÉSLELTETETT INITIAL LOAD RESET
   useEffect(() => {
     if (!loading) {
       const t = setTimeout(() => {
@@ -129,7 +126,6 @@ function Home() {
     }
   }, [loading]);
 
-  // Load képek
   useEffect(() => {
     const fetchForYou = async () => {
       try {
@@ -146,7 +142,7 @@ function Home() {
         const data = await res.json();
         setImages(Array.isArray(data) ? data : []);
       } catch (err) {
-        console.error("❌ Képek lekérési hiba:", err);
+        console.error("Képek lekérési hiba:", err);
       } finally {
         setLoading(false);
       }
@@ -166,7 +162,7 @@ function Home() {
         const data = await res.json();
         setImages(Array.isArray(data) ? data : []);
       } catch (err) {
-        console.error("❌ Követett képek lekérése hiba:", err);
+        console.error("Követett képek lekérése hiba:", err);
       } finally {
         setLoading(false);
       }
@@ -176,7 +172,6 @@ function Home() {
     else if (token) fetchFollowing();
   }, [token, feedType, navigate]);
 
-  // Like helyett: upvote/downvote képekre
 const handleImageVote = async (imageId, vote) => {
   if (!token) return navigate("/Registration");
   setLikeLoading(imageId);
@@ -188,7 +183,7 @@ const handleImageVote = async (imageId, vote) => {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({ vote }), // 1 | -1 | 0
+      body: JSON.stringify({ vote }),
     });
 
     if (res.status === 401 || res.status === 403) {
@@ -227,7 +222,7 @@ const handleImageVote = async (imageId, vote) => {
       );
     }
   } catch (err) {
-    console.error("❌ Kép szavazás hiba:", err);
+    console.error("Kép szavazás hiba:", err);
   } finally {
     setLikeLoading(null);
   }
@@ -250,7 +245,7 @@ const handleImageVote = async (imageId, vote) => {
       const data = await res.json();
       setComments(Array.isArray(data) ? data : []);
     } catch (err) {
-      console.error("❌ Komment lekérési hiba:", err);
+      console.error("Komment lekérési hiba:", err);
     }
   };
 
@@ -283,7 +278,7 @@ const handleImageVote = async (imageId, vote) => {
         fetchComments(selectedImage.id);
       }
     } catch (err) {
-      console.error("❌ Komment küldési hiba:", err);
+      console.error("Komment küldési hiba:", err);
     } finally {
       setCommentLoading(false);
     }
@@ -325,7 +320,7 @@ const handleImageVote = async (imageId, vote) => {
         );
       }
     } catch (err) {
-      console.error("❌ Komment szavazás hiba:", err);
+      console.error("Komment szavazás hiba:", err);
     }
   };
   
@@ -366,7 +361,6 @@ const handleImageVote = async (imageId, vote) => {
         Noire Photo Collection
       </motion.h1>
 
-      {/* Kereső */}
       <motion.div
         className="glass-bubble text-center mx-auto mb-4 p-4 rounded-4 shadow-lg"
         initial={{ opacity: 0, y: 40, scale: 0.95 }}
@@ -400,7 +394,6 @@ const handleImageVote = async (imageId, vote) => {
         </Form>
       </motion.div>
 
-      {/* Feed váltó */}
       <motion.div
         className="feed-switch-container mx-auto mt-5 mb-5 p-3 rounded-4 glass-switch"
         initial={{ opacity: 0, y: 20 }}
@@ -432,7 +425,6 @@ const handleImageVote = async (imageId, vote) => {
         </div>
       </motion.div>
 
-      {/* Képek */}
       <AnimatePresence mode="wait">
         <motion.div
           key={feedType}

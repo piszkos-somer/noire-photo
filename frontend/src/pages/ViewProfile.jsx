@@ -86,16 +86,10 @@ function ViewProfile() {
   fetchImages();
 }, []); 
 
-  // 🔹 URL paraméter alapján modal megnyitása (csak egyszer)
   useEffect(() => {
   const params = new URLSearchParams(location.search);
   const imageId = params.get("image");
 
-  // Csak akkor nyissa meg, ha:
-  // - van image paraméter
-  // - betöltöttek a képek
-  // - még nem nyitottuk meg korábban
-  // - és jelenleg nincs nyitva modal
   if (imageId && images.length > 0 && !hasOpenedFromLink && !selectedImage) {
     const img = images.find((i) => i.id.toString() === imageId.toString());
     if (img) {
@@ -106,7 +100,6 @@ function ViewProfile() {
 }, [location.search, images, hasOpenedFromLink, selectedImage]);
 
 
-  // 🔹 Kommentek lekérése
   const fetchComments = async (imageId) => {
     try {
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
@@ -122,42 +115,62 @@ function ViewProfile() {
     }
   };
 
-  // 🔹 Like gomb
-  const handleLike = async (imageId) => {
+  const handleImageVote = async (imageId, vote) => {
     if (!token) return navigate("/Registration");
     setLikeLoading(imageId);
+  
     try {
       const res = await fetch(`http://localhost:3001/api/images/${imageId}/like`, {
         method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ vote }), // 1 | -1 | 0
       });
-if (res.status === 401 || res.status === 403) {
-  handleTokenError(res.status, navigate);
-  return;
-}
+  
+      if (res.status === 401 || res.status === 403) {
+        handleTokenError(res.status, navigate);
+        return;
+      }
+  
       if (res.ok) {
-        const updated = await res.json();
+        const updated = await res.json(); 
         setImages((prev) =>
           prev.map((img) =>
             img.id === imageId
-              ? { ...img, likes: updated.likes, isLiked: updated.isLiked }
+              ? {
+                  ...img,
+                  upvotes: updated.upvotes,
+                  downvotes: updated.downvotes,
+                  userVote: updated.userVote,
+                  likes: updated.upvotes,
+                  isLiked: updated.userVote === 1,
+                }
               : img
           )
         );
+  
         setSelectedImage((prev) =>
           prev && prev.id === imageId
-            ? { ...prev, likes: updated.likes, isLiked: updated.isLiked }
+            ? {
+                ...prev,
+                upvotes: updated.upvotes,
+                downvotes: updated.downvotes,
+                userVote: updated.userVote,
+                likes: updated.upvotes,
+                isLiked: updated.userVote === 1,
+              }
             : prev
         );
       }
     } catch (err) {
-      console.error("❌ Like fetch hiba:", err);
+      console.error("❌ Kép szavazás hiba:", err);
     } finally {
       setLikeLoading(null);
     }
   };
 
-  // 🔹 Új komment
   const handleCommentSubmit = async () => {
     if (!token) return navigate("/Registration");
     if (!newComment.trim()) return;
@@ -212,7 +225,7 @@ if (res.status === 401 || res.status === 403) {
         );
       }
     } catch (err) {
-      console.error("❌ Komment like hiba:", err);
+      console.error("Komment like hiba:", err);
     }
   };
 
@@ -286,29 +299,30 @@ if (res.status === 401 || res.status === 403) {
       <Row xs={1} sm={2} md={3} lg={4} className="g-4">
         {images.map((img) => (
           <ImageCard
-            key={img.id}
-            image={img}
-            onLike={handleLike}
-            onOpen={openModal}
-            likeLoading={likeLoading}
-          />
+          key={img.id}
+          image={img}
+          onVote={handleImageVote}
+          onOpen={openModal}
+          likeLoading={likeLoading}
+        />
+        
         ))}
       </Row>
 
-      {/* 🪟 Modal megjelenítése */}
       <ImageModal
-        show={!!selectedImage}
-        image={selectedImage}
-        onClose={closeModal}
-        onLike={handleLike}
-        likeLoading={likeLoading}
-        comments={comments}
-        newComment={newComment}
-        onCommentChange={(e) => setNewComment(e.target.value)}
-        onCommentSubmit={handleCommentSubmit}
-        commentLoading={commentLoading}
-        onCommentLike={handleCommentLike}
-      />
+  show={!!selectedImage}
+  image={selectedImage}
+  onClose={closeModal}
+  onImageVote={handleImageVote}
+  likeLoading={likeLoading}
+  comments={comments}
+  newComment={newComment}
+  onCommentChange={(e) => setNewComment(e.target.value)}
+  onCommentSubmit={handleCommentSubmit}
+  commentLoading={commentLoading}
+  onCommentLike={handleCommentLike}
+/>
+
     </Container>
   );
 }
