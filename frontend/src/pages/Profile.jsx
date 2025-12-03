@@ -1,3 +1,5 @@
+import ImageCard from "../components/ProfileImageCard";
+import ImageModal from "../components/ProfileImageModal";
 import React, { useState, useEffect, useContext } from "react";
 import {
   Container,
@@ -7,7 +9,6 @@ import {
   Row,
   Col,
   Card,
-  Badge,
   Image,
 } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
@@ -18,6 +19,7 @@ import "../css/Home.css"
 import { handleTokenError } from "../utils/auth";
 
 function Profile() {
+  const [showViewModal, setShowViewModal] = useState(false);
   const [newUsername, setNewUsername] = useState("");
   const [newEmail, setNewEmail] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -30,7 +32,11 @@ function Profile() {
   const [showModal, setShowModal] = useState(false);
   const { user, updateUsername } = useContext(UserContext);
   const navigate = useNavigate();
-
+  const openViewModal = (img) => {
+    setSelectedImage(img);
+    setShowViewModal(true);
+  };
+  
 
   // 🔹 Betöltéskor lekérjük a profil adatokat
   useEffect(() => {
@@ -309,36 +315,28 @@ if (res.status === 401 || res.status === 403) {
       <Row xs={1} sm={2} md={3} lg={4} className="g-4">
   {images.map((image) => (
     <Col key={image.id}>
-      <div className="glass-card">
-        <Card className="glass-inner">
-          <Card.Img
-            variant="top"
-            src={`http://localhost:3001${image.url}`}
-
-            alt={image.title}
-            style={{
-              borderTopLeftRadius: "22px",
-              borderTopRightRadius: "22px",
-              height: "250px",
-              objectFit: "cover",
-            }}
-          />
-          <Card.Body className="d-flex flex-column align-items-center text-center">
-            <Card.Title>{image.title}</Card.Title>
-            <Button
-              variant="outline-primary"
-              size="sm"
-              onClick={() => handleEdit(image)}
-            >
-              ✏️ Szerkesztés
-            </Button>
-          </Card.Body>
-        </Card>
-      </div>
+      <ImageCard
+        image={image}
+        onOpen={openViewModal}
+        onEdit={handleEdit}
+      />
     </Col>
   ))}
 </Row>
 
+<ImageModal
+  show={showViewModal}
+  image={selectedImage}
+  onClose={() => setShowViewModal(false)}
+  onEdit={handleEdit}
+/>
+
+<EditModal
+  show={showModal}
+  onHide={() => setShowModal(false)}
+  image={selectedImage}
+  onSave={handleSave}
+/>
 
       <EditModal
         show={showModal}

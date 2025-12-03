@@ -1005,4 +1005,4 @@ app.get("/api/following-images", verifyToken, async (req, res) => {
 });
 
 const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => console.log(`✅ Szerver fut a ${PORT} porton!`));
+app.listen(PORT, () => console.log(`Szerver fut a ${PORT} porton!`));
