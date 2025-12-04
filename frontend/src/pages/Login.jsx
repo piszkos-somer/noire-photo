@@ -59,19 +59,32 @@ if (res.status === 401 || res.status === 403) {
         </Form.Group>
 
         <Form.Group className="mb-3">
-          <Form.Label>Jelszó</Form.Label>
-          <Form.Control
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Add meg a jelszavad"
-            required
-          />
-        </Form.Group>
+  <Form.Label>Jelszó</Form.Label>
+  <Form.Control
+    type="password"
+    value={password}
+    onChange={(e) => setPassword(e.target.value)}
+    placeholder="Add meg a jelszavad"
+    required
+  />
+</Form.Group>
 
-        <Button variant="primary" type="submit" className="w-100">
-          Bejelentkezés
-        </Button>
+
+<div className="mb-3 text-center">
+  Ha még nincs fiókod,{" "}
+  <span
+    style={{ color: "blue", textDecoration: "underline", cursor: "pointer" }}
+    onClick={() => navigate("/registration")}
+  >
+    regisztrálj
+  </span>
+  .
+</div>
+
+<Button variant="primary" type="submit" className="w-100">
+  Bejelentkezés
+</Button>
+
       </Form>
     </Container>
   );
