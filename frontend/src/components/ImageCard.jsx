@@ -26,7 +26,20 @@ function ImageCard({ image, onVote, onOpen, likeLoading }) {
     e.stopPropagation();
     navigate(`/browse/${encodeURIComponent(tag)}`);
   };
-
+  const normalizedTags = React.useMemo(() => {
+    if (!image.tags) return [];
+  
+    let tagsArray = [];
+  
+    if (Array.isArray(image.tags)) {
+      tagsArray = image.tags;
+    } else if (typeof image.tags === "string") {
+      tagsArray = image.tags.split(",").map(tag => tag.trim());
+    }
+  
+    // duplikáció eltávolítása
+    return [...new Set(tagsArray)].filter(tag => tag !== "");
+  }, [image.tags]);
   return (
     <div className="glass-card">
       <Card className="glass-inner">
@@ -116,33 +129,21 @@ function ImageCard({ image, onVote, onOpen, likeLoading }) {
             <div className="info-bubble text">{image.description}</div>
           )}
 
-          {Array.isArray(image.tags) && image.tags.length > 0 ? (
-            <div className="d-flex flex-wrap gap-2 mb-3">
-              {image.tags.map((tag, i) => (
-                <span
-                  key={i}
-                  className="tag-bubble"
-                  style={{ cursor: "pointer" }}
-                  onClick={(e) => handleTagClick(e, tag)}
-                >
-                  {tag}
-                </span>
-              ))}
-            </div>
-          ) : typeof image.tags === "string" && image.tags.trim() !== "" ? (
-            <div className="d-flex flex-wrap gap-2 mb-3">
-              {image.tags.split(",").map((tag, i) => (
-                <span
-                  key={i}
-                  className="tag-bubble"
-                  style={{ cursor: "pointer" }}
-                  onClick={(e) => handleTagClick(e, tag.trim())}
-                >
-                  {tag.trim()}
-                </span>
-              ))}
-            </div>
-          ) : null}
+{normalizedTags.length > 0 && (
+  <div className="d-flex flex-wrap gap-2 mb-3">
+    {normalizedTags.map((tag, i) => (
+      <span
+        key={i}
+        className="tag-bubble"
+        style={{ cursor: "pointer" }}
+        onClick={(e) => handleTagClick(e, tag)}
+      >
+        {tag}
+      </span>
+    ))}
+  </div>
+)}
+
 
           <Button variant="outline-light" onClick={() => onOpen(image)}>
             Bővebben

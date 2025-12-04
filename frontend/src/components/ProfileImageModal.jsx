@@ -2,8 +2,6 @@
 import React, { useEffect, useState } from "react";
 import { Modal, Button } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
-import AnimatedCommentHeart from "../components/AnimatedCommentHeart";
-import AnimatedHeart from "./AnimatedHeart";
 import "../css/ImageModal.css";
 import { getToken, getAuthHeader, handleTokenError } from "../utils/auth";
 import { Share2, MessageCircle, ArrowUp, ArrowDown } from "lucide-react";
@@ -427,21 +425,21 @@ const handleShare = async () => {
             )}
           </div>
 
-          <div className="text-end mt-3">
-            <Button variant="outline-light" onClick={onClose}>
-              Bezárás
-            </Button>
-            <Button
-  variant="secondary"
-  onClick={() => {
-    onClose();
-    onEdit(image);
-  }}
->
-  Szerkesztés
-</Button>
+          <div className="text-end mt-3 d-flex justify-content-end gap-2">
+  <Button variant="outline-light" onClick={onClose}>
+    Bezárás
+  </Button>
+  <Button
+    variant="secondary"
+    onClick={() => {
+      onClose();
+      onEdit(image);
+    }}
+  >
+    Szerkesztés
+  </Button>
+</div>
 
-          </div>
         </div>
       </Modal.Body>
     </Modal>

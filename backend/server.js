@@ -472,7 +472,7 @@ app.get("/api/latest-images", async (req, res) => {
 app.post("/api/images/:id/like", verifyToken, async (req, res) => {
   const imageId = req.params.id;
   const userId = req.user.id;
-  const bodyVote = req.body?.vote; // 1 | -1 | 0 vagy undefined (régi kód)
+  const bodyVote = req.body?.vote; 
 
   if (!userId) {
     return res.status(401).json({ error: "Felhasználó nincs bejelentkezve." });
@@ -799,27 +799,38 @@ app.get("/api/images/search", async (req, res) => {
   try {
     let query = `
       SELECT 
-        i.id,
-        i.title,
-        i.description,
-        i.url,
-        i.likes,
-        u.username AS author,
-        u.id AS user_id,
-        COALESCE(GROUP_CONCAT(t.tag SEPARATOR ','), '') AS tags
-      FROM images i
-      JOIN users u ON i.user_id = u.id
-      LEFT JOIN image_tags it ON i.id = it.image_id
-      LEFT JOIN tags t ON it.tag_id = t.id
+  i.id,
+  i.title,
+  i.description,
+  i.url,
+  COALESCE(SUM(CASE WHEN iv.vote = 1 THEN 1 ELSE 0 END), 0) AS upvotes,
+  COALESCE(SUM(CASE WHEN iv.vote = -1 THEN 1 ELSE 0 END), 0) AS downvotes,
+  u.username AS author,
+  u.id AS user_id,
+  COALESCE(GROUP_CONCAT(t.tag SEPARATOR ','), '') AS tags
+FROM images i
+JOIN users u ON i.user_id = u.id
+LEFT JOIN image_tags it ON i.id = it.image_id
+LEFT JOIN tags t ON it.tag_id = t.id
+LEFT JOIN image_votes iv ON i.id = iv.image_id
+
     `;
 
     if (filter === "author") {
       query += " WHERE u.username LIKE ?";
     } else if (filter === "tag") {
-      query += " WHERE t.tag LIKE ?";
+      query += `
+        WHERE i.id IN (
+      SELECT image_id 
+      FROM image_tags it
+      JOIN tags t ON it.tag_id = t.id
+      WHERE t.tag LIKE ?
+        )
+      `;
     } else {
       query += " WHERE i.title LIKE ? OR i.description LIKE ?";
     }
+    
 
     query += " GROUP BY i.id ORDER BY i.id DESC";
 

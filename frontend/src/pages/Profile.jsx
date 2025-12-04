@@ -331,12 +331,6 @@ if (res.status === 401 || res.status === 403) {
   onEdit={handleEdit}
 />
 
-<EditModal
-  show={showModal}
-  onHide={() => setShowModal(false)}
-  image={selectedImage}
-  onSave={handleSave}
-/>
 
       <EditModal
         show={showModal}
