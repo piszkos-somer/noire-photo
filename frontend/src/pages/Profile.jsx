@@ -1,4 +1,4 @@
-import ImageCard from "../components/ProfileImageCard";
+import ImageCard from "../components/ImageCard";
 import ImageModal from "../components/ProfileImageModal";
 import React, { useState, useEffect, useContext } from "react";
 import {

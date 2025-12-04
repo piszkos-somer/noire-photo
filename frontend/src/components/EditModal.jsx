@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Modal, Button, Form, Badge, ListGroup } from "react-bootstrap";
 import "../css/EditModal.css";
-import "../css/ImageModal.css";
 import { getAuthHeader, handleTokenError } from "../utils/auth";
 import { useNavigate } from "react-router-dom";
 
@@ -19,7 +18,7 @@ function EditModal({ show, onHide, image, onSave }) {
     if (image) {
       setTitle(image.title);
       setDescription(image.description);
-      setTags(image.tags || []);
+      setTags(Array.isArray(image.tags) ? image.tags : []);
     }
   }, [image]);
 

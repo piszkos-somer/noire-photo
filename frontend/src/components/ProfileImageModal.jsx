@@ -14,6 +14,7 @@ function ImageModal({
   show,
   image,
   onClose,
+  onEdit,
   onImageVote,
   likeLoading,
   comments,
@@ -321,13 +322,14 @@ const handleShare = async () => {
             <h5 className="mb-3">Hozzászólások</h5>
 
             <div className="d-flex mb-3">
-              <input
-                type="text"
-                className="form-control me-2"
-                placeholder="Írj egy kommentet..."
-                value={newComment || ""}
-                onChange={onCommentChange}
-              />
+            <input
+  type="text"
+  className="form-control me-2"
+  placeholder="Írj egy kommentet..."
+  value={newComment || ""}
+  onChange={onCommentChange || (() => {})}
+/>
+
               <Button
                 variant="outline-light"
                 onClick={onCommentSubmit}
@@ -430,11 +432,15 @@ const handleShare = async () => {
               Bezárás
             </Button>
             <Button
-    variant="outline-primary"
-    onClick={() => onEdit(image)}
-  >
-    Szerkesztés
-  </Button>
+  variant="secondary"
+  onClick={() => {
+    onClose();
+    onEdit(image);
+  }}
+>
+  Szerkesztés
+</Button>
+
           </div>
         </div>
       </Modal.Body>
