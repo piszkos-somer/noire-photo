@@ -1,13 +1,14 @@
-// src/pages/Login.jsx
 import React, { useState, useContext } from "react";
-import { Form, Button, Container, Alert } from "react-bootstrap";
+import { Form, Button, Container, Alert, InputGroup } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { UserContext } from "../context/UserContext";
 import { handleTokenError } from "../utils/auth";
+import { Eye, EyeSlash } from "react-bootstrap-icons"; 
 
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false); 
   const [error, setError] = useState("");
   const { login } = useContext(UserContext);
   const navigate = useNavigate();
@@ -22,14 +23,16 @@ function Login() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
-if (res.status === 401 || res.status === 403) {
-  handleTokenError(res.status, navigate);
-  return;
-}
+
+      if (res.status === 401 || res.status === 403) {
+        handleTokenError(res.status, navigate);
+        return;
+      }
+
       const data = await res.json();
 
       if (res.ok) {
-        login(data.username, data.token); // ✅ Context frissítés
+        login(data.username, data.token);
         navigate("/profile");
       } else {
         setError(data.message || "Hibás bejelentkezés.");
@@ -59,32 +62,39 @@ if (res.status === 401 || res.status === 403) {
         </Form.Group>
 
         <Form.Group className="mb-3">
-  <Form.Label>Jelszó</Form.Label>
-  <Form.Control
-    type="password"
-    value={password}
-    onChange={(e) => setPassword(e.target.value)}
-    placeholder="Add meg a jelszavad"
-    required
-  />
-</Form.Group>
+          <Form.Label>Jelszó</Form.Label>
+          <InputGroup>
+            <Form.Control
+              type={showPassword ? "text" : "password"} 
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Add meg a jelszavad"
+              required
+            />
+            <Button
+              variant="outline-secondary"
+              onClick={() => setShowPassword(!showPassword)}
+              tabIndex={-1} 
+            >
+              {showPassword ? <EyeSlash /> : <Eye />}
+            </Button>
+          </InputGroup>
+        </Form.Group>
 
+        <div className="mb-3 text-center">
+          Ha még nincs fiókod,{" "}
+          <span
+            style={{ color: "blue", textDecoration: "underline", cursor: "pointer" }}
+            onClick={() => navigate("/registration")}
+          >
+            regisztrálj
+          </span>
+          .
+        </div>
 
-<div className="mb-3 text-center">
-  Ha még nincs fiókod,{" "}
-  <span
-    style={{ color: "blue", textDecoration: "underline", cursor: "pointer" }}
-    onClick={() => navigate("/registration")}
-  >
-    regisztrálj
-  </span>
-  .
-</div>
-
-<Button variant="primary" type="submit" className="w-100">
-  Bejelentkezés
-</Button>
-
+        <Button variant="primary" type="submit" className="w-100">
+          Bejelentkezés
+        </Button>
       </Form>
     </Container>
   );

@@ -62,10 +62,10 @@ const pool = mysql.createPool({
 (async () => {
   try {
     const conn = await pool.getConnection();
-    console.log("✅ Adatbázis kapcsolat sikeres!");
+    console.log("Adatbázis kapcsolat sikeres!");
     conn.release();
   } catch (err) {
-    console.error("❌ Adatbázis kapcsolat sikertelen:", err.message);
+    console.error("Adatbázis kapcsolat sikertelen:", err.message);
     process.exit(1);
   }
 })();

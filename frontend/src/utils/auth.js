@@ -1,7 +1,3 @@
-// ============================
-// 🔐 Token kezelés segédfüggvények
-// ============================
-
 export function getToken() {
   const userData = localStorage.getItem("user");
   if (!userData) return null;
@@ -27,12 +23,11 @@ export function handleTokenError(status) {
     console.warn("⚠️ Token érvénytelen vagy lejárt, kijelentkeztetés...");
     localStorage.removeItem("user");
 
-    // 🔹 Egyéni event a React Context értesítéséhez
+
     window.dispatchEvent(new Event("userLogout"));
   }
 }
 
-// auth.js végére írd ezt
 export function isTokenExpired() {
   const token = getToken();
   if (!token) return true;

@@ -1,7 +1,8 @@
 import React, { useState } from "react";
-import { Container, Form, Button, Alert } from "react-bootstrap";
+import { Container, Form, Button, Alert, InputGroup } from "react-bootstrap";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { Eye, EyeSlash } from "react-bootstrap-icons"; 
 
 function Registration() {
   const [formData, setFormData] = useState({
@@ -10,6 +11,8 @@ function Registration() {
     password: "",
     confirm: "",
   });
+  const [showPassword, setShowPassword] = useState(false); 
+  const [showConfirm, setShowConfirm] = useState(false); 
   const [message, setMessage] = useState("");
   const navigate = useNavigate();
 
@@ -65,26 +68,44 @@ function Registration() {
 
         <Form.Group className="mb-3">
           <Form.Label>Jelszó</Form.Label>
-          <Form.Control
-            type="password"
-            name="password"
-            placeholder="Jelszó"
-            value={formData.password}
-            onChange={handleChange}
-            required
-          />
+          <InputGroup>
+            <Form.Control
+              type={showPassword ? "text" : "password"}
+              name="password"
+              placeholder="Jelszó"
+              value={formData.password}
+              onChange={handleChange}
+              required
+            />
+            <Button
+              variant="outline-secondary"
+              onClick={() => setShowPassword(!showPassword)}
+              tabIndex={-1}
+            >
+              {showPassword ? <EyeSlash /> : <Eye />}
+            </Button>
+          </InputGroup>
         </Form.Group>
 
         <Form.Group className="mb-3">
           <Form.Label>Jelszó mégegyszer</Form.Label>
-          <Form.Control
-            type="password"
-            name="confirm"
-            placeholder="Jelszó mégegyszer"
-            value={formData.confirm}
-            onChange={handleChange}
-            required
-          />
+          <InputGroup>
+            <Form.Control
+              type={showConfirm ? "text" : "password"}
+              name="confirm"
+              placeholder="Jelszó mégegyszer"
+              value={formData.confirm}
+              onChange={handleChange}
+              required
+            />
+            <Button
+              variant="outline-secondary"
+              onClick={() => setShowConfirm(!showConfirm)}
+              tabIndex={-1}
+            >
+              {showConfirm ? <EyeSlash /> : <Eye />}
+            </Button>
+          </InputGroup>
         </Form.Group>
 
         <div className="d-grid gap-2">
