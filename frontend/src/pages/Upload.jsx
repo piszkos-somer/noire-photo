@@ -31,10 +31,8 @@ function Upload() {
   const navigate = useNavigate();
   const token = getToken();
 
-  const [tags, setTags] = useState(() => {
-    const saved = localStorage.getItem("tags");
-    return saved ? JSON.parse(saved) : [];
-  });
+ const [tags, setTags] = useState([]); 
+
 
   const [newTag, setNewTag] = useState("");
   const [suggestions, setSuggestions] = useState([]);
