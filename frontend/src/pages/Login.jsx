@@ -25,6 +25,7 @@ function Login() {
       });
 
       if (res.status === 401 || res.status === 403) {
+        setError("Rossz email vagy jelszó.");
         handleTokenError(res.status, navigate);
         return;
       }
