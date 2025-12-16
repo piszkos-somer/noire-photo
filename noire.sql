@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Gép: 127.0.0.1:3307
--- Létrehozás ideje: 2025. Dec 02. 13:56
+-- Létrehozás ideje: 2025. Dec 16. 12:16
 -- Kiszolgáló verziója: 10.4.28-MariaDB
 -- PHP verzió: 8.2.4
 
@@ -123,14 +123,14 @@ INSERT INTO `images` (`id`, `user_id`, `title`, `description`, `upload_date`, `u
 (4, 1, 'Bringás kép', 'Itt egy bringás kép rólam. Szerintetek jó szögből készült a kép? Vélemények?', '2025-10-27 19:03:49', '/images/1761584629316.jpg'),
 (5, 2, 'Tó az erdőben', 'Ezt a képet Kanadában készítettem, lenyűgöző látvánnyal.\r\n\r\nZáridő: kb. 10–30 másodperc\r\nRekesz: f/8 – f/1\r\nISO: 100\r\nGyújtótávolság: 18–24 mm ', '2025-10-27 19:13:21', '/images/1761585201828.jpg'),
 (6, 2, 'Izlandi hegység', 'Záridő: kb. 1/60 – 1/125 mp\r\nRekeszérték: f/8 – f/11\r\nISO érzékenység: 100 – 200\r\nGyújtótávolság: kb. 24–35 mm (nagylátószög)\r\nFehéregyensúly: napfény (kb. 5500 K)', '2025-10-27 19:41:21', '/images/1761586881317.jpg'),
-(7, 3, 'Nissan GTR R35', 'Szerintetek megpályázhatok egy versenyt ezzel a képpel?\r\nFényképezőgép: Sony A7R IV (Full Frame)\r\nObjektív: Sony FE 24–70mm f/2.8 GM\r\nGyújtótávolság: 35 mm\r\nRekesz (Aperture): f/5.6 — hogy az autó teljes élességben maradjon, de a háttér enyhén elmosódjon\r\nZáridő: 1/125 s — épp elég ahhoz, hogy kézből is éles legyen, miközben megőrzi a természetes fényeket\r\nISO: 200 — alacsony zaj, tiszta tónusok érdekében\r\nFehéregyensúly: Naplemente előbeállítás (kb. 6000K), hogy melegebb árnyalatokat kapjak\r\nUtómunka:\r\nEnyhe kontrasztnövelés és szaturáció az autó kiemelésére\r\nÁrnyékok világosítása, hogy a részletek ne vesszenek el\r\nÉgbolt enyhe színkiemelése a naplemente hangulatának fokozására', '2025-11-02 15:13:48', '/images/1762092828512.jpg'),
 (8, 3, 'Görögország', 'Telefonnal csináltam Görög nyaraláson során. Semmi extra beállítás csak egy jól elkapott pillanat.😎\nTelefonom: Samsung Galaxy S25', '2025-11-02 15:25:26', '/images/1762093526424.jpg'),
 (9, 4, 'Naplementés Balaton', 'Tavaly nyáron készítettem ezt a naplementés képet a Balatonról a telefonommal.\r\nTelefon: Samsung Galaxy S22', '2025-11-02 15:40:36', '/images/1762094436028.jpg'),
 (10, 4, 'Teknős', 'Egyik nyaraláson csináltam ezt a képet erről az aranyos teknősről. Remélem tetszik nektek. A Samsung Galaxy S22-es telefonnal készítettem ezt a képet.', '2025-11-10 11:09:03', '/images/1762769343370.jfif'),
 (11, 4, 'Vérhold', '2025 szeptember 7-én látható volt Magyarországon vérhold és ezt próbáltam lencse végre kapni, kisebb nagyobb sikerrel. Ezt a képet egy Iphone 14-el csináltam.', '2025-11-10 11:13:33', '/images/1762769613542.jfif'),
 (12, 1, 'Lánchíd', 'Ezt a képet tegnap este készítettem, hosszú expozícióval az Iphone 13 telefonommal :)', '2025-11-10 12:07:48', '/images/1762772868073.jpg'),
-(13, 3, 'Kékes', 'Smash or Pass?\nBeállítások:\nFényképezőgép: Canon EOS R6.\nObjektív: RF 24–105mm f/4 L IS USM.\nGyújtótávolság: 35 mm.\nRekesz: f/8 – részletgazdag, mély élességtartomány.\nZáridő: 1/100 s.\nISO: 200.\nFehéregyensúly: Árnyék / Naplemente mód (~6000K).\nUtómunka:\nMeleg színtónus kiemelése a naplemente hangulatához.', '2025-11-13 12:09:02', '/images/1763032142632.webp'),
-(14, 3, 'Vaddisznó', 'Nem rég egy barátommal vadászni jártam. Ő vadász én pedig egy fotós és ez lett a legjobb kép. Beállítások:\r\nFényképezőgép: Nikon D750.\r\nObjektív: Nikkor 70–200mm f/2.8.\r\nGyújtótávolság: 150 mm.\r\nRekesz: f/3.5 — sekély mélységélesség, hogy az állat kiemelkedjen a háttérből.\r\nZáridő: 1/500 s — az esetleges mozgás befagyasztásához. Fókusz: állat szemein.', '2025-11-13 12:14:38', '/images/1763032478390.webp');
+(15, 3, 'Cicám Félix', 'Nem rég tök jól elkaptam a cicámat Félixet miközben feküdt az ágyamon a délutáni alvását végezve. A telefonommal készítettem. (iPhone 12 Pro Max) A hátteret kicsit elhalványítottam, hogy a macska legyen a fókuszba. Írjatok, ha érdekel a beállítások.', '2025-12-16 12:05:35', '/images/1765883135303.jpg'),
+(16, 3, 'Túra a Mátrában', '1 hete voltam túrázni a barátaimmal a Mátrában ahol ezt a képet lőttem. Fényképezőgép: Full-frame DSLR, Objektív: 24–70 mm f/2.8, Gyújtótávolság: 35 mm', '2025-12-16 12:10:43', '/images/1765883443941.jpg'),
+(17, 3, 'Tábortúz', 'Amikor voltunk a Mátrába túrázni, akkor tettünk egy tábortüzet. Sikerült elkapni egy jó pillanatot.Fényképezőgép: Full-frame DSLR, Objektív: 24–70 mm f/2.8, Gyújtótávolság: 35–50 mm, Záridő: 1/60 s, Rekesz: f/2.8', '2025-12-16 12:14:20', '/images/1765883660781.jpg');
 
 -- --------------------------------------------------------
 
@@ -160,11 +160,6 @@ INSERT INTO `image_tags` (`image_id`, `tag_id`) VALUES
 (5, 16),
 (6, 11),
 (6, 17),
-(7, 5),
-(7, 33),
-(7, 34),
-(7, 35),
-(7, 36),
 (8, 11),
 (8, 20),
 (8, 31),
@@ -180,13 +175,16 @@ INSERT INTO `image_tags` (`image_id`, `tag_id`) VALUES
 (12, 23),
 (12, 24),
 (12, 25),
-(13, 26),
-(13, 27),
-(14, 11),
-(14, 15),
-(14, 28),
-(14, 29),
-(14, 30);
+(15, 19),
+(15, 37),
+(15, 38),
+(16, 15),
+(16, 39),
+(16, 40),
+(16, 41),
+(16, 42),
+(17, 43),
+(17, 44);
 
 -- --------------------------------------------------------
 
@@ -216,11 +214,9 @@ INSERT INTO `image_votes` (`id`, `user_id`, `image_id`, `vote`, `created_at`) VA
 (171, 1, 5, 1, '2025-12-02 12:54:44'),
 (172, 3, 6, 1, '2025-12-02 12:54:44'),
 (173, 3, 2, 1, '2025-12-02 12:54:44'),
-(174, 3, 7, 1, '2025-12-02 12:54:44'),
 (175, 3, 8, 1, '2025-12-02 12:54:44'),
 (176, 4, 9, 1, '2025-12-02 12:54:44'),
 (177, 4, 6, 1, '2025-12-02 12:54:44'),
-(178, 4, 7, 1, '2025-12-02 12:54:44'),
 (179, 4, 8, 1, '2025-12-02 12:54:44'),
 (180, 4, 11, 1, '2025-12-02 12:54:44'),
 (181, 4, 10, 1, '2025-12-02 12:54:44'),
@@ -230,8 +226,6 @@ INSERT INTO `image_votes` (`id`, `user_id`, `image_id`, `vote`, `created_at`) VA
 (187, 4, 12, 1, '2025-12-02 12:54:44'),
 (188, 3, 12, 1, '2025-12-02 12:54:44'),
 (190, 3, 9, 1, '2025-12-02 12:54:44'),
-(191, 3, 13, 1, '2025-12-02 12:54:44'),
-(192, 3, 14, 1, '2025-12-02 12:54:44'),
 (193, 3, 10, 1, '2025-12-02 12:54:44');
 
 -- --------------------------------------------------------
@@ -255,9 +249,12 @@ INSERT INTO `tags` (`id`, `tag`) VALUES
 (14, 'Bringa'),
 (22, 'Budapest'),
 (5, 'Car'),
+(38, 'Cat'),
+(37, 'Cica'),
 (19, 'Cuki'),
 (24, 'Éjszaka'),
 (15, 'Erdő'),
+(40, 'Fa'),
 (31, 'Görögország'),
 (35, 'GTR'),
 (32, 'Hajó'),
@@ -268,13 +265,18 @@ INSERT INTO `tags` (`id`, `tag`) VALUES
 (13, 'Kerékpár'),
 (23, 'Lánchíd'),
 (29, 'Malac'),
+(39, 'Mátra'),
 (4, 'Mercedes'),
+(41, 'Nap'),
+(42, 'Napfelkelte'),
 (34, 'Nissan'),
 (36, 'R35'),
+(44, 'Tábortűz'),
 (18, 'Teknős'),
 (20, 'Tenger'),
 (11, 'Természet'),
 (16, 'Tó'),
+(43, 'Tűz'),
 (30, 'Vadászat'),
 (28, 'Vaddisznó'),
 (25, 'Város');
@@ -399,7 +401,7 @@ ALTER TABLE `follows`
 -- AUTO_INCREMENT a táblához `images`
 --
 ALTER TABLE `images`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
 -- AUTO_INCREMENT a táblához `image_votes`
@@ -411,7 +413,7 @@ ALTER TABLE `image_votes`
 -- AUTO_INCREMENT a táblához `tags`
 --
 ALTER TABLE `tags`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=37;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=45;
 
 --
 -- AUTO_INCREMENT a táblához `users`
