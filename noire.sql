@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Gép: 127.0.0.1:3307
--- Létrehozás ideje: 2025. Dec 16. 12:16
+-- Létrehozás ideje: 2026. Jan 12. 12:12
 -- Kiszolgáló verziója: 10.4.28-MariaDB
 -- PHP verzió: 8.2.4
 
@@ -50,7 +50,9 @@ INSERT INTO `comments` (`id`, `user_id`, `image_id`, `comment`, `upload_date`) V
 (9, 4, 12, 'Nagyon szép ügyes vagy!!', '2025-11-13 11:57:32'),
 (10, 4, 8, 'Uhhh. De komoly kép lett.', '2025-11-13 12:00:17'),
 (11, 3, 10, 'Nagyon aranyos😍', '2025-11-13 12:01:34'),
-(12, 3, 9, 'Kezdőként nagyon jó kép. Így tovább. Remélem láthatunk még tőled képeket.', '2025-11-13 12:02:44');
+(12, 3, 9, 'Kezdőként nagyon jó kép. Így tovább. Remélem láthatunk még tőled képeket.', '2025-11-13 12:02:44'),
+(14, 4, 15, 'Nagyon jó lett. Érdekelnek a beállítások le tudnád írni légyszi?', '2026-01-12 12:07:16'),
+(15, 4, 17, 'Jézus, ez egy nagyon komoly kép lett. Szerintem simán megpályázhatnál ezzel egy versenyt.', '2026-01-12 12:10:01');
 
 -- --------------------------------------------------------
 
@@ -77,7 +79,9 @@ INSERT INTO `comment_votes` (`id`, `user_id`, `comment_id`, `vote`, `created_at`
 (51, 4, 1, 1, '2025-12-02 12:54:44'),
 (52, 4, 3, 1, '2025-12-02 12:54:44'),
 (53, 4, 5, 1, '2025-12-02 12:54:44'),
-(54, 3, 5, 1, '2025-12-02 12:54:44');
+(54, 3, 5, 1, '2025-12-02 12:54:44'),
+(55, 4, 11, 1, '2026-01-12 11:07:22'),
+(56, 4, 6, -1, '2026-01-12 11:07:50');
 
 -- --------------------------------------------------------
 
@@ -130,7 +134,7 @@ INSERT INTO `images` (`id`, `user_id`, `title`, `description`, `upload_date`, `u
 (12, 1, 'Lánchíd', 'Ezt a képet tegnap este készítettem, hosszú expozícióval az Iphone 13 telefonommal :)', '2025-11-10 12:07:48', '/images/1762772868073.jpg'),
 (15, 3, 'Cicám Félix', 'Nem rég tök jól elkaptam a cicámat Félixet miközben feküdt az ágyamon a délutáni alvását végezve. A telefonommal készítettem. (iPhone 12 Pro Max) A hátteret kicsit elhalványítottam, hogy a macska legyen a fókuszba. Írjatok, ha érdekel a beállítások.', '2025-12-16 12:05:35', '/images/1765883135303.jpg'),
 (16, 3, 'Túra a Mátrában', '1 hete voltam túrázni a barátaimmal a Mátrában ahol ezt a képet lőttem. Fényképezőgép: Full-frame DSLR, Objektív: 24–70 mm f/2.8, Gyújtótávolság: 35 mm', '2025-12-16 12:10:43', '/images/1765883443941.jpg'),
-(17, 3, 'Tábortúz', 'Amikor voltunk a Mátrába túrázni, akkor tettünk egy tábortüzet. Sikerült elkapni egy jó pillanatot.Fényképezőgép: Full-frame DSLR, Objektív: 24–70 mm f/2.8, Gyújtótávolság: 35–50 mm, Záridő: 1/60 s, Rekesz: f/2.8', '2025-12-16 12:14:20', '/images/1765883660781.jpg');
+(17, 3, 'Tábortűz', 'Amikor voltunk a Mátrába túrázni, akkor tettünk egy tábortüzet. Sikerült elkapni egy jó pillanatot.Fényképezőgép: Full-frame DSLR, Objektív: 24–70 mm f/2.8, Gyújtótávolság: 35–50 mm, Záridő: 1/60 s, Rekesz: f/2.8', '2025-12-16 12:14:20', '/images/1765883660781.jpg');
 
 -- --------------------------------------------------------
 
@@ -226,7 +230,16 @@ INSERT INTO `image_votes` (`id`, `user_id`, `image_id`, `vote`, `created_at`) VA
 (187, 4, 12, 1, '2025-12-02 12:54:44'),
 (188, 3, 12, 1, '2025-12-02 12:54:44'),
 (190, 3, 9, 1, '2025-12-02 12:54:44'),
-(193, 3, 10, 1, '2025-12-02 12:54:44');
+(193, 3, 10, 1, '2025-12-02 12:54:44'),
+(196, 3, 17, 1, '2026-01-12 11:05:19'),
+(197, 3, 16, 1, '2026-01-12 11:05:20'),
+(198, 3, 15, 1, '2026-01-12 11:05:22'),
+(199, 3, 11, 1, '2026-01-12 11:05:44'),
+(200, 3, 5, -1, '2026-01-12 11:05:47'),
+(201, 4, 17, 1, '2026-01-12 11:06:38'),
+(202, 4, 5, 1, '2026-01-12 11:07:42'),
+(203, 4, 4, -1, '2026-01-12 11:07:45'),
+(204, 4, 16, -1, '2026-01-12 11:09:14');
 
 -- --------------------------------------------------------
 
@@ -244,7 +257,6 @@ CREATE TABLE `tags` (
 --
 
 INSERT INTO `tags` (`id`, `tag`) VALUES
-(33, 'Autó'),
 (12, 'Bike'),
 (14, 'Bringa'),
 (22, 'Budapest'),
@@ -256,29 +268,21 @@ INSERT INTO `tags` (`id`, `tag`) VALUES
 (15, 'Erdő'),
 (40, 'Fa'),
 (31, 'Görögország'),
-(35, 'GTR'),
 (32, 'Hajó'),
-(27, 'Hegy'),
 (17, 'Hegység'),
 (21, 'Hold'),
-(26, 'Kékes'),
 (13, 'Kerékpár'),
 (23, 'Lánchíd'),
-(29, 'Malac'),
 (39, 'Mátra'),
 (4, 'Mercedes'),
 (41, 'Nap'),
 (42, 'Napfelkelte'),
-(34, 'Nissan'),
-(36, 'R35'),
 (44, 'Tábortűz'),
 (18, 'Teknős'),
 (20, 'Tenger'),
 (11, 'Természet'),
 (16, 'Tó'),
 (43, 'Tűz'),
-(30, 'Vadászat'),
-(28, 'Vaddisznó'),
 (25, 'Város');
 
 -- --------------------------------------------------------
@@ -303,7 +307,7 @@ CREATE TABLE `users` (
 INSERT INTO `users` (`id`, `username`, `email`, `password`, `bio`, `profile_picture`) VALUES
 (1, 'somer fatera', 'perakattis@gmail.com', '$2b$10$vBS.xhlLasGMI3DPjjr6r.8MlEsnH5wFVAr/V64MXllFI4gaMS76O', 'Sziasztok! Kezdő fotós vagyok, és szeretnék ügyesebb lenni a szakmában. Köszönök minden építő kritikát! aa', '/profile-pictures/1761583927591.jpg'),
 (2, 'Papp Sándor', 'pappsanyi@gmail.com', '$2b$10$9/iX2OKNISqPmBo13Svi/OtdCjPTxgSYNoZ7MUcLP0NwLZ7YlTrr2', 'Sziasztok! Sanyi vagyok és 4 éve foglalkozom fotózással. Szívesen megosztom veletek a munkáimat és bármikor fordulhattok hozzám segítségért. Versenyre való felkészítést is vállalok!', '/profile-pictures/1761584967721.jpg'),
-(3, 'Dávid', 'kabzso820@hengersor.hu', '$2b$10$77rO1/wis8plfrsb8ooWhuFVRhr3D8oH34ZRF13qH/plHpzArhft.', 'Sziasztok Dávid vagyok. Mizu? Tapasztalt, de egyáltalán nem profi fotós vagyok. Csak egy átlagos srác aki a fotózás szerelmese.', '/profile-pictures/1762092187007.png'),
+(3, 'Dávid', 'kabzso820@hengersor.hu', '$2b$10$77rO1/wis8plfrsb8ooWhuFVRhr3D8oH34ZRF13qH/plHpzArhft.', 'Sziasztok Dávid vagyok. Mizu? Tapasztalt, de egyáltalán nem profi fotós vagyok. Csak egy átlagos srác aki a fotózás szerelmese.', '/profile-pictures/1768215912073.jfif'),
 (4, 'Kabai Zsombor', 'kabai.zsombi@gmail.com', '$2b$10$3NiUroXsfKSnwSa6SxQ6Pu9fJhX/9dNH9r/DYTjDq9e4VNW4hjYVq', 'Sziasztok az én nevem Zsombor. Kezdő fotósnak tartom magam. A telefonommal szoktam fotózni és abból próbálom kihozni a legtöbbett.', '/profile-pictures/1762093987308.jpg'),
 (5, 'Nagy Ernő', 'habtam963@hengersor.hu', '$2b$10$xMtP8sNLogakmRQ4cfSr/uqJT3TUOTwvbEOpk5SfqAfEYBpSX0Toa', 'Sziasztok, Ernő vagyok. Kezdőként most vettem egy Nikon D3500-at. Nagyon szeretek fotózni, és várom, hogy fejlődjek benne.', '/profile-pictures/1762245188727.jpg');
 
@@ -383,13 +387,13 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT a táblához `comments`
 --
 ALTER TABLE `comments`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- AUTO_INCREMENT a táblához `comment_votes`
 --
 ALTER TABLE `comment_votes`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=55;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=57;
 
 --
 -- AUTO_INCREMENT a táblához `follows`
@@ -407,7 +411,7 @@ ALTER TABLE `images`
 -- AUTO_INCREMENT a táblához `image_votes`
 --
 ALTER TABLE `image_votes`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=196;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=205;
 
 --
 -- AUTO_INCREMENT a táblához `tags`
