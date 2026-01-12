@@ -59,13 +59,13 @@ body {
   cursor: pointer;
 }
 
-/* ░░ HOVER ░░ */
-.feed-btn:hover:not(:disabled) {
+/* HOVER */
+.feed-btn:hover:not(.locked) {
   background: rgba(255, 255, 255, 0.3);
   transform: scale(1.05);
 }
 
-/* ░░ ACTIVE STATE ░░ */
+/* AKTÍV (Neked) */
 .feed-btn.active {
   background: rgba(216, 216, 216, 0.45);
   color: #111;
@@ -73,13 +73,16 @@ body {
   box-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
 }
 
-/* ░░ DISABLED ░░ */
-/* ░░ DISABLED – olvasható, de látszik hogy nem aktív ░░ */
-.feed-btn:disabled {
-  cursor: not-allowed;
-  background: rgba(255, 255, 255, 0.25);
-  color: rgba(255, 255, 255, 0.85);
-  opacity: 1; /* FONTOS: ne halványítsuk le! */
-  border: 1px solid rgba(255, 255, 255, 0.25);
+/* 🔒 READ-ONLY / NINCS BEJELENTKEZVE */
+.feed-btn.locked {
+  background: rgba(216, 216, 216, 0.45); /* UGYANAZ mint active */
+  color: #111;
+  font-weight: 600;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
+
+  pointer-events: none;   /* 🔑 nem kattintható */
+  cursor: default;
+  opacity: 0.85;          /* finom különbség, de nem disabled */
 }
+
 

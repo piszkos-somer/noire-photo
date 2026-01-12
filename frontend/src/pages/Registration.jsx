@@ -1,8 +1,9 @@
 import React, { useState } from "react";
-import { Container, Form, Button, Alert, InputGroup } from "react-bootstrap";
+import { Container, Form, Button, Alert, InputGroup, Modal } from "react-bootstrap";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { Eye, EyeSlash } from "react-bootstrap-icons"; 
+import { Eye, EyeSlash } from "react-bootstrap-icons";
+import { Link } from "react-router-dom";
 
 function Registration() {
   const [formData, setFormData] = useState({
@@ -11,8 +12,11 @@ function Registration() {
     password: "",
     confirm: "",
   });
-  const [showPassword, setShowPassword] = useState(false); 
-  const [showConfirm, setShowConfirm] = useState(false); 
+
+  const [accepted, setAccepted] = useState(false); // ✅ új
+  const [showAszf, setShowAszf] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
   const [message, setMessage] = useState("");
   const navigate = useNavigate();
 
@@ -21,6 +25,8 @@ function Registration() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!accepted) return setMessage("Kérlek fogadd el az ÁSZF-et és az adatkezelési tájékoztatót!");
     if (formData.password !== formData.confirm)
       return setMessage("A jelszavak nem egyeznek!");
 
@@ -81,6 +87,7 @@ function Registration() {
               variant="outline-secondary"
               onClick={() => setShowPassword(!showPassword)}
               tabIndex={-1}
+              type="button"
             >
               {showPassword ? <EyeSlash /> : <Eye />}
             </Button>
@@ -102,16 +109,107 @@ function Registration() {
               variant="outline-secondary"
               onClick={() => setShowConfirm(!showConfirm)}
               tabIndex={-1}
+              type="button"
             >
               {showConfirm ? <EyeSlash /> : <Eye />}
             </Button>
           </InputGroup>
         </Form.Group>
 
+        {/* ✅ KÖTELEZŐ checkbox a gombok felett */}
+        <Form.Group className="mb-3">
+  <Form.Check type="checkbox" id="acceptTerms">
+    <Form.Check.Input
+      checked={accepted}
+      onChange={(e) => setAccepted(e.target.checked)}
+      required
+    />
+    <Form.Check.Label>
+      Elolvastam és elfogadom az{" "}
+      <span
+        style={{ color: "#0d6efd", cursor: "pointer", textDecoration: "underline" }}
+        onClick={() => setShowAszf(true)}
+      >
+        ÁSZF-et és adatkezelési tájékoztatót
+      </span>
+      .
+    </Form.Check.Label>
+  </Form.Check>
+</Form.Group>
+
+<Modal
+  show={showAszf}
+  onHide={() => setShowAszf(false)}
+  size="lg"
+  centered
+>
+  <Modal.Header closeButton>
+    <Modal.Title>ÁSZF és adatkezelési tájékoztató</Modal.Title>
+  </Modal.Header>
+
+  <Modal.Body style={{ maxHeight: "70vh", overflowY: "auto" }}>
+    {/* IDE jön az ÁSZF tartalma */}
+    <h5>Általános Felhasználási Feltételek</h5>
+
+<p>
+  Az oldal használatával a felhasználó elfogadja, hogy a szolgáltatást
+  rendeltetésszerűen, a hatályos jogszabályok betartásával használja.
+</p>
+
+<p>A felhasználó vállalja, hogy:</p>
+
+<ul>
+  <li>
+    Tartózkodik a trágár, sértő, gyűlölködő vagy másokat megalázó
+    megfogalmazásoktól.
+  </li>
+  <li>
+    Mások munkáját nem becsmérli, kritikát kizárólag kulturált, építő
+    jelleggel fogalmaz meg. A negatív vélemény megengedett, amennyiben az
+    nem személyeskedő vagy obszcén.
+  </li>
+  <li>
+    Nem tölt fel és nem oszt meg illegális tartalmat, különösen:
+    <ul>
+      <li>felnőtt (pornográf) tartalmat,</li>
+      <li>erőszakos vagy gyűlöletkeltő anyagokat,</li>
+      <li>szerzői jogot sértő tartalmakat.</li>
+    </ul>
+  </li>
+  <li>
+    Elfogadja, hogy más felhasználók részéről kritikát kaphat, amely akár
+    határozottabb hangvételű is lehet, amennyiben az nem sértő vagy
+    jogsértő.
+  </li>
+</ul>
+
+<p>A felhasználó tudomásul veszi továbbá, hogy:</p>
+
+<ul>
+  <li>
+    Az általa feltöltött tartalmak szabadon felhasználhatók, letölthetők,
+    megoszthatók és továbbterjeszthetők az oldal működésével összhangban.
+  </li>
+  <li>
+    A feltöltött tartalmakért teljes felelősséget vállal.
+  </li>
+</ul>
+
+<p>
+  Az oldal üzemeltetője fenntartja a jogot a szabályokat sértő tartalmak
+  eltávolítására, valamint a szabályszegő felhasználók korlátozására vagy
+  kizárására.
+</p>
+  </Modal.Body>
+</Modal>
+
+
+
         <div className="d-grid gap-2">
-          <Button type="submit" variant="primary">
+          <Button type="submit" variant="primary" disabled={!accepted}>
             Regisztrálok
           </Button>
+
           <Button
             variant="secondary"
             type="button"
