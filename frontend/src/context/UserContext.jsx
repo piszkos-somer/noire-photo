@@ -1,4 +1,3 @@
-// src/context/UserContext.jsx
 import React, { createContext, useState, useEffect } from "react";
 
 export const UserContext = createContext();
@@ -9,7 +8,6 @@ export function UserProvider({ children }) {
     return storedUser ? JSON.parse(storedUser) : null;
   });
 
-  // 🔹 Szinkron másik tabokkal
   useEffect(() => {
     const handleStorageChange = () => {
       const storedUser = localStorage.getItem("user");
@@ -19,7 +17,6 @@ export function UserProvider({ children }) {
     return () => window.removeEventListener("storage", handleStorageChange);
   }, []);
 
-  // 🔹 Reagál a handleTokenError által küldött saját eseményre
   useEffect(() => {
     const handleUserLogout = () => setUser(null);
     window.addEventListener("userLogout", handleUserLogout);
