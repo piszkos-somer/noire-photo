@@ -2,10 +2,10 @@
 -- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- Gép: 127.0.0.1:3307
--- Létrehozás ideje: 2026. Jan 20. 14:39
--- Kiszolgáló verziója: 10.4.28-MariaDB
--- PHP verzió: 8.2.4
+-- Host: 127.0.0.1:3306
+-- Generation Time: Jan 20, 2026 at 05:08 PM
+-- Server version: 10.4.28-MariaDB
+-- PHP Version: 8.2.4
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -18,13 +18,13 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Adatbázis: `noire`
+-- Database: `noire`
 --
 
 -- --------------------------------------------------------
 
 --
--- Tábla szerkezet ehhez a táblához `comments`
+-- Table structure for table `comments`
 --
 
 CREATE TABLE `comments` (
@@ -36,7 +36,7 @@ CREATE TABLE `comments` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- A tábla adatainak kiíratása `comments`
+-- Dumping data for table `comments`
 --
 
 INSERT INTO `comments` (`id`, `user_id`, `image_id`, `comment`, `upload_date`) VALUES
@@ -50,13 +50,12 @@ INSERT INTO `comments` (`id`, `user_id`, `image_id`, `comment`, `upload_date`) V
 (14, 4, 15, 'Nagyon jó lett. Érdekelnek a beállítások le tudnád írni légyszi?', '2026-01-12 12:07:16'),
 (15, 4, 17, 'Jézus, ez egy nagyon komoly kép lett. Szerintem simán megpályázhatnál ezzel egy versenyt.', '2026-01-12 12:10:01'),
 (16, 1, 16, 'Az igen! Milyen rekeszértéket és expozíció beállításokat használtál? Üdv, Shomer', '2026-01-20 14:00:17'),
-(17, 3, 16, 'Cum', '2026-01-20 14:34:03'),
-(18, 3, 18, 'EZARTZ', '2026-01-20 14:36:05');
+(20, 3, 11, 'Szia. Szeretnék neked adni egy építő kritikát. Nagyon jó kezdésnek, de probáld meg használni az éjszakai beállítások amikor este készítesz képeket. Írj ha segítsek benne.', '2026-01-20 16:51:35');
 
 -- --------------------------------------------------------
 
 --
--- Tábla szerkezet ehhez a táblához `comment_votes`
+-- Table structure for table `comment_votes`
 --
 
 CREATE TABLE `comment_votes` (
@@ -68,7 +67,7 @@ CREATE TABLE `comment_votes` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- A tábla adatainak kiíratása `comment_votes`
+-- Dumping data for table `comment_votes`
 --
 
 INSERT INTO `comment_votes` (`id`, `user_id`, `comment_id`, `vote`, `created_at`) VALUES
@@ -78,12 +77,14 @@ INSERT INTO `comment_votes` (`id`, `user_id`, `comment_id`, `vote`, `created_at`
 (52, 4, 3, 1, '2025-12-02 12:54:44'),
 (55, 4, 11, 1, '2026-01-12 11:07:22'),
 (58, 3, 16, 1, '2026-01-20 13:34:05'),
-(59, 3, 18, 1, '2026-01-20 13:36:07');
+(60, 3, 20, 1, '2026-01-20 15:51:39'),
+(61, 3, 8, 1, '2026-01-20 15:51:42'),
+(62, 3, 15, 1, '2026-01-20 15:52:09');
 
 -- --------------------------------------------------------
 
 --
--- Tábla szerkezet ehhez a táblához `follows`
+-- Table structure for table `follows`
 --
 
 CREATE TABLE `follows` (
@@ -93,7 +94,7 @@ CREATE TABLE `follows` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- A tábla adatainak kiíratása `follows`
+-- Dumping data for table `follows`
 --
 
 INSERT INTO `follows` (`id`, `follower_id`, `following_id`) VALUES
@@ -104,7 +105,7 @@ INSERT INTO `follows` (`id`, `follower_id`, `following_id`) VALUES
 -- --------------------------------------------------------
 
 --
--- Tábla szerkezet ehhez a táblához `images`
+-- Table structure for table `images`
 --
 
 CREATE TABLE `images` (
@@ -117,7 +118,7 @@ CREATE TABLE `images` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- A tábla adatainak kiíratása `images`
+-- Dumping data for table `images`
 --
 
 INSERT INTO `images` (`id`, `user_id`, `title`, `description`, `upload_date`, `url`) VALUES
@@ -129,13 +130,12 @@ INSERT INTO `images` (`id`, `user_id`, `title`, `description`, `upload_date`, `u
 (11, 4, 'Vérhold', '2025 szeptember 7-én látható volt Magyarországon vérhold és ezt próbáltam lencse végre kapni, kisebb nagyobb sikerrel. Ezt a képet egy Iphone 14-el csináltam.', '2025-11-10 11:13:33', '/images/1762769613542.jfif'),
 (15, 3, 'Cicám Félix', 'Nem rég tök jól elkaptam a cicámat Félixet miközben feküdt az ágyamon a délutáni alvását végezve. A telefonommal készítettem. (iPhone 12 Pro Max) A hátteret kicsit elhalványítottam, hogy a macska legyen a fókuszba. Írjatok, ha érdekel a beállítások.', '2025-12-16 12:05:35', '/images/1765883135303.jpg'),
 (16, 3, 'Túra a Mátrában', '1 hete voltam túrázni a barátaimmal a Mátrában ahol ezt a képet lőttem. Fényképezőgép: Full-frame DSLR, Objektív: 24–70 mm f/2.8, Gyújtótávolság: 35 mm', '2025-12-16 12:10:43', '/images/1765883443941.jpg'),
-(17, 3, 'Tábortűz', 'Amikor voltunk a Mátrába túrázni, akkor tettünk egy tábortüzet. Sikerült elkapni egy jó pillanatot.Fényképezőgép: Full-frame DSLR, Objektív: 24–70 mm f/2.8, Gyújtótávolság: 35–50 mm, Záridő: 1/60 s, Rekesz: f/2.8', '2025-12-16 12:14:20', '/images/1765883660781.jpg'),
-(18, 3, 'asd', 'asd', '2026-01-20 14:35:50', '/images/1768916150264.jpg');
+(17, 3, 'Tábortűz', 'Amikor voltunk a Mátrába túrázni, akkor tettünk egy tábortüzet. Sikerült elkapni egy jó pillanatot.Fényképezőgép: Full-frame DSLR, Objektív: 24–70 mm f/2.8, Gyújtótávolság: 35–50 mm, Záridő: 1/60 s, Rekesz: f/2.8', '2025-12-16 12:14:20', '/images/1765883660781.jpg');
 
 -- --------------------------------------------------------
 
 --
--- Tábla szerkezet ehhez a táblához `image_tags`
+-- Table structure for table `image_tags`
 --
 
 CREATE TABLE `image_tags` (
@@ -144,7 +144,7 @@ CREATE TABLE `image_tags` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- A tábla adatainak kiíratása `image_tags`
+-- Dumping data for table `image_tags`
 --
 
 INSERT INTO `image_tags` (`image_id`, `tag_id`) VALUES
@@ -172,15 +172,12 @@ INSERT INTO `image_tags` (`image_id`, `tag_id`) VALUES
 (16, 41),
 (16, 42),
 (17, 43),
-(17, 44),
-(18, 15),
-(18, 20),
-(18, 31);
+(17, 44);
 
 -- --------------------------------------------------------
 
 --
--- Tábla szerkezet ehhez a táblához `image_votes`
+-- Table structure for table `image_votes`
 --
 
 CREATE TABLE `image_votes` (
@@ -192,14 +189,13 @@ CREATE TABLE `image_votes` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- A tábla adatainak kiíratása `image_votes`
+-- Dumping data for table `image_votes`
 --
 
 INSERT INTO `image_votes` (`id`, `user_id`, `image_id`, `vote`, `created_at`) VALUES
 (157, 2, 6, 1, '2025-12-02 12:54:44'),
 (158, 2, 5, 1, '2025-12-02 12:54:44'),
 (171, 1, 5, 1, '2025-12-02 12:54:44'),
-(172, 3, 6, -1, '2025-12-02 12:54:44'),
 (175, 3, 8, 1, '2025-12-02 12:54:44'),
 (176, 4, 9, 1, '2025-12-02 12:54:44'),
 (177, 4, 6, 1, '2025-12-02 12:54:44'),
@@ -212,10 +208,8 @@ INSERT INTO `image_votes` (`id`, `user_id`, `image_id`, `vote`, `created_at`) VA
 (190, 3, 9, 1, '2025-12-02 12:54:44'),
 (193, 3, 10, 1, '2025-12-02 12:54:44'),
 (196, 3, 17, 1, '2026-01-12 11:05:19'),
-(197, 3, 16, -1, '2026-01-12 11:05:20'),
 (198, 3, 15, 1, '2026-01-12 11:05:22'),
 (199, 3, 11, 1, '2026-01-12 11:05:44'),
-(200, 3, 5, -1, '2026-01-12 11:05:47'),
 (201, 4, 17, 1, '2026-01-12 11:06:38'),
 (202, 4, 5, 1, '2026-01-12 11:07:42'),
 (204, 4, 16, -1, '2026-01-12 11:09:14'),
@@ -224,12 +218,14 @@ INSERT INTO `image_votes` (`id`, `user_id`, `image_id`, `vote`, `created_at`) VA
 (208, 1, 9, 1, '2026-01-20 12:13:29'),
 (209, 1, 16, 1, '2026-01-20 12:21:44'),
 (210, 1, 17, 1, '2026-01-20 12:57:57'),
-(211, 3, 18, 1, '2026-01-20 13:35:57');
+(214, 3, 6, -1, '2026-01-20 15:42:20'),
+(216, 3, 16, 1, '2026-01-20 15:43:17'),
+(217, 3, 5, -1, '2026-01-20 15:56:19');
 
 -- --------------------------------------------------------
 
 --
--- Tábla szerkezet ehhez a táblához `tags`
+-- Table structure for table `tags`
 --
 
 CREATE TABLE `tags` (
@@ -238,7 +234,7 @@ CREATE TABLE `tags` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- A tábla adatainak kiíratása `tags`
+-- Dumping data for table `tags`
 --
 
 INSERT INTO `tags` (`id`, `tag`) VALUES
@@ -264,7 +260,7 @@ INSERT INTO `tags` (`id`, `tag`) VALUES
 -- --------------------------------------------------------
 
 --
--- Tábla szerkezet ehhez a táblához `users`
+-- Table structure for table `users`
 --
 
 CREATE TABLE `users` (
@@ -273,26 +269,27 @@ CREATE TABLE `users` (
   `email` varchar(100) NOT NULL,
   `password` varchar(255) NOT NULL,
   `bio` varchar(500) DEFAULT NULL,
-  `profile_picture` varchar(255) DEFAULT NULL
+  `profile_picture` varchar(255) DEFAULT NULL,
+  `is_admin` tinyint(1) NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- A tábla adatainak kiíratása `users`
+-- Dumping data for table `users`
 --
 
-INSERT INTO `users` (`id`, `username`, `email`, `password`, `bio`, `profile_picture`) VALUES
-(1, 'somer fatera', 'perakattis@gmail.com', '$2b$10$vBS.xhlLasGMI3DPjjr6r.8MlEsnH5wFVAr/V64MXllFI4gaMS76O', 'Sziasztok! Kezdő fotós vagyok, és szeretnék ügyesebb lenni a szakmában. Köszönök minden építő kritikát! aa', '/profile-pictures/1761583927591.jpg'),
-(2, 'Papp Sándor', 'pappsanyi@gmail.com', '$2b$10$9/iX2OKNISqPmBo13Svi/OtdCjPTxgSYNoZ7MUcLP0NwLZ7YlTrr2', 'Sziasztok! Sanyi vagyok és 4 éve foglalkozom fotózással. Szívesen megosztom veletek a munkáimat és bármikor fordulhattok hozzám segítségért. Versenyre való felkészítést is vállalok!', '/profile-pictures/1761584967721.jpg'),
-(3, 'Dávid', 'kabzso820@hengersor.hu', '$2b$10$77rO1/wis8plfrsb8ooWhuFVRhr3D8oH34ZRF13qH/plHpzArhft.', 'Sziasztok Dávid vagyok. Mizu? Tapasztalt, de egyáltalán nem profi fotós vagyok. Csak egy átlagos srác aki a fotózás szerelmese.', '/profile-pictures/1768215912073.jfif'),
-(4, 'Kabai Zsombor', 'kabai.zsombi@gmail.com', '$2b$10$3NiUroXsfKSnwSa6SxQ6Pu9fJhX/9dNH9r/DYTjDq9e4VNW4hjYVq', 'Sziasztok az én nevem Zsombor. Kezdő fotósnak tartom magam. A telefonommal szoktam fotózni és abból próbálom kihozni a legtöbbett.', '/profile-pictures/1762093987308.jpg'),
-(5, 'Nagy Ernő', 'habtam963@hengersor.hu', '$2b$10$xMtP8sNLogakmRQ4cfSr/uqJT3TUOTwvbEOpk5SfqAfEYBpSX0Toa', 'Sziasztok, Ernő vagyok. Kezdőként most vettem egy Nikon D3500-at. Nagyon szeretek fotózni, és várom, hogy fejlődjek benne.', '/profile-pictures/1762245188727.jpg');
+INSERT INTO `users` (`id`, `username`, `email`, `password`, `bio`, `profile_picture`, `is_admin`) VALUES
+(1, 'somer fatera', 'perakattis@gmail.com', '$2b$10$vBS.xhlLasGMI3DPjjr6r.8MlEsnH5wFVAr/V64MXllFI4gaMS76O', 'Sziasztok! Kezdő fotós vagyok, és szeretnék ügyesebb lenni a szakmában. Köszönök minden építő kritikát! aa', '/profile-pictures/1761583927591.jpg', 0),
+(2, 'Papp Sándor', 'pappsanyi@gmail.com', '$2b$10$9/iX2OKNISqPmBo13Svi/OtdCjPTxgSYNoZ7MUcLP0NwLZ7YlTrr2', 'Sziasztok! Sanyi vagyok és 4 éve foglalkozom fotózással. Szívesen megosztom veletek a munkáimat és bármikor fordulhattok hozzám segítségért. Versenyre való felkészítést is vállalok!', '/profile-pictures/1761584967721.jpg', 0),
+(3, 'Dávid', 'kabzso820@hengersor.hu', '$2b$10$77rO1/wis8plfrsb8ooWhuFVRhr3D8oH34ZRF13qH/plHpzArhft.', 'Sziasztok Dávid vagyok. Mizu? Tapasztalt, de egyáltalán nem profi fotós vagyok. Csak egy átlagos srác aki a fotózás szerelmese.', '/profile-pictures/1768215912073.jfif', 0),
+(4, 'Kabai Zsombor', 'kabai.zsombi@gmail.com', '$2b$10$3NiUroXsfKSnwSa6SxQ6Pu9fJhX/9dNH9r/DYTjDq9e4VNW4hjYVq', 'Sziasztok az én nevem Zsombor. Kezdő fotósnak tartom magam. A telefonommal szoktam fotózni és abból próbálom kihozni a legtöbbett.', '/profile-pictures/1762093987308.jpg', 0),
+(5, 'Nagy Ernő', 'habtam963@hengersor.hu', '$2b$10$xMtP8sNLogakmRQ4cfSr/uqJT3TUOTwvbEOpk5SfqAfEYBpSX0Toa', 'Sziasztok, Ernő vagyok. Kezdőként most vettem egy Nikon D3500-at. Nagyon szeretek fotózni, és várom, hogy fejlődjek benne.', '/profile-pictures/1762245188727.jpg', 0);
 
 --
--- Indexek a kiírt táblákhoz
+-- Indexes for dumped tables
 --
 
 --
--- A tábla indexei `comments`
+-- Indexes for table `comments`
 --
 ALTER TABLE `comments`
   ADD PRIMARY KEY (`id`),
@@ -300,7 +297,7 @@ ALTER TABLE `comments`
   ADD KEY `image_id` (`image_id`);
 
 --
--- A tábla indexei `comment_votes`
+-- Indexes for table `comment_votes`
 --
 ALTER TABLE `comment_votes`
   ADD PRIMARY KEY (`id`),
@@ -309,7 +306,7 @@ ALTER TABLE `comment_votes`
   ADD KEY `comment_id` (`comment_id`);
 
 --
--- A tábla indexei `follows`
+-- Indexes for table `follows`
 --
 ALTER TABLE `follows`
   ADD PRIMARY KEY (`id`),
@@ -317,21 +314,21 @@ ALTER TABLE `follows`
   ADD KEY `following_id` (`following_id`);
 
 --
--- A tábla indexei `images`
+-- Indexes for table `images`
 --
 ALTER TABLE `images`
   ADD PRIMARY KEY (`id`),
   ADD KEY `user_id` (`user_id`);
 
 --
--- A tábla indexei `image_tags`
+-- Indexes for table `image_tags`
 --
 ALTER TABLE `image_tags`
   ADD PRIMARY KEY (`image_id`,`tag_id`),
   ADD KEY `tag_id` (`tag_id`);
 
 --
--- A tábla indexei `image_votes`
+-- Indexes for table `image_votes`
 --
 ALTER TABLE `image_votes`
   ADD PRIMARY KEY (`id`),
@@ -341,14 +338,14 @@ ALTER TABLE `image_votes`
   ADD KEY `image_id` (`image_id`);
 
 --
--- A tábla indexei `tags`
+-- Indexes for table `tags`
 --
 ALTER TABLE `tags`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `tag` (`tag`);
 
 --
--- A tábla indexei `users`
+-- Indexes for table `users`
 --
 ALTER TABLE `users`
   ADD PRIMARY KEY (`id`),
@@ -356,90 +353,90 @@ ALTER TABLE `users`
   ADD UNIQUE KEY `email` (`email`);
 
 --
--- A kiírt táblák AUTO_INCREMENT értéke
+-- AUTO_INCREMENT for dumped tables
 --
 
 --
--- AUTO_INCREMENT a táblához `comments`
+-- AUTO_INCREMENT for table `comments`
 --
 ALTER TABLE `comments`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
--- AUTO_INCREMENT a táblához `comment_votes`
+-- AUTO_INCREMENT for table `comment_votes`
 --
 ALTER TABLE `comment_votes`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=60;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=63;
 
 --
--- AUTO_INCREMENT a táblához `follows`
+-- AUTO_INCREMENT for table `follows`
 --
 ALTER TABLE `follows`
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
 
 --
--- AUTO_INCREMENT a táblához `images`
+-- AUTO_INCREMENT for table `images`
 --
 ALTER TABLE `images`
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
 
 --
--- AUTO_INCREMENT a táblához `image_votes`
+-- AUTO_INCREMENT for table `image_votes`
 --
 ALTER TABLE `image_votes`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=212;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=218;
 
 --
--- AUTO_INCREMENT a táblához `tags`
+-- AUTO_INCREMENT for table `tags`
 --
 ALTER TABLE `tags`
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=45;
 
 --
--- AUTO_INCREMENT a táblához `users`
+-- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
--- Megkötések a kiírt táblákhoz
+-- Constraints for dumped tables
 --
 
 --
--- Megkötések a táblához `comments`
+-- Constraints for table `comments`
 --
 ALTER TABLE `comments`
   ADD CONSTRAINT `comments_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `comments_ibfk_2` FOREIGN KEY (`image_id`) REFERENCES `images` (`id`) ON DELETE CASCADE;
 
 --
--- Megkötések a táblához `comment_votes`
+-- Constraints for table `comment_votes`
 --
 ALTER TABLE `comment_votes`
   ADD CONSTRAINT `comment_votes_ibfk_2` FOREIGN KEY (`comment_id`) REFERENCES `comments` (`id`) ON DELETE CASCADE;
 
 --
--- Megkötések a táblához `follows`
+-- Constraints for table `follows`
 --
 ALTER TABLE `follows`
   ADD CONSTRAINT `follows_ibfk_1` FOREIGN KEY (`follower_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `follows_ibfk_2` FOREIGN KEY (`following_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 
 --
--- Megkötések a táblához `images`
+-- Constraints for table `images`
 --
 ALTER TABLE `images`
   ADD CONSTRAINT `images_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 
 --
--- Megkötések a táblához `image_tags`
+-- Constraints for table `image_tags`
 --
 ALTER TABLE `image_tags`
   ADD CONSTRAINT `image_tags_ibfk_1` FOREIGN KEY (`image_id`) REFERENCES `images` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `image_tags_ibfk_2` FOREIGN KEY (`tag_id`) REFERENCES `tags` (`id`) ON DELETE CASCADE;
 
 --
--- Megkötések a táblához `image_votes`
+-- Constraints for table `image_votes`
 --
 ALTER TABLE `image_votes`
   ADD CONSTRAINT `image_votes_ibfk_2` FOREIGN KEY (`image_id`) REFERENCES `images` (`id`) ON DELETE CASCADE;
