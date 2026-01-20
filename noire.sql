@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Gép: 127.0.0.1:3307
--- Létrehozás ideje: 2026. Jan 12. 12:12
+-- Létrehozás ideje: 2026. Jan 20. 14:39
 -- Kiszolgáló verziója: 10.4.28-MariaDB
 -- PHP verzió: 8.2.4
 
@@ -41,18 +41,17 @@ CREATE TABLE `comments` (
 
 INSERT INTO `comments` (`id`, `user_id`, `image_id`, `comment`, `upload_date`) VALUES
 (1, 1, 5, 'Nagyon szép, és tetszik, hogy pont elkaptad benne a villámot!! 10/11', '2025-10-28 14:25:55'),
-(2, 2, 3, 'Az igen! Kezdőnek nem is rossz, bár egy kicsit feljebb vettem volna a szaturációt, mert illene az ilyen fényekkel dolgoz képnél. Ha leírod a kamerád típusát, szívesen segítek ebben.', '2025-10-28 15:49:22'),
 (3, 1, 5, 'Tényleg nagyon jó!', '2025-10-29 17:28:44'),
 (4, 3, 6, 'Azta ez nagyon király lett.', '2025-11-02 15:04:27'),
-(5, 3, 2, 'Én láttam már szebbett. De amugy nem rossz kép. Meg tudnád mondani milyen fényképezővel csináltad és milyen beállításokkal?', '2025-11-02 15:05:41'),
-(6, 3, 4, 'Elég menő. Talán egy kicsi utómunkával lehetne javítani rajta. Ha segítség kéne bátran írj.', '2025-11-02 15:17:52'),
 (8, 1, 11, 'Nagyon szép, de ha a Holdat akarod kiemelni, akkor legközelebb zoomolj rá jobban!', '2025-11-10 11:58:30'),
-(9, 4, 12, 'Nagyon szép ügyes vagy!!', '2025-11-13 11:57:32'),
 (10, 4, 8, 'Uhhh. De komoly kép lett.', '2025-11-13 12:00:17'),
 (11, 3, 10, 'Nagyon aranyos😍', '2025-11-13 12:01:34'),
 (12, 3, 9, 'Kezdőként nagyon jó kép. Így tovább. Remélem láthatunk még tőled képeket.', '2025-11-13 12:02:44'),
 (14, 4, 15, 'Nagyon jó lett. Érdekelnek a beállítások le tudnád írni légyszi?', '2026-01-12 12:07:16'),
-(15, 4, 17, 'Jézus, ez egy nagyon komoly kép lett. Szerintem simán megpályázhatnál ezzel egy versenyt.', '2026-01-12 12:10:01');
+(15, 4, 17, 'Jézus, ez egy nagyon komoly kép lett. Szerintem simán megpályázhatnál ezzel egy versenyt.', '2026-01-12 12:10:01'),
+(16, 1, 16, 'Az igen! Milyen rekeszértéket és expozíció beállításokat használtál? Üdv, Shomer', '2026-01-20 14:00:17'),
+(17, 3, 16, 'Cum', '2026-01-20 14:34:03'),
+(18, 3, 18, 'EZARTZ', '2026-01-20 14:36:05');
 
 -- --------------------------------------------------------
 
@@ -75,13 +74,11 @@ CREATE TABLE `comment_votes` (
 INSERT INTO `comment_votes` (`id`, `user_id`, `comment_id`, `vote`, `created_at`) VALUES
 (39, 2, 1, 1, '2025-12-02 12:54:44'),
 (45, 1, 1, 1, '2025-12-02 12:54:44'),
-(46, 1, 2, 1, '2025-12-02 12:54:44'),
 (51, 4, 1, 1, '2025-12-02 12:54:44'),
 (52, 4, 3, 1, '2025-12-02 12:54:44'),
-(53, 4, 5, 1, '2025-12-02 12:54:44'),
-(54, 3, 5, 1, '2025-12-02 12:54:44'),
 (55, 4, 11, 1, '2026-01-12 11:07:22'),
-(56, 4, 6, -1, '2026-01-12 11:07:50');
+(58, 3, 16, 1, '2026-01-20 13:34:05'),
+(59, 3, 18, 1, '2026-01-20 13:36:07');
 
 -- --------------------------------------------------------
 
@@ -100,7 +97,9 @@ CREATE TABLE `follows` (
 --
 
 INSERT INTO `follows` (`id`, `follower_id`, `following_id`) VALUES
-(19, 1, 3);
+(23, 1, 3),
+(20, 1, 4),
+(24, 3, 2);
 
 -- --------------------------------------------------------
 
@@ -122,19 +121,16 @@ CREATE TABLE `images` (
 --
 
 INSERT INTO `images` (`id`, `user_id`, `title`, `description`, `upload_date`, `url`) VALUES
-(2, 1, 'Mercedes', 'A legszebb merci amit valaha láttam!', '2025-10-27 17:43:22', '/images/1761579802620.jpg'),
-(3, 1, 'Tájkép', 'Ezt a képet egy másik országban készítettem, lenyűgöző volt a látvány!', '2025-10-27 19:02:33', '/images/1761584553646.jpg'),
-(4, 1, 'Bringás kép', 'Itt egy bringás kép rólam. Szerintetek jó szögből készült a kép? Vélemények?', '2025-10-27 19:03:49', '/images/1761584629316.jpg'),
 (5, 2, 'Tó az erdőben', 'Ezt a képet Kanadában készítettem, lenyűgöző látvánnyal.\r\n\r\nZáridő: kb. 10–30 másodperc\r\nRekesz: f/8 – f/1\r\nISO: 100\r\nGyújtótávolság: 18–24 mm ', '2025-10-27 19:13:21', '/images/1761585201828.jpg'),
 (6, 2, 'Izlandi hegység', 'Záridő: kb. 1/60 – 1/125 mp\r\nRekeszérték: f/8 – f/11\r\nISO érzékenység: 100 – 200\r\nGyújtótávolság: kb. 24–35 mm (nagylátószög)\r\nFehéregyensúly: napfény (kb. 5500 K)', '2025-10-27 19:41:21', '/images/1761586881317.jpg'),
 (8, 3, 'Görögország', 'Telefonnal csináltam Görög nyaraláson során. Semmi extra beállítás csak egy jól elkapott pillanat.😎\nTelefonom: Samsung Galaxy S25', '2025-11-02 15:25:26', '/images/1762093526424.jpg'),
 (9, 4, 'Naplementés Balaton', 'Tavaly nyáron készítettem ezt a naplementés képet a Balatonról a telefonommal.\r\nTelefon: Samsung Galaxy S22', '2025-11-02 15:40:36', '/images/1762094436028.jpg'),
 (10, 4, 'Teknős', 'Egyik nyaraláson csináltam ezt a képet erről az aranyos teknősről. Remélem tetszik nektek. A Samsung Galaxy S22-es telefonnal készítettem ezt a képet.', '2025-11-10 11:09:03', '/images/1762769343370.jfif'),
 (11, 4, 'Vérhold', '2025 szeptember 7-én látható volt Magyarországon vérhold és ezt próbáltam lencse végre kapni, kisebb nagyobb sikerrel. Ezt a képet egy Iphone 14-el csináltam.', '2025-11-10 11:13:33', '/images/1762769613542.jfif'),
-(12, 1, 'Lánchíd', 'Ezt a képet tegnap este készítettem, hosszú expozícióval az Iphone 13 telefonommal :)', '2025-11-10 12:07:48', '/images/1762772868073.jpg'),
 (15, 3, 'Cicám Félix', 'Nem rég tök jól elkaptam a cicámat Félixet miközben feküdt az ágyamon a délutáni alvását végezve. A telefonommal készítettem. (iPhone 12 Pro Max) A hátteret kicsit elhalványítottam, hogy a macska legyen a fókuszba. Írjatok, ha érdekel a beállítások.', '2025-12-16 12:05:35', '/images/1765883135303.jpg'),
 (16, 3, 'Túra a Mátrában', '1 hete voltam túrázni a barátaimmal a Mátrában ahol ezt a képet lőttem. Fényképezőgép: Full-frame DSLR, Objektív: 24–70 mm f/2.8, Gyújtótávolság: 35 mm', '2025-12-16 12:10:43', '/images/1765883443941.jpg'),
-(17, 3, 'Tábortűz', 'Amikor voltunk a Mátrába túrázni, akkor tettünk egy tábortüzet. Sikerült elkapni egy jó pillanatot.Fényképezőgép: Full-frame DSLR, Objektív: 24–70 mm f/2.8, Gyújtótávolság: 35–50 mm, Záridő: 1/60 s, Rekesz: f/2.8', '2025-12-16 12:14:20', '/images/1765883660781.jpg');
+(17, 3, 'Tábortűz', 'Amikor voltunk a Mátrába túrázni, akkor tettünk egy tábortüzet. Sikerült elkapni egy jó pillanatot.Fényképezőgép: Full-frame DSLR, Objektív: 24–70 mm f/2.8, Gyújtótávolság: 35–50 mm, Záridő: 1/60 s, Rekesz: f/2.8', '2025-12-16 12:14:20', '/images/1765883660781.jpg'),
+(18, 3, 'asd', 'asd', '2026-01-20 14:35:50', '/images/1768916150264.jpg');
 
 -- --------------------------------------------------------
 
@@ -152,14 +148,6 @@ CREATE TABLE `image_tags` (
 --
 
 INSERT INTO `image_tags` (`image_id`, `tag_id`) VALUES
-(2, 4),
-(2, 5),
-(3, 11),
-(3, 15),
-(3, 16),
-(4, 12),
-(4, 13),
-(4, 14),
 (5, 15),
 (5, 16),
 (6, 11),
@@ -175,10 +163,6 @@ INSERT INTO `image_tags` (`image_id`, `tag_id`) VALUES
 (10, 19),
 (10, 20),
 (11, 21),
-(12, 22),
-(12, 23),
-(12, 24),
-(12, 25),
 (15, 19),
 (15, 37),
 (15, 38),
@@ -188,7 +172,10 @@ INSERT INTO `image_tags` (`image_id`, `tag_id`) VALUES
 (16, 41),
 (16, 42),
 (17, 43),
-(17, 44);
+(17, 44),
+(18, 15),
+(18, 20),
+(18, 31);
 
 -- --------------------------------------------------------
 
@@ -209,15 +196,10 @@ CREATE TABLE `image_votes` (
 --
 
 INSERT INTO `image_votes` (`id`, `user_id`, `image_id`, `vote`, `created_at`) VALUES
-(72, 2, 3, 1, '2025-12-02 12:54:44'),
-(103, 2, 4, 1, '2025-12-02 12:54:44'),
-(129, 1, 4, 1, '2025-12-02 12:54:44'),
-(140, 1, 3, 1, '2025-12-02 12:54:44'),
 (157, 2, 6, 1, '2025-12-02 12:54:44'),
 (158, 2, 5, 1, '2025-12-02 12:54:44'),
 (171, 1, 5, 1, '2025-12-02 12:54:44'),
-(172, 3, 6, 1, '2025-12-02 12:54:44'),
-(173, 3, 2, 1, '2025-12-02 12:54:44'),
+(172, 3, 6, -1, '2025-12-02 12:54:44'),
 (175, 3, 8, 1, '2025-12-02 12:54:44'),
 (176, 4, 9, 1, '2025-12-02 12:54:44'),
 (177, 4, 6, 1, '2025-12-02 12:54:44'),
@@ -227,19 +209,22 @@ INSERT INTO `image_votes` (`id`, `user_id`, `image_id`, `vote`, `created_at`) VA
 (182, 1, 6, 1, '2025-12-02 12:54:44'),
 (183, 1, 10, 1, '2025-12-02 12:54:44'),
 (186, 1, 11, 1, '2025-12-02 12:54:44'),
-(187, 4, 12, 1, '2025-12-02 12:54:44'),
-(188, 3, 12, 1, '2025-12-02 12:54:44'),
 (190, 3, 9, 1, '2025-12-02 12:54:44'),
 (193, 3, 10, 1, '2025-12-02 12:54:44'),
 (196, 3, 17, 1, '2026-01-12 11:05:19'),
-(197, 3, 16, 1, '2026-01-12 11:05:20'),
+(197, 3, 16, -1, '2026-01-12 11:05:20'),
 (198, 3, 15, 1, '2026-01-12 11:05:22'),
 (199, 3, 11, 1, '2026-01-12 11:05:44'),
 (200, 3, 5, -1, '2026-01-12 11:05:47'),
 (201, 4, 17, 1, '2026-01-12 11:06:38'),
 (202, 4, 5, 1, '2026-01-12 11:07:42'),
-(203, 4, 4, -1, '2026-01-12 11:07:45'),
-(204, 4, 16, -1, '2026-01-12 11:09:14');
+(204, 4, 16, -1, '2026-01-12 11:09:14'),
+(205, 1, 15, 1, '2026-01-20 12:09:41'),
+(207, 1, 8, 1, '2026-01-20 12:13:28'),
+(208, 1, 9, 1, '2026-01-20 12:13:29'),
+(209, 1, 16, 1, '2026-01-20 12:21:44'),
+(210, 1, 17, 1, '2026-01-20 12:57:57'),
+(211, 3, 18, 1, '2026-01-20 13:35:57');
 
 -- --------------------------------------------------------
 
@@ -257,24 +242,16 @@ CREATE TABLE `tags` (
 --
 
 INSERT INTO `tags` (`id`, `tag`) VALUES
-(12, 'Bike'),
-(14, 'Bringa'),
-(22, 'Budapest'),
-(5, 'Car'),
 (38, 'Cat'),
 (37, 'Cica'),
 (19, 'Cuki'),
-(24, 'Éjszaka'),
 (15, 'Erdő'),
 (40, 'Fa'),
 (31, 'Görögország'),
 (32, 'Hajó'),
 (17, 'Hegység'),
 (21, 'Hold'),
-(13, 'Kerékpár'),
-(23, 'Lánchíd'),
 (39, 'Mátra'),
-(4, 'Mercedes'),
 (41, 'Nap'),
 (42, 'Napfelkelte'),
 (44, 'Tábortűz'),
@@ -282,8 +259,7 @@ INSERT INTO `tags` (`id`, `tag`) VALUES
 (20, 'Tenger'),
 (11, 'Természet'),
 (16, 'Tó'),
-(43, 'Tűz'),
-(25, 'Város');
+(43, 'Tűz');
 
 -- --------------------------------------------------------
 
@@ -387,31 +363,31 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT a táblához `comments`
 --
 ALTER TABLE `comments`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
 
 --
 -- AUTO_INCREMENT a táblához `comment_votes`
 --
 ALTER TABLE `comment_votes`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=57;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=60;
 
 --
 -- AUTO_INCREMENT a táblához `follows`
 --
 ALTER TABLE `follows`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
 
 --
 -- AUTO_INCREMENT a táblához `images`
 --
 ALTER TABLE `images`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
 
 --
 -- AUTO_INCREMENT a táblához `image_votes`
 --
 ALTER TABLE `image_votes`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=205;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=212;
 
 --
 -- AUTO_INCREMENT a táblához `tags`
