@@ -1,12 +1,12 @@
 // src/components/ImageModal.jsx
 import React, { useEffect, useState } from "react";
-import { Modal, Button } from "react-bootstrap";
+import { Modal, Button, Dropdown } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import AnimatedCommentHeart from "../components/AnimatedCommentHeart";
 import AnimatedHeart from "./AnimatedHeart";
 import "../css/ImageModal.css";
 import { getToken, getAuthHeader, handleTokenError } from "../utils/auth";
-import { Share2, MessageCircle, ArrowUp, ArrowDown } from "lucide-react";
+import { Share2, MessageCircle, ArrowUp, ArrowDown, MoreVertical } from "lucide-react";
 
 
 
@@ -33,6 +33,9 @@ function ImageModal({
   const [localImage, setLocalImage] = useState(image);
 const [showToast, setShowToast] = useState(false);
 const [isFollowing, setIsFollowing] = useState(false);
+const [editingCommentId, setEditingCommentId] = useState(null);
+const [editCommentText, setEditCommentText] = useState("");
+const [openDropdownId, setOpenDropdownId] = useState(null);
 
   useEffect(() => {
     setLocalImage(image);
@@ -148,6 +151,77 @@ const handleShare = async () => {
     );
   };
 
+  const handleDeleteComment = async (commentId) => {
+    if (!window.confirm("Biztosan törölni szeretnéd ezt a hozzászólást?")) return;
+
+    try {
+      const res = await fetch(`http://localhost:3001/api/comments/${commentId}`, {
+        method: "DELETE",
+        headers: getAuthHeader(),
+      });
+
+      if (res.status === 401 || res.status === 403) {
+        handleTokenError(res.status, navigate);
+        return;
+      }
+
+      if (res.ok) {
+        
+        window.location.reload(); 
+      } else {
+        alert("Hiba történt a törlés során");
+      }
+    } catch (err) {
+      console.error("Komment törlési hiba:", err);
+      alert("Szerverhiba");
+    }
+  };
+
+  const handleEditComment = (comment) => {
+    console.log("Edit comment clicked:", comment);
+    setEditingCommentId(comment.id);
+    setEditCommentText(comment.comment);
+  };
+
+  const handleSaveComment = async (commentId) => {
+    if (!editCommentText.trim()) {
+      alert("A komment nem lehet üres");
+      return;
+    }
+
+    try {
+      const res = await fetch(`http://localhost:3001/api/comments/${commentId}`, {
+        method: "PUT",
+        headers: {
+          ...getAuthHeader(),
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ comment: editCommentText }),
+      });
+
+      if (res.status === 401 || res.status === 403) {
+        handleTokenError(res.status, navigate);
+        return;
+      }
+
+      if (res.ok) {
+        setEditingCommentId(null);
+        setEditCommentText("");
+        window.location.reload(); 
+      } else {
+        alert("Hiba történt a módosítás során");
+      }
+    } catch (err) {
+      console.error("Komment szerkesztési hiba:", err);
+      alert("Szerverhiba");
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditingCommentId(null);
+    setEditCommentText("");
+  };
+
   return (
     <Modal show={show} onHide={onClose} centered size="lg" className="glass-modal">
       {showToast && (
@@ -157,8 +231,16 @@ const handleShare = async () => {
 )}
 
       <Modal.Body className="p-0">
-        <div className="glass-header">
+        <div className="glass-header d-flex justify-content-between align-items-center">
           <h3 className="glass-title m-0">{localImage?.title || "Kép megtekintése"}</h3>
+          <Button 
+            variant="link" 
+            onClick={onClose}
+            className="text-dark p-0"
+            style={{ fontSize: "24px", textDecoration: "none", lineHeight: 1 }}
+          >
+            ×
+          </Button>
         </div>
 
         {localImage?.url && (
@@ -318,13 +400,13 @@ const handleShare = async () => {
             {localImage?.description || "Nincs leírás."}
           </p>
 
-          <div className="comment-section mt-5 px-4 pb-4">
+          <div className="comment-section mt-5 px-2 px-md-4 pb-4">
             <h5 className="mb-3">Hozzászólások</h5>
 
-            <div className="d-flex mb-3">
+            <div className="d-flex flex-column flex-sm-row gap-2 mb-3">
               <input
                 type="text"
-                className="form-control me-2"
+                className="form-control"
                 placeholder="Írj egy kommentet..."
                 value={newComment || ""}
                 onChange={onCommentChange}
@@ -333,6 +415,7 @@ const handleShare = async () => {
                 variant="outline-light"
                 onClick={onCommentSubmit}
                 disabled={commentLoading}
+                style={{ minWidth: "100px" }}
               >
                 Küldés
               </Button>
@@ -346,29 +429,84 @@ const handleShare = async () => {
                   key={c.id}
                   className="comment-item glass-comment mb-3 p-3 rounded-3"
                 >
-                  <div className="d-flex align-items-start">
+                  <div className="d-flex flex-column flex-sm-row align-items-start">
                     <img
                       src={`http://localhost:3001${c.profile_picture}`}
                       alt={c.username}
-                      className="rounded-circle me-3"
+                      className="rounded-circle me-3 mb-2 mb-sm-0"
                       width="40"
                       height="40"
-                      style={{ cursor: "pointer" }}
+                      style={{ cursor: "pointer", flexShrink: 0 }}
                       onClick={() => handleUserClick(c.user_id)}
                     />
-                    <div className="flex-grow-1 position-relative">
-                      <div className="d-flex justify-content-between align-items-center">
+                    <div className="flex-grow-1 w-100">
+                      <div className="d-flex flex-column flex-sm-row justify-content-between align-items-start gap-2">
                         <strong
                           style={{ cursor: "pointer" }}
                           onClick={() => handleUserClick(c.user_id)}
                         >
                           {c.username}
                         </strong>
-                        <small className="text-muted">
-                          {new Date(c.created_at).toLocaleString("hu-HU")}
-                        </small>
+                        <div className="d-flex flex-wrap align-items-center gap-2">
+                          <small className="text-muted text-nowrap">
+                            {new Date(c.created_at).toLocaleString("hu-HU")}
+                          </small>
+                          {c.user_id === loggedInId && (
+                            <div className="d-flex gap-1">
+                              <button
+                                className="btn btn-sm btn-outline-primary comment-action-btn"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleEditComment(c);
+                                }}
+                                title="Szerkesztés"
+                              >
+                                Szerkesztés
+                              </button>
+                              <button
+                                className="btn btn-sm btn-outline-danger comment-action-btn"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDeleteComment(c.id);
+                                }}
+                                title="Törlés"
+                              >
+                                Törlés
+                              </button>
+                            </div>
+                          )}
+                        </div>
                       </div>
-                      <p className="mb-1">{c.comment}</p>
+                      
+                      {editingCommentId === c.id ? (
+                        <div className="mt-2">
+                          <input
+                            type="text"
+                            className="form-control form-control-sm mb-2"
+                            value={editCommentText}
+                            onChange={(e) => setEditCommentText(e.target.value)}
+                            autoFocus
+                          />
+                          <div className="d-flex gap-2">
+                            <Button 
+                              size="sm" 
+                              variant="success" 
+                              onClick={() => handleSaveComment(c.id)}
+                            >
+                              Mentés
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              variant="secondary" 
+                              onClick={handleCancelEdit}
+                            >
+                              Mégse
+                            </Button>
+                          </div>
+                        </div>
+                      ) : (
+                        <p className="mb-1">{c.comment}</p>
+                      )}
 
                       <div className="comment-like d-flex align-items-center gap-1 mt-1">
   {(() => {

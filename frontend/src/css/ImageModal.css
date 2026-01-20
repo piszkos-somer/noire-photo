@@ -256,3 +256,44 @@
     opacity: 0;
   }
 }
+
+/* 🔹 Komment akció gombok (Szerkesztés és Törlés) */
+.comment-action-btn {
+  padding: 4px 8px !important;
+  font-size: 16px !important;
+  line-height: 1 !important;
+  border-radius: 6px !important;
+  transition: all 0.2s ease !important;
+  min-width: 32px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.comment-action-btn:hover {
+  transform: scale(1.1);
+}
+
+.comment-action-btn:active {
+  transform: scale(0.95);
+}
+
+.btn-outline-primary.comment-action-btn {
+  border-color: #007bff !important;
+  color: #007bff !important;
+}
+
+.btn-outline-primary.comment-action-btn:hover {
+  background-color: #007bff !important;
+  color: white !important;
+}
+
+.btn-outline-danger.comment-action-btn {
+  border-color: #dc3545 !important;
+  color: #dc3545 !important;
+}
+
+.btn-outline-danger.comment-action-btn:hover {
+  background-color: #dc3545 !important;
+  color: white !important;
+}

@@ -92,7 +92,9 @@ function EditModal({ show, onHide, image, onSave, onDeleted }) {
       if (data.success) {
         setShowDeleteConfirm(false);
         onHide();
-        navigate("/profile"); // vagy frissítheted a képlistát itt
+        if (onDeleted) {
+          onDeleted(image.id); // Értesíti a parent komponenst a törlésről
+        }
       } else {
         alert(data.error || "Hiba történt a törlés közben.");
       }

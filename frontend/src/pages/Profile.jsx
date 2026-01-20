@@ -30,11 +30,133 @@ function Profile() {
   const [message, setMessage] = useState("");
   const [selectedImage, setSelectedImage] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [comments, setComments] = useState([]);
+  const [newComment, setNewComment] = useState("");
+  const [commentLoading, setCommentLoading] = useState(false);
+  const [likeLoading, setLikeLoading] = useState(null);
   const { user, updateUsername } = useContext(UserContext);
   const navigate = useNavigate();
-  const openViewModal = (img) => {
+  const openViewModal = async (img) => {
     setSelectedImage(img);
     setShowViewModal(true);
+    await fetchComments(img.id);
+  };
+  
+  // 💬 Kommentek lekérése
+  const fetchComments = async (imageId) => {
+    try {
+      const headers = user?.token ? { Authorization: `Bearer ${user.token}` } : {};
+      const res = await fetch(`http://localhost:3001/api/images/${imageId}/comments`, { headers });
+      if (res.status === 401 || res.status === 403) {
+        handleTokenError(res.status, navigate);
+        return;
+      }
+      const data = await res.json();
+      setComments(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error("❌ Kommentek lekérési hiba:", err);
+    }
+  };
+
+  // 💬 Komment küldése
+  const handleCommentSubmit = async () => {
+    if (!newComment.trim() || !selectedImage) return;
+    if (!user?.token) return navigate("/Registration");
+    
+    setCommentLoading(true);
+    try {
+      const res = await fetch(`http://localhost:3001/api/images/${selectedImage.id}/comment`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${user.token}`,
+        },
+        body: JSON.stringify({ text: newComment }),
+      });
+      if (res.status === 401 || res.status === 403) {
+        handleTokenError(res.status, navigate);
+        return;
+      }
+      if (res.ok) {
+        setNewComment("");
+        await fetchComments(selectedImage.id);
+      }
+    } catch (err) {
+      console.error("❌ Komment küldési hiba:", err);
+    } finally {
+      setCommentLoading(false);
+    }
+  };
+
+  // ❤️ Kép vote kezelése
+  const handleImageVote = async (imageId, vote) => {
+    if (!user?.token) return navigate("/Registration");
+    setLikeLoading(imageId);
+    try {
+      const res = await fetch(`http://localhost:3001/api/images/${imageId}/like`, {
+        method: "POST",
+        headers: { 
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${user.token}` 
+        },
+        body: JSON.stringify({ vote })
+      });
+      if (res.status === 401 || res.status === 403) {
+        handleTokenError(res.status, navigate);
+        return;
+      }
+      if (res.ok) {
+        const updated = await res.json();
+        setImages((prev) =>
+          prev.map((img) =>
+            img.id === imageId ? { ...img, upvotes: updated.upvotes, downvotes: updated.downvotes, userVote: updated.userVote } : img
+          )
+        );
+        if (selectedImage?.id === imageId) {
+          setSelectedImage(prev => ({
+            ...prev,
+            upvotes: updated.upvotes,
+            downvotes: updated.downvotes,
+            userVote: updated.userVote
+          }));
+        }
+      }
+    } catch (err) {
+      console.error("❌ Vote fetch hiba:", err);
+    } finally {
+      setLikeLoading(null);
+    }
+  };
+
+  // 💬 Komment vote kezelése
+  const handleCommentVote = async (commentId, vote) => {
+    if (!user?.token) return navigate("/Registration");
+    try {
+      const res = await fetch(`http://localhost:3001/api/comments/${commentId}/like`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${user.token}`,
+        },
+        body: JSON.stringify({ vote }),
+      });
+      if (res.status === 401 || res.status === 403) {
+        handleTokenError(res.status, navigate);
+        return;
+      }
+      if (res.ok) {
+        const updated = await res.json();
+        setComments((prev) =>
+          prev.map((c) =>
+            c.id === commentId
+              ? { ...c, upvotes: updated.upvotes, downvotes: updated.downvotes, userVote: updated.userVote }
+              : c
+          )
+        );
+      }
+    } catch (err) {
+      console.error("❌ Komment vote hiba:", err);
+    }
   };
   
   const handleDeleted = async (deletedId) => {
@@ -186,13 +308,22 @@ function Profile() {
   };
 
   const handleEdit = (img) => {
+    let tagsArray = [];
+    
+    if (img.tags) {
+      if (Array.isArray(img.tags)) {
+        tagsArray = img.tags;
+      } else if (typeof img.tags === "string") {
+        tagsArray = img.tags.split(",").map((t) => t.trim()).filter((t) => t !== "");
+      }
+    }
+    
     setSelectedImage({
       ...img,
-      tags: img.tags
-        ? img.tags.split(",").map((t) => t.trim()).filter((t) => t !== "")
-        : [],
+      tags: tagsArray,
     });
     setShowModal(true);
+    setShowViewModal(false); 
   };
 
   const handleSave = async (updatedImage) => {
@@ -332,6 +463,7 @@ if (res.status === 401 || res.status === 403) {
         image={image}
         onOpen={openViewModal}
         onEdit={handleEdit}
+        onVote={handleImageVote}
       />
     </Col>
   ))}
@@ -342,6 +474,13 @@ if (res.status === 401 || res.status === 403) {
   image={selectedImage}
   onClose={() => setShowViewModal(false)}
   onEdit={handleEdit}
+  comments={comments}
+  newComment={newComment}
+  onCommentChange={setNewComment}
+  onCommentSubmit={handleCommentSubmit}
+  commentLoading={commentLoading}
+  onImageVote={handleImageVote}
+  onCommentVote={handleCommentVote}
 />
 
 

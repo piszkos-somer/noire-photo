@@ -88,6 +88,46 @@ const fetchLatestImages = async () => {
     }
   };
 
+  // ❤️ Kép vote kezelése
+  const handleImageVote = async (imageId, vote) => {
+    if (!token) return navigate("/Registration");
+    setLikeLoading(imageId);
+    try {
+      const res = await fetch(`http://localhost:3001/api/images/${imageId}/like`, {
+        method: "POST",
+        headers: { 
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}` 
+        },
+        body: JSON.stringify({ vote })
+      });
+      if (res.status === 401 || res.status === 403) {
+  handleTokenError(res.status, navigate);
+  return;
+}
+      if (res.ok) {
+        const updated = await res.json();
+        setImages((prev) =>
+          prev.map((img) =>
+            img.id === imageId ? { ...img, upvotes: updated.upvotes, downvotes: updated.downvotes, userVote: updated.userVote } : img
+          )
+        );
+        if (selectedImage?.id === imageId) {
+          setSelectedImage(prev => ({
+            ...prev,
+            upvotes: updated.upvotes,
+            downvotes: updated.downvotes,
+            userVote: updated.userVote
+          }));
+        }
+      }
+    } catch (err) {
+      console.error("❌ Vote fetch hiba:", err);
+    } finally {
+      setLikeLoading(null);
+    }
+  };
+
   // ❤️ Like kezelése
   const handleLike = async (imageId) => {
     if (!token) return navigate("/Registration");
@@ -163,12 +203,16 @@ const fetchLatestImages = async () => {
     }
   };
 
-  const handleCommentLike = async (commentId) => {
+  const handleCommentVote = async (commentId, vote) => {
     if (!token) return navigate("/Registration");
     try {
       const res = await fetch(`http://localhost:3001/api/comments/${commentId}/like`, {
         method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { 
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}` 
+        },
+        body: JSON.stringify({ vote })
       });
       if (res.status === 401 || res.status === 403) {
   handleTokenError(res.status, navigate);
@@ -178,12 +222,12 @@ const fetchLatestImages = async () => {
         const updated = await res.json();
         setComments((prev) =>
           prev.map((c) =>
-            c.id === commentId ? { ...c, likes: updated.likes, isLiked: updated.isLiked } : c
+            c.id === commentId ? { ...c, upvotes: updated.upvotes, downvotes: updated.downvotes, userVote: updated.userVote } : c
           )
         );
       }
     } catch (err) {
-      console.error("❌ Komment like hiba:", err);
+      console.error("❌ Komment vote hiba:", err);
     }
   };
 
@@ -211,6 +255,11 @@ const fetchLatestImages = async () => {
                 placeholder="Keresés cím, leírás, tag vagy feltöltő alapján..."
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    handleSearch();
+                  }
+                }}
               />
               <Form.Select
                 value={filter}
@@ -241,7 +290,7 @@ const fetchLatestImages = async () => {
             <ImageCard
               key={img.id}
               image={img}
-              onLike={handleLike}
+              onVote={handleImageVote}
               onOpen={openModal}
               likeLoading={likeLoading}
             />
@@ -254,14 +303,14 @@ const fetchLatestImages = async () => {
         show={!!selectedImage}
         image={selectedImage}
         onClose={closeModal}
-        onLike={handleLike}
+        onImageVote={handleImageVote}
         likeLoading={likeLoading}
         comments={comments}
         newComment={newComment}
         onCommentChange={(e) => setNewComment(e.target.value)}
         onCommentSubmit={handleCommentSubmit}
         commentLoading={commentLoading}
-        onCommentLike={handleCommentLike}
+        onCommentVote={handleCommentVote}
       />
     </div>
   );

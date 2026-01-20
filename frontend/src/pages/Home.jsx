@@ -33,6 +33,19 @@ function Home() {
   const userData = localStorage.getItem("user");
   const token = userData ? JSON.parse(userData).token : null;
 
+  // JWT token dekódolása a user ID kinyeréséhez
+  const getCurrentUserId = () => {
+    if (!token) return null;
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      return payload.id;
+    } catch (err) {
+      return null;
+    }
+  };
+
+  const currentUserId = getCurrentUserId();
+
   useEffect(() => {
     const fetchForYou = async () => {
       try {
@@ -47,7 +60,11 @@ function Home() {
         }
 
         const data = await res.json();
-        setImages(Array.isArray(data) ? data : []);
+        // Kiszűrjük a saját képeket
+        const filteredImages = Array.isArray(data) 
+          ? data.filter(img => img.user_id !== currentUserId)
+          : [];
+        setImages(filteredImages);
       } catch (err) {
         console.error("Képek lekérési hiba:", err);
       } finally {
@@ -67,7 +84,11 @@ function Home() {
         }
 
         const data = await res.json();
-        setImages(Array.isArray(data) ? data : []);
+        // Kiszűrjük a saját képeket
+        const filteredImages = Array.isArray(data) 
+          ? data.filter(img => img.user_id !== currentUserId)
+          : [];
+        setImages(filteredImages);
       } catch (err) {
         console.error("Követett képek lekérése hiba:", err);
       } finally {

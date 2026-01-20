@@ -16,7 +16,7 @@ app.use("/images", express.static(path.join(__dirname, "images")));
 app.use("/profile-pictures", express.static(path.join(__dirname, "profile-pictures")));
 
 if (!process.env.JWT_SECRET) {
-  console.error("❌ HIBA: JWT_SECRET nincs megadva az .env fájlban!");
+  console.error("HIBA: JWT_SECRET nincs megadva az .env fájlban!");
   process.exit(1);
 }
 
@@ -81,7 +81,7 @@ function verifyToken(req, res, next) {
     req.user = decoded;
     next();
   } catch (err) {
-    console.error("❌ JWT hiba:", err.message);
+    console.error("JWT hiba:", err.message);
     if (err.name === "TokenExpiredError")
       return res.status(401).json({ message: "A bejelentkezés lejárt, kérlek jelentkezz be újra." });
     if (err.name === "JsonWebTokenError")
@@ -108,12 +108,12 @@ app.post("/api/register", async (req, res) => {
         email,
         hashed,
       ]);
-      res.json({ message: "✅ Sikeres regisztráció!" });
+      res.json({ message: "Sikeres regisztráció!" });
     } finally {
       conn.release();
     }
   } catch (err) {
-    console.error("❌ Regisztrációs hiba:", err);
+    console.error("Regisztrációs hiba:", err);
     res.status(500).json({ message: "Szerverhiba regisztráció közben." });
   }
 });
@@ -145,7 +145,7 @@ app.post("/api/login", async (req, res) => {
       conn.release();
     }
   } catch (err) {
-    console.error("❌ Bejelentkezési hiba:", err);
+    console.error("Bejelentkezési hiba:", err);
     res.status(500).json({ message: "Szerverhiba bejelentkezés közben." });
   }
 });
@@ -188,7 +188,7 @@ app.post("/api/upload", verifyToken, upload.single("image"), async (req, res) =>
     res.json({ success: true, imageId });
   } catch (err) {
     await conn.rollback();
-    console.error("❌ Hiba feltöltéskor:", err);
+    console.error("Hiba feltöltéskor:", err);
     res.status(500).json({ error: "Szerverhiba a feltöltés során." });
   } finally {
     conn.release();
@@ -231,7 +231,7 @@ app.get("/api/my-images", verifyToken, async (req, res) => {
 
     res.json(images);
   } catch (err) {
-    console.error("❌ Hiba a képek lekérdezésénél:", err);
+    console.error("Hiba a képek lekérdezésénél:", err);
     res.status(500).json({ error: "Szerverhiba a képek lekérésekor." });
   } finally {
     conn.release();
@@ -266,9 +266,9 @@ app.put("/api/update-profile", verifyToken, async (req, res) => {
   const conn = await pool.getConnection();
   try {
     await conn.execute(`UPDATE users SET ${updates.join(", ")} WHERE id = ?`, params);
-    res.json({ message: "✅ Adatok frissítve!", username });
+    res.json({ message: "Adatok frissítve!", username });
   } catch (err) {
-    console.error("❌ Profil módosítási hiba:", err);
+    console.error("Profil módosítási hiba:", err);
     res.status(500).json({ message: "Szerverhiba." });
   } finally {
     conn.release();
@@ -300,7 +300,7 @@ app.put(
       await conn.execute(query, params);
       res.json({ success: true, message: "Profil frissítve!" });
     } catch (err) {
-      console.error("❌ Profil frissítési hiba:", err);
+      console.error("Profil frissítési hiba:", err);
       res.status(500).json({ error: "Szerverhiba a profil frissítéskor." });
     } finally {
       conn.release();
@@ -353,10 +353,10 @@ app.put("/api/update-image/:id", verifyToken, async (req, res) => {
     }
 
     await conn.commit();
-    res.json({ success: true, message: "✅ Kép és tagek frissítve!" });
+    res.json({ success: true, message: "Kép és tagek frissítve!" });
   } catch (err) {
     await conn.rollback();
-    console.error("❌ Képfrissítési hiba:", err);
+    console.error("Képfrissítési hiba:", err);
     res.status(500).json({ error: "Szerverhiba képfrissítés közben." });
   } finally {
     conn.release();
@@ -376,7 +376,7 @@ app.get("/api/tags/search", verifyToken, async (req, res) => {
     );
     res.json(rows.map((r) => r.tag));
   } catch (err) {
-    console.error("❌ Tag keresési hiba:", err);
+    console.error("Tag keresési hiba:", err);
     res.status(500).json({ error: "Szerverhiba a tag keresésekor." });
   } finally {
     conn.release();
@@ -393,7 +393,7 @@ async function cleanupUnusedTags() {
     if (result.affectedRows > 0)
       console.log(`🧹 ${result.affectedRows} használatlan tag törölve.`);
   } catch (err) {
-    console.error("❌ Tisztítási hiba:", err.message);
+    console.error("Tisztítási hiba:", err.message);
   } finally {
     conn.release();
   }
@@ -413,7 +413,7 @@ app.get("/api/me", verifyToken, async (req, res) => {
       return res.status(404).json({ error: "Felhasználó nem található." });
     res.json(rows[0]);
   } catch (err) {
-    console.error("❌ Profil lekérési hiba:", err);
+    console.error("Profil lekérési hiba:", err);
     res.status(500).json({ error: "Szerverhiba." });
   } finally {
     conn.release();
@@ -478,7 +478,7 @@ app.get("/api/latest-images", async (req, res) => {
 
     res.json(rows);
   } catch (err) {
-    console.error("❌ Hiba képek lekérdezésénél:", err);
+    console.error("Hiba képek lekérdezésénél:", err);
     res.status(500).json({ error: "Szerverhiba." });
   } finally {
     conn.release();
@@ -552,7 +552,7 @@ app.post("/api/images/:id/like", verifyToken, async (req, res) => {
 
     res.json(response);
   } catch (err) {
-    console.error("❌ Kép szavazás hiba:", err);
+    console.error("Kép szavazás hiba:", err);
     res.status(500).json({ error: "Adatbázis hiba a szavazat művelet közben." });
   } finally {
     conn.release();
@@ -624,7 +624,7 @@ app.get("/api/images/:id/comments", async (req, res) => {
 
     res.json(rows);
   } catch (err) {
-    console.error("❌ Komment lekérési hiba:", err);
+    console.error("Komment lekérési hiba:", err);
     res.status(500).json({ error: "Szerverhiba a kommentek lekérdezésénél." });
   } finally {
     conn.release();
@@ -649,8 +649,84 @@ app.post("/api/images/:id/comments", verifyToken, async (req, res) => {
     );
     res.json({ success: true });
   } catch (err) {
-    console.error("❌ Komment mentési hiba:", err);
+    console.error("Komment mentési hiba:", err);
     res.status(500).json({ error: "Szerverhiba a komment mentésénél." });
+  } finally {
+    conn.release();
+  }
+});
+
+// 🔹 Komment szerkesztése
+app.put("/api/comments/:id", verifyToken, async (req, res) => {
+  const commentId = req.params.id;
+  const userId = req.user.id;
+  const { comment } = req.body;
+
+  if (!comment || comment.trim() === "") {
+    return res.status(400).json({ error: "A komment nem lehet üres." });
+  }
+
+  const conn = await pool.getConnection();
+  try {
+    // Ellenőrizzük, hogy a felhasználó a saját kommentjét szerkeszti-e
+    const [commentRows] = await conn.query(
+      "SELECT user_id FROM comments WHERE id = ?",
+      [commentId]
+    );
+
+    if (commentRows.length === 0) {
+      return res.status(404).json({ error: "A komment nem található." });
+    }
+
+    if (commentRows[0].user_id !== userId) {
+      return res.status(403).json({ error: "Csak a saját kommentedet szerkesztheted." });
+    }
+
+    await conn.query(
+      "UPDATE comments SET comment = ? WHERE id = ?",
+      [comment, commentId]
+    );
+
+    res.json({ success: true, message: "Komment sikeresen frissítve." });
+  } catch (err) {
+    console.error("Komment szerkesztési hiba:", err);
+    res.status(500).json({ error: "Szerverhiba a komment szerkesztésénél." });
+  } finally {
+    conn.release();
+  }
+});
+
+// 🔹 Komment törlése
+app.delete("/api/comments/:id", verifyToken, async (req, res) => {
+  const commentId = req.params.id;
+  const userId = req.user.id;
+
+  const conn = await pool.getConnection();
+  try {
+    // Ellenőrizzük, hogy a felhasználó a saját kommentjét törli-e
+    const [commentRows] = await conn.query(
+      "SELECT user_id FROM comments WHERE id = ?",
+      [commentId]
+    );
+
+    if (commentRows.length === 0) {
+      return res.status(404).json({ error: "A komment nem található." });
+    }
+
+    if (commentRows[0].user_id !== userId) {
+      return res.status(403).json({ error: "Csak a saját kommentedet törölheted." });
+    }
+
+    // Töröljük a kommenthez tartozó szavazatokat is
+    await conn.query("DELETE FROM comment_votes WHERE comment_id = ?", [commentId]);
+    
+    // Töröljük a kommentet
+    await conn.query("DELETE FROM comments WHERE id = ?", [commentId]);
+
+    res.json({ success: true, message: "Komment sikeresen törölve." });
+  } catch (err) {
+    console.error("Komment törlési hiba:", err);
+    res.status(500).json({ error: "Szerverhiba a komment törlésénél." });
   } finally {
     conn.release();
   }
@@ -716,7 +792,7 @@ app.post("/api/comments/:id/like", verifyToken, async (req, res) => {
 
     res.json(response);
   } catch (err) {
-    console.error("❌ Komment szavazás hiba:", err);
+    console.error("Komment szavazás hiba:", err);
     res.status(500).json({ error: "Szerverhiba a komment szavazásnál." });
   } finally {
     conn.release();
@@ -736,7 +812,7 @@ app.get("/api/users/:id", async (req, res) => {
       return res.status(404).json({ error: "Felhasználó nem található." });
     res.json(rows[0]);
   } catch (err) {
-    console.error("❌ Felhasználó lekérési hiba:", err);
+    console.error("Felhasználó lekérési hiba:", err);
     res.status(500).json({ error: "Szerverhiba." });
   } finally {
     conn.release();
@@ -800,7 +876,7 @@ app.get("/api/user-images/:id", async (req, res) => {
 
     res.json(rows);
   } catch (err) {
-    console.error("❌ Felhasználó képeinek lekérési hiba:", err);
+    console.error("Felhasználó képeinek lekérési hiba:", err);
     res.status(500).json({ error: "Szerverhiba." });
   } finally {
     conn.release();
@@ -811,6 +887,17 @@ app.get("/api/user-images/:id", async (req, res) => {
 app.get("/api/images/search", async (req, res) => {
   const { q, filter } = req.query;
   const search = q ? `%${q}%` : "%";
+  
+  const authHeader = req.headers.authorization;
+  let userId = null;
+
+  if (authHeader && authHeader.startsWith("Bearer ")) {
+    try {
+      const token = authHeader.split(" ")[1];
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      userId = decoded.id;
+    } catch (err) {}
+  }
 
   const conn = await pool.getConnection();
   try {
@@ -822,6 +909,13 @@ app.get("/api/images/search", async (req, res) => {
   i.url,
   COALESCE(SUM(CASE WHEN iv.vote = 1 THEN 1 ELSE 0 END), 0) AS upvotes,
   COALESCE(SUM(CASE WHEN iv.vote = -1 THEN 1 ELSE 0 END), 0) AS downvotes,
+  CASE
+    WHEN ? IS NOT NULL THEN (
+      SELECT vote FROM image_votes 
+      WHERE image_id = i.id AND user_id = ? LIMIT 1
+    )
+    ELSE 0
+  END AS userVote,
   u.username AS author,
   u.id AS user_id,
   COALESCE(GROUP_CONCAT(t.tag SEPARATOR ','), '') AS tags
@@ -853,14 +947,25 @@ LEFT JOIN image_votes iv ON i.id = iv.image_id
 
     const [rows] =
       filter === "author"
-        ? await conn.query(query, [search])
+        ? await conn.query(query, [userId, userId, search])
         : filter === "tag"
-        ? await conn.query(query, [search])
-        : await conn.query(query, [search, search]);
+        ? await conn.query(query, [userId, userId, search])
+        : await conn.query(query, [userId, userId, search, search]);
+
+    rows.forEach((img) => {
+      img.upvotes = Number(img.upvotes) || 0;
+      img.downvotes = Number(img.downvotes) || 0;
+      img.userVote = img.userVote || 0;
+      img.likes = img.upvotes;
+      img.isLiked = img.userVote === 1;
+      img.tags = img.tags
+        ? img.tags.split(",").filter((t) => t.trim() !== "")
+        : [];
+    });
 
     res.json(rows);
   } catch (err) {
-    console.error("❌ Keresési hiba:", err);
+    console.error("Keresési hiba:", err);
     res.status(500).json({ error: "Szerverhiba keresés közben." });
   } finally {
     conn.release();
@@ -877,7 +982,7 @@ app.get("/api/images/:id/comment-count", async (req, res) => {
     );
     res.json({ count: row.count });
   } catch (err) {
-    console.error("❌ Komment szám lekérési hiba:", err);
+    console.error("Komment szám lekérési hiba:", err);
     res.status(500).json({ error: "Szerverhiba a kommentek számolásakor." });
   } finally {
     conn.release();
@@ -890,7 +995,6 @@ app.delete("/api/images/:id", verifyToken, async (req, res) => {
 
   const conn = await pool.getConnection();
   try {
-    // Ellenőrizzük, hogy a kép tényleg az adott useré
     const [rows] = await conn.query("SELECT url FROM images WHERE id = ? AND user_id = ?", [
       imageId,
       userId,
@@ -898,18 +1002,16 @@ app.delete("/api/images/:id", verifyToken, async (req, res) => {
     if (rows.length === 0)
       return res.status(403).json({ error: "Nincs jogosultság a kép törléséhez." });
 
-    // Fájl törlése a szerverről
     const imagePath = path.join(__dirname, rows[0].url);
     if (fs.existsSync(imagePath)) {
       fs.unlinkSync(imagePath);
     }
 
-    // Kép törlése az adatbázisból (cascade törli a kommenteket és like-okat is)
     await conn.query("DELETE FROM images WHERE id = ? AND user_id = ?", [imageId, userId]);
 
-    res.json({ success: true, message: "✅ A kép sikeresen törölve lett." });
+    res.json({ success: true, message: "A kép sikeresen törölve lett." });
   } catch (err) {
-    console.error("❌ Kép törlési hiba:", err);
+    console.error("Kép törlési hiba:", err);
     res.status(500).json({ error: "Szerverhiba a törlés közben." });
   } finally {
     conn.release();
@@ -947,7 +1049,7 @@ app.post("/api/follow/:id", verifyToken, async (req, res) => {
       return res.json({ following: true });
     }
   } catch (err) {
-    console.error("❌ Követés hiba:", err);
+    console.error("Követés hiba:", err);
     res.status(500).json({ message: "Szerverhiba a követés műveletnél." });
   } finally {
     conn.release();
@@ -966,7 +1068,7 @@ app.get("/api/follow/status/:id", verifyToken, async (req, res) => {
     );
     res.json({ following: rows.length > 0 });
   } catch (err) {
-    console.error("❌ Követés státusz hiba:", err);
+    console.error("Követés státusz hiba:", err);
     res.status(500).json({ message: "Szerverhiba a státusz lekéréskor." });
   } finally {
     conn.release();
@@ -1025,7 +1127,7 @@ app.get("/api/following-images", verifyToken, async (req, res) => {
 
     res.json(rows);
   } catch (err) {
-    console.error("❌ Követett felhasználók képeinek lekérési hiba:", err);
+    console.error("Követett felhasználók képeinek lekérési hiba:", err);
     res.status(500).json({ error: "Szerverhiba." });
   } finally {
     conn.release();
