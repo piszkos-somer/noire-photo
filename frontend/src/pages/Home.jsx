@@ -5,91 +5,16 @@ import ImageCard from "../components/ImageCard";
 import ImageModal from "../components/ImageModal";
 import { motion, AnimatePresence } from "framer-motion";
 import "../css/Home.css";
-import { Heart } from "lucide-react";
 import { handleTokenError } from "../utils/auth";
 
-export const AnimatedHeart = ({ isLiked, onClick, disabled, likeCount }) => {
-  const [animate, setAnimate] = useState(false);
-  const [showSparkle, setShowSparkle] = useState(false);
+export const AnimatedHeart = ({ isLiked, onClick, }) => {
   const prevLiked = useRef(isLiked);
-
-  const handleClick = () => {
-    setAnimate(true);
-    if (!isLiked) {
-      setShowSparkle(true);
-      setTimeout(() => setShowSparkle(false), 500);
-    }
-    onClick();
-    setTimeout(() => setAnimate(false), 500);
-  };
 
   useEffect(() => {
     prevLiked.current = isLiked;
   }, [isLiked]);
 
-  return (
-    <motion.button
-      className="heart-btn-modal relative"
-      onClick={handleClick}
-      disabled={disabled}
-      whileTap={{ scale: 0.9 }}
-      style={{
-        position: "relative",
-        border: "none",
-        background: "none",
-        cursor: disabled ? "not-allowed" : "pointer",
-      }}
-    >
-      <motion.div
-        initial={false}
-        animate={
-          animate
-            ? {
-                scale: isLiked ? [1, 1.4, 1] : [1, 0.7, 1],
-                rotate: isLiked ? [0, 10, -10, 0] : [0, 0, 0, 0],
-              }
-            : { scale: 1, rotate: 0 }
-        }
-        transition={{ duration: 0.4, ease: "easeOut" }}
-      >
-        <Heart
-          size={28}
-          fill={isLiked ? "#e84118" : "none"}
-          color="#e84118"
-          style={{ transition: "fill 0.25s ease" }}
-        />
-      </motion.div>
 
-      <AnimatePresence>
-        {showSparkle && (
-          <motion.span
-            key="sparkle"
-            initial={{ scale: 0, opacity: 1 }}
-            animate={{
-              scale: [0, 1.3, 1],
-              opacity: [1, 0.8, 0],
-              y: [-5, -15, -25],
-            }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.5, ease: "easeOut" }}
-            style={{
-              position: "absolute",
-              top: "-5px",
-              left: "50%",
-              transform: "translateX(-50%)",
-              color: "#ff7675",
-              fontSize: "12px",
-              pointerEvents: "none",
-            }}
-          >
-            ✨
-          </motion.span>
-        )}
-      </AnimatePresence>
-
-      <span className="ms-1">{likeCount}</span>
-    </motion.button>
-  );
 };
 
 function Home() {
@@ -104,27 +29,9 @@ function Home() {
 
   const [feedType, setFeedType] = useState("foryou");
 
-  const INITIAL_ANIMATION_DURATION = 1; 
-  const FEED_SWITCH_DURATION = 0.2; 
-
-  const [isInitialLoad, setIsInitialLoad] = useState(true);
-
-  const transitionSpeed = isInitialLoad
-    ? INITIAL_ANIMATION_DURATION
-    : FEED_SWITCH_DURATION;
-
   const navigate = useNavigate();
   const userData = localStorage.getItem("user");
   const token = userData ? JSON.parse(userData).token : null;
-
-  useEffect(() => {
-    if (!loading) {
-      const t = setTimeout(() => {
-        setIsInitialLoad(false);
-      }, 50);
-      return () => clearTimeout(t);
-    }
-  }, [loading]);
 
   useEffect(() => {
     const fetchForYou = async () => {
@@ -351,25 +258,18 @@ const handleImageVote = async (imageId, vote) => {
 
   return (
     <div className="home-page py-5">
-      {/* Cím */}
-      <motion.h1
-        className="text-center text-light mb-4 szinatmenet"
-        initial={{ opacity: 0, y: -50 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: transitionSpeed }}
-      >
-        Noire Photo Collection
-      </motion.h1>
+      <h1 className="text-center text-light mb-4 szinatmenet">
+  Noire Photo Collection
+</h1>
 
-      <motion.div
+
+      <div
         className="glass-bubble text-center mx-auto mb-4 p-4 rounded-4 shadow-lg"
         initial={{ opacity: 0, y: 40, scale: 0.95 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ duration: transitionSpeed }}
         style={{
           maxWidth: "600px",
           background: "rgba(255, 255, 255, 0.15)",
-          backdropFilter: "blur(10px)",
           color: "black",
         }}
       >
@@ -392,20 +292,18 @@ const handleImageVote = async (imageId, vote) => {
             </Col>
           </Row>
         </Form>
-      </motion.div>
+      </div>
 
-      <motion.div
+      <div
         className="feed-switch-container mx-auto mt-5 mb-5 p-3 rounded-4 glass-switch"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: transitionSpeed }}
         style={{ maxWidth: "500px" }}
       >
         <div className="d-flex justify-content-center gap-3">
           <button
             className={`feed-btn ${feedType === "foryou" ? "active" : ""}`}
             onClick={() => {
-              setIsInitialLoad(false);
               setFeedType("foryou");
             }}
           >
@@ -415,7 +313,6 @@ const handleImageVote = async (imageId, vote) => {
           <button
             className={`feed-btn ${feedType === "following" ? "active" : ""}`}
             onClick={() => {
-              setIsInitialLoad(false);
               setFeedType("following");
             }}
             disabled={!token}
@@ -423,39 +320,19 @@ const handleImageVote = async (imageId, vote) => {
             Követések
           </button>
         </div>
-      </motion.div>
-
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={feedType}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: transitionSpeed }}
-        >
-          <Container className="image-grid">
-            {images.map((img, index) => (
-              <motion.div
-                key={img.id + "-" + feedType}
-                initial={{ opacity: 0, y: 40 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{
-                  delay: index * 0.07,
-                  duration: transitionSpeed,
-                }}
-              >
-                <ImageCard
-                 image={img}
-                  onVote={handleImageVote}          
-                  onOpen={openModal}
-                  likeLoading={likeLoading}
-                />
-
-              </motion.div>
-            ))}
-          </Container>
-        </motion.div>
-      </AnimatePresence>
+      </div>
+      <Container className="image-grid">
+  {images.map((img) => (
+    <div key={img.id}>
+      <ImageCard
+        image={img}
+        onVote={handleImageVote}
+        onOpen={openModal}
+        likeLoading={likeLoading}
+      />
+    </div>
+  ))}
+</Container>
 
       <ImageModal
         show={!!selectedImage}

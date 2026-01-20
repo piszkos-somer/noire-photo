@@ -31,21 +31,20 @@
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-/* 💎 Szürkés, üveges kártya háttér */
 .glass-inner {
   background: rgba(180, 180, 180, 0.25);
   border: 2px solid rgba(255, 255, 255, 0.25);
   border-radius: 22px;
   color: #111;
   width: 100%;
-  height: 100%; /* 💡 kitölti a teljes kártyát */
+  height: 100%;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
-  backdrop-filter: blur(40px) saturate(160%);
-  -webkit-backdrop-filter: blur(40px) saturate(160%);
-  transition: all 0.3s ease;
+  backdrop-filter: blur(14px) saturate(160%);
+  -webkit-backdrop-filter: blur(14px) saturate(160%);
+  transition: box-shadow 0.3s ease;
   position: relative;
   overflow: hidden;
 }
@@ -73,11 +72,25 @@
 }
 
 /* Hover állapot */
-.glass-card:hover .glass-inner {
-  transform: translateY(-5px) scale(1.02);
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
-  background: rgba(160, 160, 160, 0.3);
+.glass-card {
+  will-change: transform;
+  transform: translateZ(0);
 }
+
+.glass-inner {
+  /* NE transition: all; */
+  transition: box-shadow 0.3s ease; /* csak ami muszáj */
+}
+
+.glass-card:hover {
+  transform: translateY(-5px) scale(1.02);
+}
+
+.glass-card:hover .glass-inner {
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+  /* background változást inkább hagyd el, vagy opacity-vel oldd meg */
+}
+
 
 /* ========== KÉPEK ========== */
 .img-wrapper {
@@ -240,4 +253,8 @@
 .comment-icon {
   color: #007bff;
   opacity: 0.8;
+}
+.img-wrapper img {
+  will-change: transform;
+  transform: translateZ(0);
 }
