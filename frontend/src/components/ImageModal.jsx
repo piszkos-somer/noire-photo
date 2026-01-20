@@ -33,6 +33,7 @@ function ImageModal({
   const [localImage, setLocalImage] = useState(image);
 const [showToast, setShowToast] = useState(false);
 const [isFollowing, setIsFollowing] = useState(false);
+
   useEffect(() => {
     setLocalImage(image);
   }, [image]);
@@ -208,7 +209,7 @@ const handleShare = async () => {
       setIsFollowing(data.following);
     }}
   >
-    {isFollowing ? "Követem" : "Követés"}
+    {isFollowing ? "Követés leállítása" : "Követés"}
   </Button>
 )}
 

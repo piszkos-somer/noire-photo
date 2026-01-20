@@ -198,20 +198,36 @@ app.post("/api/upload", verifyToken, upload.single("image"), async (req, res) =>
 app.get("/api/my-images", verifyToken, async (req, res) => {
   const conn = await pool.getConnection();
   try {
+    const userId = req.user.id;
+
     const [images] = await conn.execute(
       `
       SELECT 
-        i.id, i.title, i.description, i.url,
-        COALESCE(GROUP_CONCAT(t.tag SEPARATOR ','), '') AS tags
+        i.id, i.user_id, i.title, i.description, i.url,
+        COALESCE(SUM(CASE WHEN iv.vote = 1 THEN 1 ELSE 0 END), 0) AS upvotes,
+        COALESCE(SUM(CASE WHEN iv.vote = -1 THEN 1 ELSE 0 END), 0) AS downvotes,
+        (
+          SELECT vote FROM image_votes 
+          WHERE image_id = i.id AND user_id = ? LIMIT 1
+        ) AS userVote,
+        COALESCE(GROUP_CONCAT(DISTINCT t.tag SEPARATOR ','), '') AS tags
       FROM images i
       LEFT JOIN image_tags it ON i.id = it.image_id
       LEFT JOIN tags t ON it.tag_id = t.id
+      LEFT JOIN image_votes iv ON i.id = iv.image_id
       WHERE i.user_id = ?
       GROUP BY i.id
       ORDER BY i.id DESC
       `,
-      [req.user.id]
+      [userId, userId]
     );
+
+    images.forEach((img) => {
+      img.upvotes = Number(img.upvotes) || 0;
+      img.downvotes = Number(img.downvotes) || 0;
+      img.userVote = Number(img.userVote) || 0;
+      img.tags = img.tags ? img.tags.split(",").filter((t) => t.trim() !== "") : [];
+    });
 
     res.json(images);
   } catch (err) {
@@ -221,6 +237,7 @@ app.get("/api/my-images", verifyToken, async (req, res) => {
     conn.release();
   }
 });
+
 
 app.put("/api/update-profile", verifyToken, async (req, res) => {
   const { username, email, password } = req.body;

@@ -37,7 +37,25 @@ function Profile() {
     setShowViewModal(true);
   };
   
-
+  const handleDeleted = async (deletedId) => {
+    // A) leggyorsabb: helyben kiszűrjük
+    setImages((prev) => prev.filter((img) => img.id !== deletedId));
+    setMessage("🗑️ Kép törölve!");
+    
+    // opcionális: zárjuk a modalt és nullázzuk a kiválasztott képet
+    setShowModal(false);
+    setSelectedImage(null);
+  
+    // B) ha biztosra akarsz menni: refetch (kommenteld ki az A-t, és használd ezt)
+    /*
+    const refresh = await fetch("http://localhost:3001/api/my-images", {
+      headers: { Authorization: `Bearer ${user.token}` },
+    });
+    const newData = await refresh.json();
+    if (Array.isArray(newData)) setImages(newData);
+    */
+  };
+  
   // 🔹 Betöltéskor lekérjük a profil adatokat
   useEffect(() => {
     if (!user?.token) {
@@ -83,7 +101,6 @@ function Profile() {
     fetchImages();
   }, [user, navigate]);
 
-  // 🔹 Profil frissítése (bio + kép)
   const handleProfileUpdate = async (e) => {
     e.preventDefault();
     const formData = new FormData();
@@ -103,7 +120,7 @@ function Profile() {
       const data = await res.json();
 
       if (res.ok) {
-        setMessage("✅ Profil frissítve!");
+        setMessage("Profil frissítve!");
         const refreshed = await fetch("http://localhost:3001/api/me", {
           headers: { Authorization: `Bearer ${user.token}` },
         });
@@ -116,15 +133,14 @@ function Profile() {
         if (newData.profile_picture)
           setPreview(`http://localhost:3001${newData.profile_picture}`);
       } else {
-        setMessage(data.error || "❌ Hiba a frissítés közben.");
+        setMessage(data.error || "Hiba a frissítés közben.");
       }
     } catch (err) {
       console.error("Profil frissítési hiba:", err);
-      setMessage("❌ Szerverhiba a profil mentésekor.");
+      setMessage("Szerverhiba a profil mentésekor.");
     }
   };
 
-  // 🔹 Account adatok frissítése
   const handleAccountUpdate = async (e) => {
     e.preventDefault();
     try {
@@ -157,7 +173,7 @@ function Profile() {
       setNewPassword("");
     } catch (err) {
       console.error(err);
-      setMessage("❌ Hiba történt a frissítés közben.");
+      setMessage("Hiba történt a frissítés közben.");
     }
   };
 
@@ -169,7 +185,6 @@ function Profile() {
     }
   };
 
-  // 🔹 Modal
   const handleEdit = (img) => {
     setSelectedImage({
       ...img,
@@ -204,7 +219,7 @@ if (res.status === 401 || res.status === 403) {
       const data = await res.json();
 
       if (res.ok) {
-        setMessage("✅ Kép sikeresen frissítve!");
+        setMessage("Kép sikeresen frissítve!");
         setShowModal(false);
         const refresh = await fetch("http://localhost:3001/api/my-images", {
           headers: { Authorization: `Bearer ${user.token}` },
@@ -216,11 +231,11 @@ if (res.status === 401 || res.status === 403) {
         const newData = await refresh.json();
         if (Array.isArray(newData)) setImages(newData);
       } else {
-        setMessage(`❌ Hiba: ${data.error || data.message}`);
+        setMessage(`Hiba: ${data.error || data.message}`);
       }
     } catch (err) {
       console.error("Képszerkesztési hiba:", err);
-      setMessage("❌ Szerverhiba a frissítés közben.");
+      setMessage("Szerverhiba a frissítés közben.");
     }
   };
 
@@ -231,7 +246,6 @@ if (res.status === 401 || res.status === 403) {
       {message && <Alert variant="info" className="text-center">{message}</Alert>}
 
       <div className="profile-section d-flex justify-content-center align-items-start mb-5">
-        {/* BAL OLDAL */}
         <div className="profile-left text-center me-5 pe-5 border-end">
           <Image
             src={preview || "/profile-pictures/default.png"}
@@ -264,7 +278,6 @@ if (res.status === 401 || res.status === 403) {
           </Form>
         </div>
 
-        {/* JOBB OLDAL */}
         <div className="profile-right ps-5" style={{ maxWidth: "500px", width: "100%" }}>
           <Form onSubmit={handleAccountUpdate}>
             <Form.Group className="mb-3">
@@ -332,12 +345,14 @@ if (res.status === 401 || res.status === 403) {
 />
 
 
-      <EditModal
-        show={showModal}
-        onHide={() => setShowModal(false)}
-        image={selectedImage}
-        onSave={handleSave}
-      />
+<EditModal
+  show={showModal}
+  onHide={() => setShowModal(false)}
+  image={selectedImage}
+  onSave={handleSave}
+  onDeleted={handleDeleted}
+/>
+
     </Container>
   );
 }

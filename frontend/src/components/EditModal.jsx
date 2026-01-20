@@ -4,7 +4,7 @@ import "../css/EditModal.css";
 import { getAuthHeader, handleTokenError } from "../utils/auth";
 import { useNavigate } from "react-router-dom";
 
-function EditModal({ show, onHide, image, onSave }) {
+function EditModal({ show, onHide, image, onSave, onDeleted }) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [tags, setTags] = useState([]);
@@ -92,7 +92,7 @@ function EditModal({ show, onHide, image, onSave }) {
       if (data.success) {
         setShowDeleteConfirm(false);
         onHide();
-        navigate("/"); // vagy frissítheted a képlistát itt
+        navigate("/profile"); // vagy frissítheted a képlistát itt
       } else {
         alert(data.error || "Hiba történt a törlés közben.");
       }
@@ -100,6 +100,7 @@ function EditModal({ show, onHide, image, onSave }) {
       console.error("Törlési hiba:", err);
       alert("Szerverhiba a törlés közben.");
     }
+    
   };
 
   if (!show || !image) return null;
