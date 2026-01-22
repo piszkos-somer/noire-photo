@@ -37,6 +37,7 @@ function Profile() {
   const { user, updateUsername } = useContext(UserContext);
   const navigate = useNavigate();
   const openViewModal = async (img) => {
+    setNewComment("");
     setSelectedImage(img);
     setShowViewModal(true);
     await fetchComments(img.id);
@@ -476,7 +477,14 @@ if (res.status === 401 || res.status === 403) {
   onEdit={handleEdit}
   comments={comments}
   newComment={newComment}
-  onCommentChange={setNewComment}
+  onCommentChange={(v) => {
+    if (v && typeof v === "object" && "target" in v) {
+      setNewComment(v.target.value ?? "");
+      return;
+    }
+    setNewComment(typeof v === "string" ? v : "");
+  }}
+  
   onCommentSubmit={handleCommentSubmit}
   commentLoading={commentLoading}
   onImageVote={handleImageVote}

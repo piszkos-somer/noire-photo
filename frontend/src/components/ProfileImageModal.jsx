@@ -479,12 +479,13 @@ const handleShare = async () => {
                       {editingCommentId === c.id ? (
                         <div className="mt-2">
                           <input
-                            type="text"
-                            className="form-control form-control-sm mb-2"
-                            value={editCommentText}
-                            onChange={(e) => setEditCommentText(e.target.value)}
-                            autoFocus
-                          />
+  type="text"
+  className="form-control"
+  placeholder="Írj egy kommentet..."
+  value={newComment ?? ""}
+  onChange={(e) => onCommentChange?.(e.target.value)}
+/>
+
                           <div className="d-flex gap-2">
                             <Button 
                               size="sm" 
