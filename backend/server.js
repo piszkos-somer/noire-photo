@@ -1134,5 +1134,135 @@ app.get("/api/following-images", verifyToken, async (req, res) => {
   }
 });
 
+app.get("/api/images", async (req, res) => {
+  const authHeader = req.headers.authorization;
+  let userId = null;
+
+  if (authHeader && authHeader.startsWith("Bearer ")) {
+    try {
+      const token = authHeader.split(" ")[1];
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      userId = decoded.id;
+    } catch (err) {}
+  }
+
+  const conn = await pool.getConnection();
+  try {
+    const [rows] = await conn.query(
+      `
+      SELECT 
+        i.id,
+        i.user_id,
+        i.title,
+        i.description,
+        i.url,
+        COALESCE(SUM(CASE WHEN iv.vote = 1 THEN 1 ELSE 0 END), 0) AS upvotes,
+        COALESCE(SUM(CASE WHEN iv.vote = -1 THEN 1 ELSE 0 END), 0) AS downvotes,
+        CASE
+          WHEN ? IS NOT NULL THEN (
+            SELECT vote FROM image_votes 
+            WHERE image_id = i.id AND user_id = ? LIMIT 1
+          )
+          ELSE 0
+        END AS userVote,
+        u.username AS author,
+        COALESCE(GROUP_CONCAT(t.tag SEPARATOR ','), '') AS tags
+      FROM images i
+      JOIN users u ON i.user_id = u.id
+      LEFT JOIN image_tags it ON i.id = it.image_id
+      LEFT JOIN tags t ON it.tag_id = t.id
+      LEFT JOIN image_votes iv ON i.id = iv.image_id
+      GROUP BY i.id
+      ORDER BY i.id DESC
+      `,
+      [userId, userId]
+    );
+
+    rows.forEach((img) => {
+      img.upvotes = Number(img.upvotes) || 0;
+      img.downvotes = Number(img.downvotes) || 0;
+      img.userVote = img.userVote || 0;
+      img.likes = img.upvotes;
+      img.isLiked = img.userVote === 1;
+      img.tags = img.tags
+        ? img.tags.split(",").filter((t) => t.trim() !== "")
+        : [];
+    });
+
+    res.json(rows);
+  } catch (err) {
+    console.error("Hiba az összes kép lekérdezésénél:", err);
+    res.status(500).json({ error: "Szerverhiba." });
+  } finally {
+    conn.release();
+  }
+});
+
+app.get("/api/random-images", async (req, res) => {
+  const authHeader = req.headers.authorization;
+  let userId = null;
+
+  if (authHeader && authHeader.startsWith("Bearer ")) {
+    try {
+      const token = authHeader.split(" ")[1];
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      userId = decoded.id;
+    } catch (err) {}
+  }
+
+  const conn = await pool.getConnection();
+  try {
+    const [rows] = await conn.query(
+      `
+      SELECT 
+        i.id,
+        i.user_id,
+        i.title,
+        i.description,
+        i.url,
+        COALESCE(SUM(CASE WHEN iv.vote = 1 THEN 1 ELSE 0 END), 0) AS upvotes,
+        COALESCE(SUM(CASE WHEN iv.vote = -1 THEN 1 ELSE 0 END), 0) AS downvotes,
+        CASE
+          WHEN ? IS NOT NULL THEN (
+            SELECT vote FROM image_votes 
+            WHERE image_id = i.id AND user_id = ? LIMIT 1
+          )
+          ELSE 0
+        END AS userVote,
+        u.username AS author,
+        COALESCE(GROUP_CONCAT(t.tag SEPARATOR ','), '') AS tags
+      FROM images i
+      JOIN users u ON i.user_id = u.id
+      LEFT JOIN image_tags it ON i.id = it.image_id
+      LEFT JOIN tags t ON it.tag_id = t.id
+      LEFT JOIN image_votes iv ON i.id = iv.image_id
+      WHERE i.user_id != ? OR ? IS NULL
+      GROUP BY i.id
+      ORDER BY RAND()
+      LIMIT 12
+      `,
+      [userId, userId, userId, userId]
+    );
+
+    rows.forEach((img) => {
+      img.upvotes = Number(img.upvotes) || 0;
+      img.downvotes = Number(img.downvotes) || 0;
+      img.userVote = img.userVote || 0;
+      img.likes = img.upvotes;
+      img.isLiked = img.userVote === 1;
+      img.tags = img.tags
+        ? img.tags.split(",").filter((t) => t.trim() !== "")
+        : [];
+    });
+
+    res.json(rows);
+  } catch (err) {
+    console.error("Hiba a random képek lekérdezésénél:", err);
+    res.status(500).json({ error: "Szerverhiba." });
+  } finally {
+    conn.release();
+  }
+});
+
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => console.log(`Szerver fut a ${PORT} porton!`));

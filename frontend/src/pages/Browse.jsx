@@ -43,6 +43,23 @@ const fetchLatestImages = async () => {
   }
 };
 
+const fetchAllImages = async () => {
+  setLoading(true);
+  try {
+    const headers = token ? { Authorization: `Bearer ${token}` } : {};
+    const res = await fetch("http://localhost:3001/api/images", { headers });
+    if (res.status === 401 || res.status === 403) {
+      handleTokenError(res.status, navigate);
+      return;
+    }
+    const data = await res.json();
+    setImages(Array.isArray(data) ? data : []);
+  } catch (err) {
+    console.error("❌ Összes kép lekérési hiba:", err);
+  } finally {
+    setLoading(false);
+  }
+};
 
   // Ha URL-ből jön egy tag
   useEffect(() => {
@@ -65,6 +82,9 @@ const fetchLatestImages = async () => {
   }
 }, [tag, location.search]);
 
+useEffect(() => {
+  fetchAllImages();
+}, []);
 
   // 🔍 Keresés backendről
   const handleSearch = async (q = query, f = filter) => {

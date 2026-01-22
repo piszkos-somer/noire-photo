@@ -47,58 +47,26 @@ function Home() {
   const currentUserId = getCurrentUserId();
 
   useEffect(() => {
-    const fetchForYou = async () => {
+    const fetchRandomImages = async () => {
+      setLoading(true);
       try {
         const headers = token ? { Authorization: `Bearer ${token}` } : {};
-        const res = await fetch("http://localhost:3001/api/latest-images", {
-          headers,
-        });
-
+        const res = await fetch("http://localhost:3001/api/random-images", { headers });
         if (res.status === 401 || res.status === 403) {
           handleTokenError(res.status, navigate);
           return;
         }
-
         const data = await res.json();
-        // Kiszűrjük a saját képeket
-        const filteredImages = Array.isArray(data) 
-          ? data.filter(img => img.user_id !== currentUserId)
-          : [];
-        setImages(filteredImages);
+        setImages(Array.isArray(data) ? data : []);
       } catch (err) {
-        console.error("Képek lekérési hiba:", err);
+        console.error("Random képek lekérési hiba:", err);
       } finally {
         setLoading(false);
       }
     };
 
-    const fetchFollowing = async () => {
-      try {
-        const res = await fetch("http://localhost:3001/api/following-images", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-
-        if (res.status === 401 || res.status === 403) {
-          handleTokenError(res.status, navigate);
-          return;
-        }
-
-        const data = await res.json();
-        // Kiszűrjük a saját képeket
-        const filteredImages = Array.isArray(data) 
-          ? data.filter(img => img.user_id !== currentUserId)
-          : [];
-        setImages(filteredImages);
-      } catch (err) {
-        console.error("Követett képek lekérése hiba:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (feedType === "foryou") fetchForYou();
-    else if (token) fetchFollowing();
-  }, [token, feedType, navigate]);
+    fetchRandomImages();
+  }, [token, navigate]);
 
 const handleImageVote = async (imageId, vote) => {
   if (!token) return navigate("/Registration");
