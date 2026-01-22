@@ -22,6 +22,7 @@ function ImageModal({
   onCommentSubmit,
   commentLoading,
   onCommentVote,
+  
 }) {
 
   const navigate = useNavigate();

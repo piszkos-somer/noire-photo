@@ -204,6 +204,7 @@ app.get("/api/my-images", verifyToken, async (req, res) => {
       `
       SELECT 
         i.id, i.user_id, i.title, i.description, i.url,
+        u.username AS author,
         COALESCE(SUM(CASE WHEN iv.vote = 1 THEN 1 ELSE 0 END), 0) AS upvotes,
         COALESCE(SUM(CASE WHEN iv.vote = -1 THEN 1 ELSE 0 END), 0) AS downvotes,
         (
@@ -212,6 +213,7 @@ app.get("/api/my-images", verifyToken, async (req, res) => {
         ) AS userVote,
         COALESCE(GROUP_CONCAT(DISTINCT t.tag SEPARATOR ','), '') AS tags
       FROM images i
+      JOIN users u ON i.user_id = u.id
       LEFT JOIN image_tags it ON i.id = it.image_id
       LEFT JOIN tags t ON it.tag_id = t.id
       LEFT JOIN image_votes iv ON i.id = iv.image_id
@@ -227,6 +229,8 @@ app.get("/api/my-images", verifyToken, async (req, res) => {
       img.downvotes = Number(img.downvotes) || 0;
       img.userVote = Number(img.userVote) || 0;
       img.tags = img.tags ? img.tags.split(",").filter((t) => t.trim() !== "") : [];
+      img.likes = img.upvotes;
+      img.isLiked = img.userVote === 1;
     });
 
     res.json(images);
@@ -237,6 +241,7 @@ app.get("/api/my-images", verifyToken, async (req, res) => {
     conn.release();
   }
 });
+
 
 
 app.put("/api/update-profile", verifyToken, async (req, res) => {
