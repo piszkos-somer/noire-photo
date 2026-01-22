@@ -63,31 +63,42 @@ function Profile() {
   const handleCommentSubmit = async () => {
     if (!newComment.trim() || !selectedImage) return;
     if (!user?.token) return navigate("/Registration");
-    
+  
     setCommentLoading(true);
     try {
-      const res = await fetch(`http://localhost:3001/api/images/${selectedImage.id}/comment`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${user.token}`,
-        },
-        body: JSON.stringify({ text: newComment }),
-      });
+      const res = await fetch(
+        `http://localhost:3001/api/images/${selectedImage.id}/comments`, // ✅ comments (többes)
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${user.token}`,
+          },
+          body: JSON.stringify({ comment: newComment }), // ✅ comment kulcs
+        }
+      );
+  
       if (res.status === 401 || res.status === 403) {
         handleTokenError(res.status, navigate);
         return;
       }
-      if (res.ok) {
-        setNewComment("");
-        await fetchComments(selectedImage.id);
+  
+      const data = await res.json().catch(() => ({}));
+  
+      if (!res.ok) {
+        console.error("Komment küldés hiba:", data);
+        return;
       }
+  
+      setNewComment("");
+      await fetchComments(selectedImage.id);
     } catch (err) {
       console.error("❌ Komment küldési hiba:", err);
     } finally {
       setCommentLoading(false);
     }
   };
+  
 
   // ❤️ Kép vote kezelése
   const handleImageVote = async (imageId, vote) => {
