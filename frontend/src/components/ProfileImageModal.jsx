@@ -398,170 +398,168 @@ const handleShare = async () => {
           </p>
 
           <div className="comment-section mt-5 px-2 px-md-4 pb-4">
-            <h5 className="mb-3">Hozzászólások</h5>
+  <h5 className="mb-3">Hozzászólások</h5>
 
-            <div className="d-flex flex-column flex-sm-row gap-2 mb-3">
-            <input
-  type="text"
-  className="form-control"
-  placeholder="Írj egy kommentet..."
-  value={newComment || ""}
-  onChange={onCommentChange || (() => {})}
-/>
+  <div className="d-flex flex-column flex-sm-row gap-2 mb-3">
+    <input
+      type="text"
+      className="form-control"
+      placeholder="Írj egy kommentet..."
+      value={newComment || ""}
+      onChange={onCommentChange}
+    />
+    <Button
+      variant="outline-light"
+      onClick={onCommentSubmit}
+      disabled={commentLoading}
+      style={{ minWidth: "100px" }}
+    >
+      Küldés
+    </Button>
+  </div>
 
-              <Button
-                variant="outline-light"
-                onClick={onCommentSubmit}
-                disabled={commentLoading}
-                style={{ minWidth: "100px" }}
+  {!comments || comments.length === 0 ? (
+    <p className="text-muted">Még nincs komment ehhez a képhez.</p>
+  ) : (
+    comments.map((c) => (
+      <div
+        key={c.id}
+        className="comment-item glass-comment mb-3 p-3 rounded-3"
+      >
+        <div className="d-flex flex-column flex-sm-row align-items-start">
+          <img
+            src={`http://localhost:3001${c.profile_picture}`}
+            alt={c.username}
+            className="rounded-circle me-3 mb-2 mb-sm-0"
+            width="40"
+            height="40"
+            style={{ cursor: "pointer", flexShrink: 0 }}
+            onClick={() => handleUserClick(c.user_id)}
+          />
+          <div className="flex-grow-1 w-100">
+            <div className="d-flex flex-column flex-sm-row justify-content-between align-items-start gap-2">
+              <strong
+                style={{ cursor: "pointer" }}
+                onClick={() => handleUserClick(c.user_id)}
               >
-                Küldés
-              </Button>
+                {c.username}
+              </strong>
+              <div className="d-flex flex-wrap align-items-center gap-2">
+                <small className="text-muted text-nowrap">
+                  {new Date(c.created_at).toLocaleString("hu-HU")}
+                </small>
+                {c.user_id === loggedInId && (
+                  <div className="d-flex gap-1">
+                    <button
+                      className="btn btn-sm btn-outline-primary comment-action-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleEditComment(c);
+                      }}
+                      title="Szerkesztés"
+                    >
+                      Szerkesztés
+                    </button>
+                    <button
+                      className="btn btn-sm btn-outline-danger comment-action-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteComment(c.id);
+                      }}
+                      title="Törlés"
+                    >
+                      Törlés
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
 
-            {!comments || comments.length === 0 ? (
-              <p className="text-muted">Még nincs komment ehhez a képhez.</p>
+            {editingCommentId === c.id ? (
+              <div className="mt-2">
+                <input
+                  type="text"
+                  className="form-control form-control-sm mb-2"
+                  value={editCommentText}
+                  onChange={(e) => setEditCommentText(e.target.value)}
+                  autoFocus
+                />
+                <div className="d-flex gap-2">
+                  <Button
+                    size="sm"
+                    variant="success"
+                    onClick={() => handleSaveComment(c.id)}
+                  >
+                    Mentés
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    onClick={handleCancelEdit}
+                  >
+                    Mégse
+                  </Button>
+                </div>
+              </div>
             ) : (
-              comments.map((c) => (
-                <div
-                  key={c.id}
-                  className="comment-item glass-comment mb-3 p-3 rounded-3"
-                >
-                  <div className="d-flex flex-column flex-sm-row align-items-start">
-                    <img
-                      src={`http://localhost:3001${c.profile_picture}`}
-                      alt={c.username}
-                      className="rounded-circle me-3 mb-2 mb-sm-0"
-                      width="40"
-                      height="40"
-                      style={{ cursor: "pointer", flexShrink: 0 }}
-                      onClick={() => handleUserClick(c.user_id)}
-                    />
-                    <div className="flex-grow-1 w-100">
-                      <div className="d-flex flex-column flex-sm-row justify-content-between align-items-start gap-2">
-                        <strong
-                          style={{ cursor: "pointer" }}
-                          onClick={() => handleUserClick(c.user_id)}
-                        >
-                          {c.username}
-                        </strong>
-                        <div className="d-flex flex-wrap align-items-center gap-2">
-                          <small className="text-muted text-nowrap">
-                            {new Date(c.created_at).toLocaleString("hu-HU")}
-                          </small>
-                          {c.user_id === loggedInId && (
-                            <div className="d-flex gap-1">
-                              <button
-                                className="btn btn-sm btn-outline-primary comment-action-btn"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleEditComment(c);
-                                }}
-                                title="Szerkesztés"
-                              >
-                                ✏️
-                              </button>
-                              <button
-                                className="btn btn-sm btn-outline-danger comment-action-btn"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleDeleteComment(c.id);
-                                }}
-                                title="Törlés"
-                              >
-                                🗑️
-                              </button>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                      
-                      {editingCommentId === c.id ? (
-                        <div className="mt-2">
-                          <input
-  type="text"
-  className="form-control"
-  placeholder="Írj egy kommentet..."
-  value={newComment ?? ""}
-  onChange={(e) => onCommentChange?.(e.target.value)}
-/>
+              <p className="mb-1">{c.comment}</p>
+            )}
 
-                          <div className="d-flex gap-2">
-                            <Button 
-                              size="sm" 
-                              variant="success" 
-                              onClick={() => handleSaveComment(c.id)}
-                            >
-                              Mentés
-                            </Button>
-                            <Button 
-                              size="sm" 
-                              variant="secondary" 
-                              onClick={handleCancelEdit}
-                            >
-                              Mégse
-                            </Button>
-                          </div>
-                        </div>
-                      ) : (
-                        <p className="mb-1">{c.comment}</p>
-                      )}
+            <div className="comment-like d-flex align-items-center gap-1 mt-1">
+              {(() => {
+                const up = c.upvotes || c.likes || 0;
+                const down = c.downvotes || 0;
+                const total = up + down;
+                const upPercent = total ? Math.round((up / total) * 100) : 0;
+                const downPercent = total ? 100 - upPercent : 0;
+                const userVote = c.userVote || (c.isLiked ? 1 : 0);
 
-                      <div className="comment-like d-flex align-items-center gap-1 mt-1">
-  {(() => {
-    const up = c.upvotes || c.likes || 0;
-    const down = c.downvotes || 0;
-    const total = up + down;
-    const upPercent = total ? Math.round((up / total) * 100) : 0;
-    const downPercent = total ? 100 - upPercent : 0;
-    const userVote = c.userVote || (c.isLiked ? 1 : 0);
+                return (
+                  <>
+                    <button
+                      type="button"
+                      className="btn btn-sm p-0"
+                      disabled={likeLoading === c.id}
+                      onClick={() => {
+                        const nextVote = userVote === 1 ? 0 : 1;
+                        onCommentVote(c.id, nextVote);
+                      }}
+                    >
+                      <ArrowUp
+                        size={18}
+                        color={userVote === 1 ? "#16a34a" : "#555"}
+                        fill={userVote === 1 ? "#16a34a" : "none"}
+                      />
+                    </button>
+                    <span className="small me-1">{upPercent}%</span>
 
-    return (
-      <>
-        <button
-          type="button"
-          className="btn btn-sm p-0"
-          disabled={likeLoading === c.id}
-          onClick={() => {
-            const nextVote = userVote === 1 ? 0 : 1;
-            onCommentVote(c.id, nextVote);
-          }}
-        >
-          <ArrowUp
-            size={18}
-            color={userVote === 1 ? "#16a34a" : "#555"}
-            fill={userVote === 1 ? "#16a34a" : "none"}
-          />
-        </button>
-        <span className="small me-1">{upPercent}%</span>
-
-        <button
-          type="button"
-          className="btn btn-sm p-0"
-          disabled={likeLoading === c.id}
-          onClick={() => {
-            const nextVote = userVote === -1 ? 0 : -1;
-            onCommentVote(c.id, nextVote);
-          }}
-        >
-          <ArrowDown
-            size={18}
-            color={userVote === -1 ? "#dc2626" : "#555"}
-            fill={userVote === -1 ? "#dc2626" : "none"}
-          />
-        </button>
-        <span className="small">{downPercent}%</span>
-      </>
-    );
-  })()}
+                    <button
+                      type="button"
+                      className="btn btn-sm p-0"
+                      disabled={likeLoading === c.id}
+                      onClick={() => {
+                        const nextVote = userVote === -1 ? 0 : -1;
+                        onCommentVote(c.id, nextVote);
+                      }}
+                    >
+                      <ArrowDown
+                        size={18}
+                        color={userVote === -1 ? "#dc2626" : "#555"}
+                        fill={userVote === -1 ? "#dc2626" : "none"}
+                      />
+                    </button>
+                    <span className="small">{downPercent}%</span>
+                  </>
+                );
+              })()}
+            </div>
+          </div>
+        </div>
+      </div>
+    ))
+  )}
 </div>
 
-                    </div>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
 
           <div className="text-end mt-3 d-flex justify-content-end gap-2">
   <Button variant="outline-light" onClick={onClose}>
