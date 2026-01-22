@@ -200,6 +200,43 @@ function Registration() {
   eltávolítására, valamint a szabályszegő felhasználók korlátozására vagy
   kizárására.
 </p>
+<h5>Személyiségi jogok és kereskedelmi felhasználás korlátozása</h5>
+
+<p>
+  Az oldalon elérhető képek és videók feltöltése során a feltöltők kötelesek
+  törekedni arra, hogy a tartalmak ne ábrázoljanak felismerhető személyeket
+  olyan módon, amely sértő, megtévesztő, vagy a személy jó hírnevét,
+  méltóságát, illetve magánszféráját sértheti.
+</p>
+
+<p>
+  A felhasználó tudomásul veszi, hogy a képeken esetlegesen szereplő személyek,
+  márkák, logók vagy egyéb megjelölések megjelenése nem értelmezhető úgy,
+  hogy azok a felhasználó termékét, szolgáltatását vagy tevékenységét
+  támogatnák, jóváhagynák vagy népszerűsítenék.
+</p>
+
+<ul>
+  <li>
+    Tilos a képek vagy videók eredeti, változatlan formában történő
+    értékesítése vagy fizikai termékként történő forgalmazása
+    (különösen: plakát, nyomat, vászonkép, ajándéktárgy),
+    a jogosult előzetes engedélye nélkül.
+  </li>
+  <li>
+    Tilos a képekben szereplő személyek, illetve megjelenő brandek, logók
+    vagy termékek felhasználása oly módon, hogy az a termék vagy szolgáltatás
+    reklámozásának, támogatásának vagy ajánlásának látszatát keltse.
+  </li>
+</ul>
+
+<p>
+  A felhasználó a tartalmak felhasználása során köteles betartani a vonatkozó
+  személyiségi jogi, adatvédelmi és szerzői jogi szabályokat. Amennyiben a
+  felhasználás harmadik személy jogát sérti, azért a felelősség a felhasználót
+  terheli.
+</p>
+
   </Modal.Body>
 </Modal>
 

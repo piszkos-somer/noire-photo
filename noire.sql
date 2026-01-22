@@ -2,10 +2,10 @@
 -- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- Gép: 127.0.0.1
--- Létrehozás ideje: 2026. Jan 21. 23:35
--- Kiszolgáló verziója: 10.4.32-MariaDB
--- PHP verzió: 8.2.12
+-- Gép: 127.0.0.1:3307
+-- Létrehozás ideje: 2026. Jan 22. 08:30
+-- Kiszolgáló verziója: 10.4.28-MariaDB
+-- PHP verzió: 8.2.4
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -68,7 +68,10 @@ INSERT INTO `comments` (`id`, `user_id`, `image_id`, `comment`, `upload_date`) V
 (35, 9, 10, 'Félek a teknősöktől :(', '2026-01-21 23:12:08'),
 (36, 9, 8, 'Ugyan itt voltam. Nagyon szép!', '2026-01-21 23:13:03'),
 (37, 10, 36, 'Szerintem nagyon feltűnően be van állítva minden ez kicsit fantáziaromboló.', '2026-01-21 23:33:14'),
-(38, 10, 10, 'Egy kevés utómunka és tökéletes.', '2026-01-21 23:34:19');
+(38, 10, 10, 'Egy kevés utómunka és tökéletes.', '2026-01-21 23:34:19'),
+(39, 1, 42, 'Nagyon király hangulata van a képnek, kifejezetten találó.', '2026-01-22 08:18:10'),
+(40, 1, 41, 'Ezzel a fekete fehér fileterrel vagány lett', '2026-01-22 08:18:48'),
+(41, 1, 30, 'Fantörpisztikus!', '2026-01-22 08:21:43');
 
 -- --------------------------------------------------------
 
@@ -119,6 +122,7 @@ CREATE TABLE `follows` (
 INSERT INTO `follows` (`id`, `follower_id`, `following_id`) VALUES
 (23, 1, 3),
 (20, 1, 4),
+(31, 1, 10),
 (24, 3, 2),
 (28, 7, 3),
 (25, 7, 4),
@@ -389,7 +393,20 @@ INSERT INTO `image_votes` (`id`, `user_id`, `image_id`, `vote`, `created_at`) VA
 (260, 10, 10, 1, '2026-01-21 22:33:39'),
 (261, 10, 6, 1, '2026-01-21 22:34:23'),
 (262, 10, 16, 1, '2026-01-21 22:34:37'),
-(265, 10, 35, 1, '2026-01-21 22:35:12');
+(265, 10, 35, 1, '2026-01-21 22:35:12'),
+(266, 1, 43, 1, '2026-01-22 07:17:29'),
+(267, 1, 42, 1, '2026-01-22 07:17:30'),
+(268, 1, 41, -1, '2026-01-22 07:17:32'),
+(269, 1, 39, 1, '2026-01-22 07:17:33'),
+(270, 1, 38, -1, '2026-01-22 07:17:35'),
+(271, 1, 35, 1, '2026-01-22 07:17:37'),
+(272, 1, 36, 1, '2026-01-22 07:17:38'),
+(273, 1, 37, 1, '2026-01-22 07:17:39'),
+(274, 1, 33, -1, '2026-01-22 07:17:41'),
+(275, 1, 34, 1, '2026-01-22 07:17:42'),
+(276, 1, 32, 1, '2026-01-22 07:17:44'),
+(277, 1, 31, 1, '2026-01-22 07:21:19'),
+(278, 1, 30, 1, '2026-01-22 07:21:21');
 
 -- --------------------------------------------------------
 
@@ -582,7 +599,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT a táblához `comments`
 --
 ALTER TABLE `comments`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=39;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=42;
 
 --
 -- AUTO_INCREMENT a táblához `comment_votes`
@@ -594,7 +611,7 @@ ALTER TABLE `comment_votes`
 -- AUTO_INCREMENT a táblához `follows`
 --
 ALTER TABLE `follows`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=31;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=32;
 
 --
 -- AUTO_INCREMENT a táblához `images`
@@ -606,7 +623,7 @@ ALTER TABLE `images`
 -- AUTO_INCREMENT a táblához `image_votes`
 --
 ALTER TABLE `image_votes`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=266;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=279;
 
 --
 -- AUTO_INCREMENT a táblához `tags`
