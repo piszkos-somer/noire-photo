@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Gép: 127.0.0.1:3307
--- Létrehozás ideje: 2026. Jan 22. 08:30
+-- Létrehozás ideje: 2026. Feb 02. 11:56
 -- Kiszolgáló verziója: 10.4.28-MariaDB
 -- PHP verzió: 8.2.4
 
@@ -71,7 +71,8 @@ INSERT INTO `comments` (`id`, `user_id`, `image_id`, `comment`, `upload_date`) V
 (38, 10, 10, 'Egy kevés utómunka és tökéletes.', '2026-01-21 23:34:19'),
 (39, 1, 42, 'Nagyon király hangulata van a képnek, kifejezetten találó.', '2026-01-22 08:18:10'),
 (40, 1, 41, 'Ezzel a fekete fehér fileterrel vagány lett', '2026-01-22 08:18:48'),
-(41, 1, 30, 'Fantörpisztikus!', '2026-01-22 08:21:43');
+(41, 1, 30, 'Fantörpisztikus!', '2026-01-22 08:21:43'),
+(42, 4, 39, 'Majd írok papi😎', '2026-02-02 11:04:18');
 
 -- --------------------------------------------------------
 
@@ -124,6 +125,8 @@ INSERT INTO `follows` (`id`, `follower_id`, `following_id`) VALUES
 (20, 1, 4),
 (31, 1, 10),
 (24, 3, 2),
+(33, 4, 9),
+(32, 4, 10),
 (28, 7, 3),
 (25, 7, 4),
 (29, 9, 1),
@@ -406,7 +409,14 @@ INSERT INTO `image_votes` (`id`, `user_id`, `image_id`, `vote`, `created_at`) VA
 (275, 1, 34, 1, '2026-01-22 07:17:42'),
 (276, 1, 32, 1, '2026-01-22 07:17:44'),
 (277, 1, 31, 1, '2026-01-22 07:21:19'),
-(278, 1, 30, 1, '2026-01-22 07:21:21');
+(278, 1, 30, 1, '2026-01-22 07:21:21'),
+(279, 4, 36, 1, '2026-02-02 10:03:35'),
+(280, 4, 37, 1, '2026-02-02 10:03:36'),
+(281, 4, 39, 1, '2026-02-02 10:03:39'),
+(282, 4, 40, 1, '2026-02-02 10:03:42'),
+(283, 4, 32, 1, '2026-02-02 10:04:55'),
+(284, 4, 19, 1, '2026-02-02 10:04:57'),
+(285, 4, 41, 1, '2026-02-02 10:05:05');
 
 -- --------------------------------------------------------
 
@@ -599,7 +609,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT a táblához `comments`
 --
 ALTER TABLE `comments`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=42;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=43;
 
 --
 -- AUTO_INCREMENT a táblához `comment_votes`
@@ -611,7 +621,7 @@ ALTER TABLE `comment_votes`
 -- AUTO_INCREMENT a táblához `follows`
 --
 ALTER TABLE `follows`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=32;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=34;
 
 --
 -- AUTO_INCREMENT a táblához `images`
@@ -623,7 +633,7 @@ ALTER TABLE `images`
 -- AUTO_INCREMENT a táblához `image_votes`
 --
 ALTER TABLE `image_votes`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=279;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=286;
 
 --
 -- AUTO_INCREMENT a táblához `tags`
