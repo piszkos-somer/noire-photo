@@ -47,11 +47,12 @@ function Home() {
   const currentUserId = getCurrentUserId();
 
   useEffect(() => {
-    const fetchRandomImages = async () => {
+    const fetchImages = async () => {
       setLoading(true);
       try {
         const headers = token ? { Authorization: `Bearer ${token}` } : {};
-        const res = await fetch("http://localhost:3001/api/random-images", { headers });
+        const endpoint = feedType === "foryou" ? "/api/random-images" : "/api/following-images";
+        const res = await fetch(`http://localhost:3001${endpoint}`, { headers });
         if (res.status === 401 || res.status === 403) {
           handleTokenError(res.status, navigate);
           return;
@@ -59,14 +60,14 @@ function Home() {
         const data = await res.json();
         setImages(Array.isArray(data) ? data : []);
       } catch (err) {
-        console.error("Random képek lekérési hiba:", err);
+        console.error("Képek lekérési hiba:", err);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchRandomImages();
-  }, [token, navigate]);
+    fetchImages();
+  }, [token, navigate, feedType]);
 
 const handleImageVote = async (imageId, vote) => {
   if (!token) return navigate("/Registration");
