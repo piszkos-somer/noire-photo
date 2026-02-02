@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Gép: 127.0.0.1:3307
--- Létrehozás ideje: 2026. Feb 02. 11:56
+-- Létrehozás ideje: 2026. Feb 02. 11:59
 -- Kiszolgáló verziója: 10.4.28-MariaDB
 -- PHP verzió: 8.2.4
 
@@ -531,7 +531,8 @@ INSERT INTO `users` (`id`, `username`, `email`, `password`, `bio`, `profile_pict
 (7, 'PixelHunter87', 'pixelhunter87@gmail.com', '$2b$10$9JF3W/njYh2DLa0VtnpG0uN9tvIDllnMCnBW6He6drchgd2VbWALG', 'Hobbi portréfotós, 5 éve kattintgatok. Érdekel a természetes fény használata, szívesen tanulok profiktól.', '/profile-pictures/1769030450665.jpg', 0),
 (8, 'László Nagy', 'laszlonagyphoto@gmail.com', '$2b$10$hOIshDmevNp1sPX0Si8d1Os2b0gDgCln//Vin48DI9PE60sqZA7V6', 'Haladó utazó fotós, főleg utcai pillanatokat örökítek meg. Megosztom tapasztalataimat kezdőkkel.', '/profile-pictures/1769031583605.jpg', 0),
 (9, 'ShutterQueen', 'shutterqueen.hu@gmail.com', '$2b$10$HV0kebpDM5TgyYg6WwVKUeCOwLTbxCjFjGkbpVJE5qdPYUxWnIEPy', 'Nőként fotózom a mindennapi életet, makróval és portréval. Csatlakoztam a közösséghez inspirációért.', '/profile-pictures/1769032960645.jpg', 0),
-(10, 'Tamás Szabó', 'tamasszabo.shoot@gmail.com', '$2b$10$E03GBrEMSOSLmQIZEsoUsO9aLxZMbTbLFj3ZNTic49DCDysp7e6WC', 'Profi stúdiófotós 10+ éves gyakorlattal, szívesen adok tanácsot világításról és utómunkáról.', '/profile-pictures/1769033678059.jpg', 0);
+(10, 'Tamás Szabó', 'tamasszabo.shoot@gmail.com', '$2b$10$E03GBrEMSOSLmQIZEsoUsO9aLxZMbTbLFj3ZNTic49DCDysp7e6WC', 'Profi stúdiófotós 10+ éves gyakorlattal, szívesen adok tanácsot világításról és utómunkáról.', '/profile-pictures/1769033678059.jpg', 0),
+(11, 'Admin', 'info.sfl.technologies@gmail.com', '$2b$10$rHaKVG.APJTmDU3NhwZsg.uF7uhou441fnwUD4oLPN159bofieTwC', NULL, NULL, 1);
 
 --
 -- Indexek a kiírt táblákhoz
@@ -645,7 +646,7 @@ ALTER TABLE `tags`
 -- AUTO_INCREMENT a táblához `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- Megkötések a kiírt táblákhoz
