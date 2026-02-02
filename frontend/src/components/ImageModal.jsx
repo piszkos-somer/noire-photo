@@ -34,6 +34,48 @@ const [isFollowing, setIsFollowing] = useState(false);
 const [editingCommentId, setEditingCommentId] = useState(null);
 const [editCommentText, setEditCommentText] = useState("");
 const [localComments, setLocalComments] = useState(comments || []);
+const [showDeleteModal, setShowDeleteModal] = useState(false);
+const [pendingDeleteCommentId, setPendingDeleteCommentId] = useState(null);
+const [deleteLoading, setDeleteLoading] = useState(false);
+const handleDeleteComment = (commentId) => {
+  setPendingDeleteCommentId(commentId);
+  setShowDeleteModal(true);
+};
+const confirmDeleteComment = async () => {
+  if (!pendingDeleteCommentId) return;
+
+  setDeleteLoading(true);
+  try {
+    const res = await fetch(
+      `http://localhost:3001/api/comments/${pendingDeleteCommentId}`,
+      {
+        method: "DELETE",
+        headers: getAuthHeader(),
+      }
+    );
+
+    if (res.status === 401 || res.status === 403) {
+      handleTokenError(res.status, navigate);
+      return;
+    }
+
+    if (res.ok) {
+      setLocalComments((prev) =>
+        prev.filter((c) => c.id !== pendingDeleteCommentId)
+      );
+      setShowDeleteModal(false);
+      setPendingDeleteCommentId(null);
+    } else {
+      alert("Hiba történt a törlés során");
+    }
+  } catch (err) {
+    console.error("Komment törlési hiba:", err);
+    alert("Szerverhiba");
+  } finally {
+    setDeleteLoading(false);
+  }
+};
+
 useEffect(() => {
   setLocalComments(comments || []);
 }, [comments]);
@@ -153,31 +195,7 @@ const handleShare = async () => {
     );
   };
 
-  const handleDeleteComment = async (commentId) => {
-    if (!window.confirm("Biztosan törölni szeretnéd ezt a hozzászólást?")) return;
-
-    try {
-      const res = await fetch(`http://localhost:3001/api/comments/${commentId}`, {
-        method: "DELETE",
-        headers: getAuthHeader(),
-      });
-
-      if (res.status === 401 || res.status === 403) {
-        handleTokenError(res.status, navigate);
-        return;
-      }
-
-      if (res.ok) {
-        
-        setLocalComments((prev) => prev.filter((c) => c.id !== commentId));
-      } else {
-        alert("Hiba történt a törlés során");
-      }
-    } catch (err) {
-      console.error("Komment törlési hiba:", err);
-      alert("Szerverhiba");
-    }
-  };
+ 
 
   const handleEditComment = (comment) => {
     console.log("Edit comment clicked:", comment);
@@ -579,8 +597,68 @@ const handleShare = async () => {
             </Button>
           </div>
         </div>
+        <Modal
+  show={showDeleteModal}
+  onHide={() => {
+    if (deleteLoading) return;
+    setShowDeleteModal(false);
+    setPendingDeleteCommentId(null);
+  }}
+  centered
+  backdrop="static"
+  keyboard={!deleteLoading}
+  className="glass-modal glass-confirm"
+>
+  <Modal.Body className="p-0">
+    <div className="glass-header d-flex justify-content-between align-items-center">
+      <h3 className="glass-title m-0"> Komment törlése</h3>
+      <Button
+        variant="link"
+        onClick={() => {
+          if (deleteLoading) return;
+          setShowDeleteModal(false);
+          setPendingDeleteCommentId(null);
+        }}
+        className="text-dark p-0"
+        style={{ fontSize: "24px", textDecoration: "none", lineHeight: 1 }}
+      >
+        ×
+      </Button>
+    </div>
+
+    <div className="glass-info p-4">
+      <p className="glass-description m-0">
+        Biztosan törölni akarod ezt a hozzászólást?
+      </p>
+
+      <div className="d-flex justify-content-end gap-2 mt-3">
+        <Button
+          variant="outline-light"
+          disabled={deleteLoading}
+          onClick={() => {
+            setShowDeleteModal(false);
+            setPendingDeleteCommentId(null);
+          }}
+        >
+          Mégse
+        </Button>
+
+        <Button
+          variant="outline-danger"
+          disabled={deleteLoading}
+          onClick={confirmDeleteComment}
+        >
+          {deleteLoading ? "Törlés..." : "Igen, törlöm"}
+        </Button>
+      </div>
+    </div>
+  </Modal.Body>
+</Modal>
+
       </Modal.Body>
+      
     </Modal>
+    
   );
 }
 

@@ -17,6 +17,15 @@
   overflow: hidden !important;
   padding: 0 !important;
 }
+/* ✅ Törlős confirm modal kisebb legyen, de ugyanaz a glass design */
+.glass-modal.glass-confirm .modal-dialog {
+  max-width: 460px; /* kis középső */
+}
+
+/* a leírás ne legyen full szélességű "doboz" érzés, ha nem akarod */
+.glass-modal.glass-confirm .glass-description {
+  width: 100%;
+}
 
 .glass-modal .modal-content::before {
   content: "";
