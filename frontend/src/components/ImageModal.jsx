@@ -270,12 +270,16 @@ const handleShare = async () => {
         </div>
 
         {localImage?.url && (
-          <img
-            src={`http://localhost:3001${localImage.url}`}
-            alt={localImage?.title || ""}
-            className="modal-image"
-          />
-        )}
+  <img
+    src={`http://localhost:3001${localImage.url}`}
+    alt={localImage?.title || ""}
+    className="modal-image"
+    onContextMenu={(e) => e.preventDefault()}
+    draggable={false}
+    onDragStart={(e) => e.preventDefault()}
+  />
+)}
+
 
         <div className="glass-info p-4">
 <div className="glass-info-top d-flex justify-content-between align-items-center flex-wrap gap-2">
