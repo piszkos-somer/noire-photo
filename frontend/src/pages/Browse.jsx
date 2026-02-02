@@ -6,6 +6,7 @@ import ImageCard from "../components/ImageCard";
 import ImageModal from "../components/ImageModal";
 import "../css/Browse.css";
 import { handleTokenError } from "../utils/auth";
+import InfiniteScroll from "react-infinite-scroll-component";
 
 function Browse() {
   const [images, setImages] = useState([]);
@@ -17,6 +18,8 @@ function Browse() {
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
   const [commentLoading, setCommentLoading] = useState(false);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
 
   const navigate = useNavigate();
   const { tag } = useParams();
@@ -25,66 +28,51 @@ function Browse() {
   const userData = localStorage.getItem("user");
   const token = userData ? JSON.parse(userData).token : null;
 
-const fetchLatestImages = async () => {
-  setLoading(true);
-  try {
-    const headers = token ? { Authorization: `Bearer ${token}` } : {};
-    const res = await fetch("http://localhost:3001/api/latest-images", { headers });
-    if (res.status === 401 || res.status === 403) {
-      handleTokenError(res.status, navigate);
-      return;
+  const fetchImages = async (pageNumber = 1) => {
+    setLoading(true);
+    try {
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+      const res = await fetch(`http://localhost:3001/api/images?page=${pageNumber}&limit=12`, { headers });
+      if (res.status === 401 || res.status === 403) {
+        handleTokenError(res.status, navigate);
+        return;
+      }
+      const data = await res.json();
+      if (data.length < 12) {
+        setHasMore(false);
+      }
+      setImages((prev) => {
+        const newImages = data.filter(newImage => !prev.some(existingImage => existingImage.id === newImage.id));
+        return [...prev, ...newImages];
+      });
+    } catch (err) {
+      console.error("❌ Képek lekérési hiba:", err);
+    } finally {
+      setLoading(false);
     }
-    const data = await res.json();
-    setImages(Array.isArray(data) ? data : []);
-  } catch (err) {
-    console.error("❌ Képek lekérési hiba:", err);
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
-const fetchAllImages = async () => {
-  setLoading(true);
-  try {
-    const headers = token ? { Authorization: `Bearer ${token}` } : {};
-    const res = await fetch("http://localhost:3001/api/images", { headers });
-    if (res.status === 401 || res.status === 403) {
-      handleTokenError(res.status, navigate);
-      return;
-    }
-    const data = await res.json();
-    setImages(Array.isArray(data) ? data : []);
-  } catch (err) {
-    console.error("❌ Összes kép lekérési hiba:", err);
-  } finally {
-    setLoading(false);
-  }
-};
-
-  // Ha URL-ből jön egy tag
   useEffect(() => {
-  const urlParams = new URLSearchParams(location.search);
-  const qParam = urlParams.get("q");
+    const urlParams = new URLSearchParams(location.search);
+    const qParam = urlParams.get("q");
 
-  if (tag) {
-    // ha URL paraméter van, pl. /browse/macska → tag keresés
-    setQuery(tag);
-    setFilter("tag");
-    handleSearch(tag, "tag");
-  } else if (qParam) {
-    // ha ?q=valami → title/description keresés
-    setQuery(qParam);
-    setFilter("title");
-    handleSearch(qParam, "title");
-  }else {
-    // ⬇️ Ha nincs semmi paraméter, töltsük be az utolsó képeket
-    fetchLatestImages();
-  }
-}, [tag, location.search]);
+    if (tag) {
+      setQuery(tag);
+      setFilter("tag");
+      handleSearch(tag, "tag");
+    } else if (qParam) {
+      setQuery(qParam);
+      setFilter("title");
+      handleSearch(qParam, "title");
+    } else {
+      fetchImages();
+    }
+  }, [tag, location.search]);
 
-useEffect(() => {
-  fetchAllImages();
-}, []);
+  const fetchMoreImages = () => {
+    setPage((prevPage) => prevPage + 1);
+    fetchImages(page + 1);
+  };
 
   // 🔍 Keresés backendről
   const handleSearch = async (q = query, f = filter) => {
@@ -96,9 +84,9 @@ useEffect(() => {
         { headers }
       );
       if (res.status === 401 || res.status === 403) {
-  handleTokenError(res.status, navigate);
-  return;
-}
+        handleTokenError(res.status, navigate);
+        return;
+      }
       const data = await res.json();
       setImages(Array.isArray(data) ? data : []);
     } catch (err) {
@@ -122,9 +110,9 @@ useEffect(() => {
         body: JSON.stringify({ vote })
       });
       if (res.status === 401 || res.status === 403) {
-  handleTokenError(res.status, navigate);
-  return;
-}
+        handleTokenError(res.status, navigate);
+        return;
+      }
       if (res.ok) {
         const updated = await res.json();
         setImages((prev) =>
@@ -158,9 +146,9 @@ useEffect(() => {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (res.status === 401 || res.status === 403) {
-  handleTokenError(res.status, navigate);
-  return;
-}
+        handleTokenError(res.status, navigate);
+        return;
+      }
       if (res.ok) {
         const updated = await res.json();
         setImages((prev) =>
@@ -182,9 +170,9 @@ useEffect(() => {
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
       const res = await fetch(`http://localhost:3001/api/images/${imageId}/comments`, { headers });
       if (res.status === 401 || res.status === 403) {
-  handleTokenError(res.status, navigate);
-  return;
-}
+        handleTokenError(res.status, navigate);
+        return;
+      }
       const data = await res.json();
       setComments(Array.isArray(data) ? data : []);
     } catch (err) {
@@ -209,9 +197,9 @@ useEffect(() => {
         }
       );
       if (res.status === 401 || res.status === 403) {
-  handleTokenError(res.status, navigate);
-  return;
-}
+        handleTokenError(res.status, navigate);
+        return;
+      }
       if (res.ok) {
         setNewComment("");
         fetchComments(selectedImage.id);
@@ -235,9 +223,9 @@ useEffect(() => {
         body: JSON.stringify({ vote })
       });
       if (res.status === 401 || res.status === 403) {
-  handleTokenError(res.status, navigate);
-  return;
-}
+        handleTokenError(res.status, navigate);
+        return;
+      }
       if (res.ok) {
         const updated = await res.json();
         setComments((prev) =>
@@ -298,15 +286,15 @@ useEffect(() => {
         </Row>
       </Container>
 
-      {/* 🔹 Találatok */}
-      <Container className="image-grid">
-        
-        {loading ? (
-          <h4 className="text-center text-light py-5">Keresés folyamatban...</h4>
-        ) : images.length === 0 ? (
-          <h5 className="text-center text-light py-5">Nincs találat.</h5>
-        ) : (
-          images.map((img) => (
+      <InfiniteScroll
+        dataLength={images.length}
+        next={fetchMoreImages}
+        hasMore={hasMore}
+        loader={<h4 className="text-center text-light py-5">Töltés...</h4>}
+        endMessage={<h5 className="text-center text-light py-5">Nincs több kép.</h5>}
+      >
+        <Container className="image-grid">
+          {images.map((img) => (
             <ImageCard
               key={img.id}
               image={img}
@@ -314,11 +302,10 @@ useEffect(() => {
               onOpen={openModal}
               likeLoading={likeLoading}
             />
-          ))
-        )}
-      </Container>
+          ))}
+        </Container>
+      </InfiniteScroll>
 
-      {/* 🔹 Modal */}
       <ImageModal
         show={!!selectedImage}
         image={selectedImage}
