@@ -1,9 +1,6 @@
-// src/components/ImageModal.jsx
 import React, { useEffect, useState } from "react";
-import { Modal, Button, Dropdown } from "react-bootstrap";
+import { Modal, Button } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
-import AnimatedCommentHeart from "../components/AnimatedCommentHeart";
-import AnimatedHeart from "./AnimatedHeart";
 import "../css/ImageModal.css";
 import { getToken, getAuthHeader, handleTokenError } from "../utils/auth";
 import { Share2, MessageCircle, ArrowUp, ArrowDown, MoreVertical } from "lucide-react";
