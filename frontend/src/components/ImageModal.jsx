@@ -33,7 +33,11 @@ const [showToast, setShowToast] = useState(false);
 const [isFollowing, setIsFollowing] = useState(false);
 const [editingCommentId, setEditingCommentId] = useState(null);
 const [editCommentText, setEditCommentText] = useState("");
-const [openDropdownId, setOpenDropdownId] = useState(null);
+const [localComments, setLocalComments] = useState(comments || []);
+useEffect(() => {
+  setLocalComments(comments || []);
+}, [comments]);
+
 
   useEffect(() => {
     setLocalImage(image);
@@ -165,7 +169,7 @@ const handleShare = async () => {
 
       if (res.ok) {
         
-        window.location.reload(); 
+        setLocalComments((prev) => prev.filter((c) => c.id !== commentId));
       } else {
         alert("Hiba történt a törlés során");
       }
@@ -203,10 +207,16 @@ const handleShare = async () => {
       }
 
       if (res.ok) {
+        setLocalComments((prev) =>
+          prev.map((c) =>
+            c.id === commentId ? { ...c, comment: editCommentText } : c
+          )
+        );
+      
         setEditingCommentId(null);
         setEditCommentText("");
-        window.location.reload(); 
-      } else {
+      }
+       else {
         alert("Hiba történt a módosítás során");
       }
     } catch (err) {
@@ -335,8 +345,9 @@ const handleShare = async () => {
       title="Hozzászólások"
     />
     <span style={{ color: "black", fontWeight: 500 }}>
-      {comments?.length || 0}
-    </span>
+  {localComments?.length || 0}
+</span>
+
   </div>
   {(() => {
   const up = localImage?.upvotes || localImage?.likes || 0;
@@ -419,10 +430,10 @@ const handleShare = async () => {
               </Button>
             </div>
 
-            {!comments || comments.length === 0 ? (
-              <p className="text-muted">Még nincs komment ehhez a képhez.</p>
-            ) : (
-              comments.map((c) => (
+            {!localComments || localComments.length === 0 ? (
+  <p className="text-muted">Még nincs komment ehhez a képhez.</p>
+) : (
+              localComments.map((c) => (
                 <div
                   key={c.id}
                   className="comment-item glass-comment mb-3 p-3 rounded-3"
