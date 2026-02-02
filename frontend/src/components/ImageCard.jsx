@@ -44,11 +44,15 @@ function ImageCard({ image, onVote, onOpen, likeLoading }) {
     <div className="glass-card">
       <Card className="glass-inner">
         <div className="img-wrapper" onClick={() => onOpen(image)} style={{ cursor: "pointer" }}>
-          <Card.Img
-            variant="top"
-            src={`http://localhost:3001${image.url}`}
-            alt={image.title}
-          />
+        <Card.Img
+  variant="top"
+  src={`http://localhost:3001${image.url}`}
+  alt={image.title}
+  onContextMenu={(e) => e.preventDefault()}
+  draggable={false}
+  onDragStart={(e) => e.preventDefault()}
+/>
+
         </div>
 
         <Card.Body>
