@@ -134,13 +134,19 @@ app.post("/api/login", async (req, res) => {
       const match = await bcrypt.compare(password, user.password);
       if (!match) return res.status(401).json({ message: "Hibás email vagy jelszó." });
 
+      // JWT-be beletehetjük az is_admin-t is, ha szeretnénk backend ellenőrzést
       const token = jwt.sign(
-        { id: user.id, username: user.username },
+        { id: user.id, username: user.username, isAdmin: user.is_admin === 1 },
         process.env.JWT_SECRET,
         { expiresIn: "1h" }
       );
 
-      res.json({ token, username: user.username });
+      // Visszaadjuk az admin státuszt a frontendnek is
+      res.json({ 
+        token, 
+        username: user.username, 
+        isAdmin: user.is_admin === 1 
+      });
     } finally {
       conn.release();
     }
@@ -149,6 +155,7 @@ app.post("/api/login", async (req, res) => {
     res.status(500).json({ message: "Szerverhiba bejelentkezés közben." });
   }
 });
+
 
 app.post("/api/upload", verifyToken, upload.single("image"), async (req, res) => {
   const { title, description } = req.body;

@@ -5,6 +5,7 @@ import { UserContext } from "../context/UserContext";
 import { handleTokenError } from "../utils/auth";
 import { Eye, EyeSlash } from "react-bootstrap-icons"; 
 
+
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -16,25 +17,28 @@ function Login() {
   const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
-
+  
     try {
       const res = await fetch("http://localhost:3001/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
-
+  
       if (res.status === 401 || res.status === 403) {
         setError("Rossz email vagy jelszó.");
         handleTokenError(res.status, navigate);
         return;
       }
-
+  
       const data = await res.json();
-
+  
       if (res.ok) {
-        login(data.username, data.token);
-        navigate("/profile");
+        // itt adjuk át az isAdmin-t is
+        login(data.username, data.token, data.isAdmin); 
+  
+        // átirányítás a home-ra, mert ott van az admin X gomb
+        navigate("/home");
       } else {
         setError(data.message || "Hibás bejelentkezés.");
       }
@@ -43,6 +47,7 @@ function Login() {
       setError("Szerverhiba vagy hálózati hiba történt.");
     }
   };
+  
 
   return (
     <Container style={{ maxWidth: "400px" }} className="py-5">

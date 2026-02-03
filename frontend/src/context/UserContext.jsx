@@ -23,8 +23,9 @@ export function UserProvider({ children }) {
     return () => window.removeEventListener("userLogout", handleUserLogout);
   }, []);
 
-  const login = (username, token) => {
-    const userData = { username, token };
+  // 🔹 Módosított login: hozzáadtuk az isAdmin-t
+  const login = (username, token, isAdmin) => {
+    const userData = { username, token, isAdmin }; // isAdmin hozzáadva
     localStorage.setItem("user", JSON.stringify(userData));
     setUser(userData);
   };

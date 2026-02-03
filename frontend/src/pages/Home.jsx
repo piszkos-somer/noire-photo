@@ -6,6 +6,10 @@ import ImageModal from "../components/ImageModal";
 import { motion, AnimatePresence } from "framer-motion";
 import "../css/Home.css";
 import { handleTokenError } from "../utils/auth";
+import { useContext } from "react";
+import { UserContext } from "../context/UserContext";
+
+
 
 export const AnimatedHeart = ({ isLiked, onClick, }) => {
   const prevLiked = useRef(isLiked);
@@ -26,12 +30,77 @@ function Home() {
   const [newComment, setNewComment] = useState("");
   const [commentLoading, setCommentLoading] = useState(false);
   const [query, setQuery] = useState("");
-
+  const { user } = useContext(UserContext);
   const [feedType, setFeedType] = useState("foryou");
+
+
 
   const navigate = useNavigate();
   const userData = localStorage.getItem("user");
   const token = userData ? JSON.parse(userData).token : null;
+
+  const handleDeleteComment = async (commentId) => {
+    if (!window.confirm("Biztosan törölni akarod a kommentet?")) return;
+  
+    try {
+      const res = await fetch(`http://localhost:3001/api/comments/${commentId}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+  
+      if (res.status === 401 || res.status === 403) {
+        handleTokenError(res.status, navigate);
+        return;
+      }
+  
+      if (res.ok) {
+        // frissítjük a frontendben a komment listát
+        setComments((prev) => prev.filter((c) => c.id !== commentId));
+      } else {
+        alert("Hiba a komment törlésénél!");
+      }
+    } catch (err) {
+      console.error("Komment törlés hiba:", err);
+      alert("Hiba történt a komment törlésénél!");
+    }
+  };
+  
+
+  const handleDeleteImage = async (imageId) => {
+    if (!window.confirm("Biztosan törölni akarod a képet?")) return;
+  
+    try {
+      const res = await fetch(`http://localhost:3001/api/images/${imageId}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+  
+      if (res.status === 401 || res.status === 403) {
+        handleTokenError(res.status, navigate);
+        return;
+      }
+  
+      if (res.ok) {
+        // törlés frontend frissítés
+        setImages((prev) => prev.filter((img) => img.id !== imageId));
+        if (selectedImage?.id === imageId) closeModal();
+      } else {
+        alert("Hiba a törlés során!");
+      }
+    } catch (err) {
+      console.error("Kép törlés hiba:", err);
+      alert("Hiba történt a törlés során!");
+    }
+  };
+  
+  
+
 
   // JWT token dekódolása a user ID kinyeréséhez
   const getCurrentUserId = () => {
@@ -313,7 +382,36 @@ const handleImageVote = async (imageId, vote) => {
       </div>
       <Container className="image-grid">
   {images.map((img) => (
-    <div key={img.id}>
+    <div key={img.id} style={{ position: "relative", display: "inline-block" }}>
+      
+      {/* ✅ Admin X gomb */}
+      {user?.isAdmin && (
+  <button
+    onClick={() => handleDeleteImage(img.id)}
+    style={{
+      position: "absolute",
+      top: "8px",      // távolság a tetejétől
+      right: "8px",    // távolság a jobbtól
+      zIndex: 10,      // a kép fölé kerül
+      background: "rgba(255,0,0,0.8)",
+      color: "white",
+      border: "none",
+      borderRadius: "50%",
+      width: "25px",
+      height: "25px",
+      cursor: "pointer",
+      fontWeight: "bold",
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+    }}
+    title="Törlés"
+  >
+    X
+  </button>
+)}
+
+
       <ImageCard
         image={img}
         onVote={handleImageVote}
@@ -323,6 +421,7 @@ const handleImageVote = async (imageId, vote) => {
     </div>
   ))}
 </Container>
+
 
       <ImageModal
         show={!!selectedImage}
