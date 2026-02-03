@@ -9,4 +9,5 @@ Frontend:
     npm run dev
     Új gépnél: npm i vite
 	       npm i framer-motion
-           npm install react-bootstrap-icons
+               npm i react-bootstrap-icons
+	       npm i react-infinite-scroll-component
