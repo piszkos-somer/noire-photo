@@ -37,8 +37,12 @@ function Login() {
         // itt adjuk át az isAdmin-t is
         login(data.username, data.token, data.isAdmin); 
   
-        // átirányítás a home-ra, mert ott van az admin X gomb
-        navigate("/home");
+        // átirányítás a jogosultság alapján
+        if (data.isAdmin) {
+          navigate("/browse");
+        } else {
+          navigate("/profile");
+        }
       } else {
         setError(data.message || "Hibás bejelentkezés.");
       }
@@ -47,6 +51,7 @@ function Login() {
       setError("Szerverhiba vagy hálózati hiba történt.");
     }
   };
+  
   
 
   return (
