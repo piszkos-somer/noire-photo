@@ -7,6 +7,9 @@ import ImageModal from "../components/ImageModal";
 import "../css/Browse.css";
 import { handleTokenError } from "../utils/auth";
 import InfiniteScroll from "react-infinite-scroll-component";
+import { useContext } from "react";
+import { UserContext } from "../context/UserContext";
+
 
 function Browse() {
   const [images, setImages] = useState([]);
@@ -20,6 +23,8 @@ function Browse() {
   const [commentLoading, setCommentLoading] = useState(false);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
+  const { user } = useContext(UserContext);
+
 
   const navigate = useNavigate();
   const { tag } = useParams();
@@ -27,6 +32,36 @@ function Browse() {
 
   const userData = localStorage.getItem("user");
   const token = userData ? JSON.parse(userData).token : null;
+
+  const handleDeleteImage = async (imageId) => {
+    if (!window.confirm("Biztosan törölni akarod a képet?")) return;
+  
+    try {
+      const res = await fetch(`http://localhost:3001/api/images/${imageId}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+  
+      if (res.status === 401 || res.status === 403) {
+        handleTokenError(res.status, navigate);
+        return;
+      }
+  
+      if (res.ok) {
+        setImages((prev) => prev.filter((img) => img.id !== imageId));
+        if (selectedImage?.id === imageId) closeModal();
+      } else {
+        alert("Hiba a törlés során!");
+      }
+    } catch (err) {
+      console.error("Kép törlés hiba:", err);
+      alert("Hiba történt a törlés során!");
+    }
+  };
+  
 
   const fetchImages = async (pageNumber = 1) => {
     setLoading(true);
@@ -294,15 +329,45 @@ function Browse() {
         endMessage={<h5 className="text-center text-light py-5">Nincs több kép.</h5>}
       >
         <Container className="image-grid">
-          {images.map((img) => (
-            <ImageCard
-              key={img.id}
-              image={img}
-              onVote={handleImageVote}
-              onOpen={openModal}
-              likeLoading={likeLoading}
-            />
-          ))}
+        {images.map((img) => (
+  <div key={img.id} style={{ position: "relative", display: "inline-block" }}>
+    
+    {/* ✅ Admin X gomb */}
+    {user?.isAdmin && (
+      <button
+        onClick={() => handleDeleteImage(img.id)}
+        style={{
+          position: "absolute",
+          top: "8px",
+          right: "8px",
+          zIndex: 10,
+          background: "rgba(255,0,0,0.8)",
+          color: "white",
+          border: "none",
+          borderRadius: "50%",
+          width: "25px",
+          height: "25px",
+          cursor: "pointer",
+          fontWeight: "bold",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+        title="Törlés"
+      >
+        X
+      </button>
+    )}
+
+    <ImageCard
+      image={img}
+      onVote={handleImageVote}
+      onOpen={openModal}
+      likeLoading={likeLoading}
+    />
+  </div>
+))}
+
         </Container>
       </InfiniteScroll>
 
