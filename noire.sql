@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Gép: 127.0.0.1:3307
--- Létrehozás ideje: 2026. Feb 02. 11:59
+-- Létrehozás ideje: 2026. Feb 04. 10:29
 -- Kiszolgáló verziója: 10.4.28-MariaDB
 -- PHP verzió: 8.2.4
 
@@ -40,8 +40,6 @@ CREATE TABLE `comments` (
 --
 
 INSERT INTO `comments` (`id`, `user_id`, `image_id`, `comment`, `upload_date`) VALUES
-(1, 1, 5, 'Nagyon szép, és tetszik, hogy pont elkaptad benne a villámot!! 10/11', '2025-10-28 14:25:55'),
-(3, 1, 5, 'Tényleg nagyon jó!', '2025-10-29 17:28:44'),
 (4, 3, 6, 'Azta ez nagyon király lett.', '2025-11-02 15:04:27'),
 (8, 1, 11, 'Nagyon szép, de ha a Holdat akarod kiemelni, akkor legközelebb zoomolj rá jobban!', '2025-11-10 11:58:30'),
 (10, 4, 8, 'Uhhh. De komoly kép lett.', '2025-11-13 12:00:17'),
@@ -93,10 +91,6 @@ CREATE TABLE `comment_votes` (
 --
 
 INSERT INTO `comment_votes` (`id`, `user_id`, `comment_id`, `vote`, `created_at`) VALUES
-(39, 2, 1, 1, '2025-12-02 12:54:44'),
-(45, 1, 1, 1, '2025-12-02 12:54:44'),
-(51, 4, 1, 1, '2025-12-02 12:54:44'),
-(52, 4, 3, 1, '2025-12-02 12:54:44'),
 (55, 4, 11, 1, '2026-01-12 11:07:22'),
 (58, 3, 16, 1, '2026-01-20 13:34:05'),
 (60, 3, 20, 1, '2026-01-20 15:51:39'),
@@ -152,7 +146,6 @@ CREATE TABLE `images` (
 --
 
 INSERT INTO `images` (`id`, `user_id`, `title`, `description`, `upload_date`, `url`) VALUES
-(5, 2, 'Tó az erdőben', 'Ezt a képet Kanadában készítettem, lenyűgöző látvánnyal.\r\n\r\nZáridő: kb. 10–30 másodperc\r\nRekesz: f/8 – f/1\r\nISO: 100\r\nGyújtótávolság: 18–24 mm ', '2025-10-27 19:13:21', '/images/1761585201828.jpg'),
 (6, 2, 'Izlandi hegység', 'Záridő: kb. 1/60 – 1/125 mp\r\nRekeszérték: f/8 – f/11\r\nISO érzékenység: 100 – 200\r\nGyújtótávolság: kb. 24–35 mm (nagylátószög)\r\nFehéregyensúly: napfény (kb. 5500 K)', '2025-10-27 19:41:21', '/images/1761586881317.jpg'),
 (8, 3, 'Görögország', 'Telefonnal csináltam Görög nyaraláson során. Semmi extra beállítás csak egy jól elkapott pillanat.😎\nTelefonom: Samsung Galaxy S25', '2025-11-02 15:25:26', '/images/1762093526424.jpg'),
 (9, 4, 'Naplementés Balaton', 'Tavaly nyáron készítettem ezt a naplementés képet a Balatonról a telefonommal.\r\nTelefon: Samsung Galaxy S22', '2025-11-02 15:40:36', '/images/1762094436028.jpg'),
@@ -203,8 +196,6 @@ CREATE TABLE `image_tags` (
 --
 
 INSERT INTO `image_tags` (`image_id`, `tag_id`) VALUES
-(5, 15),
-(5, 16),
 (6, 11),
 (6, 17),
 (8, 11),
@@ -327,8 +318,6 @@ CREATE TABLE `image_votes` (
 
 INSERT INTO `image_votes` (`id`, `user_id`, `image_id`, `vote`, `created_at`) VALUES
 (157, 2, 6, 1, '2025-12-02 12:54:44'),
-(158, 2, 5, 1, '2025-12-02 12:54:44'),
-(171, 1, 5, 1, '2025-12-02 12:54:44'),
 (175, 3, 8, 1, '2025-12-02 12:54:44'),
 (176, 4, 9, 1, '2025-12-02 12:54:44'),
 (177, 4, 6, 1, '2025-12-02 12:54:44'),
@@ -344,7 +333,6 @@ INSERT INTO `image_votes` (`id`, `user_id`, `image_id`, `vote`, `created_at`) VA
 (198, 3, 15, 1, '2026-01-12 11:05:22'),
 (199, 3, 11, 1, '2026-01-12 11:05:44'),
 (201, 4, 17, 1, '2026-01-12 11:06:38'),
-(202, 4, 5, 1, '2026-01-12 11:07:42'),
 (204, 4, 16, -1, '2026-01-12 11:09:14'),
 (205, 1, 15, 1, '2026-01-20 12:09:41'),
 (207, 1, 8, 1, '2026-01-20 12:13:28'),
@@ -353,7 +341,6 @@ INSERT INTO `image_votes` (`id`, `user_id`, `image_id`, `vote`, `created_at`) VA
 (210, 1, 17, 1, '2026-01-20 12:57:57'),
 (214, 3, 6, -1, '2026-01-20 15:42:20'),
 (216, 3, 16, 1, '2026-01-20 15:43:17'),
-(217, 3, 5, -1, '2026-01-20 15:56:19'),
 (218, 6, 17, -1, '2026-01-21 21:04:32'),
 (219, 6, 16, 1, '2026-01-21 21:04:35'),
 (220, 6, 15, 1, '2026-01-21 21:04:38'),
@@ -616,7 +603,7 @@ ALTER TABLE `comments`
 -- AUTO_INCREMENT a táblához `comment_votes`
 --
 ALTER TABLE `comment_votes`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=64;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=65;
 
 --
 -- AUTO_INCREMENT a táblához `follows`
@@ -634,7 +621,7 @@ ALTER TABLE `images`
 -- AUTO_INCREMENT a táblához `image_votes`
 --
 ALTER TABLE `image_votes`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=286;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=287;
 
 --
 -- AUTO_INCREMENT a táblához `tags`
@@ -646,7 +633,7 @@ ALTER TABLE `tags`
 -- AUTO_INCREMENT a táblához `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- Megkötések a kiírt táblákhoz
