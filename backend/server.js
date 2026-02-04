@@ -1305,3 +1305,43 @@ app.get("/api/random-images", async (req, res) => {
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => console.log(`Szerver fut a ${PORT} porton!`));
+
+// 🔹 Komment törlése (saját komment VAGY admin)
+app.delete("/api/comments/:id", verifyToken, async (req, res) => {
+  const commentId = req.params.id;
+  const userId = req.user.id;
+  const isAdmin = req.user.isAdmin === true; // JWT-be már beleteszed login-nál
+
+  const conn = await pool.getConnection();
+  try {
+    // lekérjük, kié a komment
+    const [commentRows] = await conn.query(
+      "SELECT user_id FROM comments WHERE id = ?",
+      [commentId]
+    );
+
+    if (commentRows.length === 0) {
+      return res.status(404).json({ error: "A komment nem található." });
+    }
+
+    const ownerId = commentRows[0].user_id;
+
+    // jogosultság: tulaj VAGY admin
+    if (ownerId !== userId && !isAdmin) {
+      return res.status(403).json({ error: "Nincs jogosultság a komment törléséhez." });
+    }
+
+    // Töröljük a kommenthez tartozó szavazatokat is
+    await conn.query("DELETE FROM comment_votes WHERE comment_id = ?", [commentId]);
+
+    // Töröljük a kommentet
+    await conn.query("DELETE FROM comments WHERE id = ?", [commentId]);
+
+    res.json({ success: true, message: "Komment sikeresen törölve." });
+  } catch (err) {
+    console.error("Komment törlési hiba:", err);
+    res.status(500).json({ error: "Szerverhiba a komment törlésénél." });
+  } finally {
+    conn.release();
+  }
+});

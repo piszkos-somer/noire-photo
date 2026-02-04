@@ -3,7 +3,7 @@ import { Modal, Button } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import "../css/ImageModal.css";
 import { getToken, getAuthHeader, handleTokenError } from "../utils/auth";
-import { Share2, MessageCircle, ArrowUp, ArrowDown, MoreVertical } from "lucide-react";
+import { Share2, MessageCircle, ArrowUp, ArrowDown, X } from "lucide-react";
 
 
 
@@ -40,7 +40,8 @@ const [deleteLoading, setDeleteLoading] = useState(false);
 const handleDeleteComment = (commentId) => {
   setPendingDeleteCommentId(commentId);
   setShowDeleteModal(true);
-};
+};const isAdmin = decoded?.isAdmin === true || tokenUser?.isAdmin === true;
+
 const confirmDeleteComment = async () => {
   if (!pendingDeleteCommentId) return;
 
@@ -482,30 +483,59 @@ const handleShare = async () => {
                           <small className="text-muted text-nowrap">
                             {new Date(c.created_at).toLocaleString("hu-HU")}
                           </small>
-                          {c.user_id === loggedInId && (
-                            <div className="d-flex gap-1">
-                              <button
-                                className="btn btn-sm btn-outline-primary comment-action-btn"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleEditComment(c);
-                                }}
-                                title="Szerkesztés"
-                              >
-                                Szerkesztés
-                              </button>
-                              <button
-                                className="btn btn-sm btn-outline-danger comment-action-btn"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleDeleteComment(c.id);
-                                }}
-                                title="Törlés"
-                              >
-                                Törlés
-                              </button>
-                            </div>
-                          )}
+                          {/* Saját komment: szerkesztés + törlés */}
+{c.user_id === loggedInId && (
+  <div className="d-flex gap-1">
+    <button
+      className="btn btn-sm btn-outline-primary comment-action-btn"
+      onClick={(e) => {
+        e.stopPropagation();
+        handleEditComment(c);
+      }}
+      title="Szerkesztés"
+    >
+      Szerkesztés
+    </button>
+
+    <button
+      className="btn btn-sm btn-outline-danger comment-action-btn"
+      onClick={(e) => {
+        e.stopPropagation();
+        handleDeleteComment(c.id);
+      }}
+      title="Törlés"
+    >
+      Törlés
+    </button>
+  </div>
+)}
+
+{/* Admin: más kommentjénél piros X */}
+{c.user_id !== loggedInId && isAdmin && (
+  <button
+    type="button"
+    className="btn btn-sm p-0 comment-admin-x"
+    onClick={(e) => {
+      e.stopPropagation();
+      handleDeleteComment(c.id);
+    }}
+    title="Komment törlése (admin)"
+    aria-label="Komment törlése"
+    style={{
+      width: 28,
+      height: 28,
+      display: "inline-flex",
+      alignItems: "center",
+      justifyContent: "center",
+      borderRadius: 8,
+      border: "1px solid rgba(220,38,38,0.35)",
+      background: "rgba(220,38,38,0.10)",
+    }}
+  >
+    <X size={18} color="#dc2626" />
+  </button>
+)}
+
                         </div>
                       </div>
                       
