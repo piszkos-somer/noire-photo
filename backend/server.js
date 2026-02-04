@@ -575,10 +575,15 @@ app.post("/api/images/:id/like", verifyToken, async (req, res) => {
 
 app.post("/api/refresh-token", verifyToken, (req, res) => {
   const newToken = jwt.sign(
-    { id: req.user.id, username: req.user.username },
+    { 
+      id: req.user.id, 
+      username: req.user.username,
+      isAdmin: req.user.isAdmin 
+    },
     process.env.JWT_SECRET,
     { expiresIn: "1h" }
   );
+  
   res.json({ token: newToken });
 });
 
@@ -1004,24 +1009,45 @@ app.get("/api/images/:id/comment-count", async (req, res) => {
 app.delete("/api/images/:id", verifyToken, async (req, res) => {
   const imageId = req.params.id;
   const userId = req.user.id;
+  const isAdmin = req.user.isAdmin === true;
 
   const conn = await pool.getConnection();
   try {
-    const [rows] = await conn.query("SELECT url FROM images WHERE id = ? AND user_id = ?", [
-      imageId,
-      userId,
-    ]);
-    if (rows.length === 0)
+    // Jogosultság ellenőrzés
+    const query = isAdmin
+      ? "SELECT url FROM images WHERE id = ?"
+      : "SELECT url FROM images WHERE id = ? AND user_id = ?";
+
+    const params = isAdmin ? [imageId] : [imageId, userId];
+    const [rows] = await conn.query(query, params);
+
+    if (rows.length === 0) {
       return res.status(403).json({ error: "Nincs jogosultság a kép törléséhez." });
+    }
 
     const imagePath = path.join(__dirname, rows[0].url);
+
+    // Fájl törlés
     if (fs.existsSync(imagePath)) {
       fs.unlinkSync(imagePath);
     }
 
-    await conn.query("DELETE FROM images WHERE id = ? AND user_id = ?", [imageId, userId]);
+    // 🧹 Kapcsolódó adatok törlése
+    await conn.query("DELETE FROM comments WHERE image_id = ?", [imageId]);
+    await conn.query("DELETE FROM image_votes WHERE image_id = ?", [imageId]);
+    await conn.query("DELETE FROM image_tags WHERE image_id = ?", [imageId]);
 
-    res.json({ success: true, message: "A kép sikeresen törölve lett." });
+    // Kép törlése
+    const deleteQuery = isAdmin
+      ? "DELETE FROM images WHERE id = ?"
+      : "DELETE FROM images WHERE id = ? AND user_id = ?";
+
+    const deleteParams = isAdmin ? [imageId] : [imageId, userId];
+
+    await conn.query(deleteQuery, deleteParams);
+
+    res.json({ success: true, message: "A kép és minden kapcsolódó adat törölve lett." });
+
   } catch (err) {
     console.error("Kép törlési hiba:", err);
     res.status(500).json({ error: "Szerverhiba a törlés közben." });
@@ -1029,6 +1055,8 @@ app.delete("/api/images/:id", verifyToken, async (req, res) => {
     conn.release();
   }
 });
+
+
 
 // --- 👥 KÖVETÉS RENDSZER --- //
 app.post("/api/follow/:id", verifyToken, async (req, res) => {

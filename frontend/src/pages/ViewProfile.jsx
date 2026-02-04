@@ -239,6 +239,36 @@ function ViewProfile() {
     }
   };
 
+  const handleDeleteImage = async (imageId) => {
+    if (!window.confirm("Biztosan törölni akarod ezt a képet?")) return;
+  
+    try {
+      const res = await fetch(`http://localhost:3001/api/images/${imageId}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+  
+      if (res.status === 401 || res.status === 403) {
+        handleTokenError(res.status, navigate);
+        return;
+      }
+  
+      if (res.ok) {
+        setImages((prev) => prev.filter((img) => img.id !== imageId));
+        if (selectedImage?.id === imageId) closeModal();
+      } else {
+        alert("Hiba a kép törlésekor!");
+      }
+    } catch (err) {
+      console.error("Kép törlés hiba:", err);
+      alert("Hiba történt a törlés során!");
+    }
+  };
+  
+
   // ----- comment submit -----
   const handleCommentSubmit = async () => {
     if (!token) return navigate("/Registration");
@@ -424,16 +454,47 @@ function ViewProfile() {
       <h3 className="text-center mb-4">📸 {profile?.username} képei</h3>
 
       <Row xs={1} sm={2} md={3} lg={4} className="g-4">
-        {images.map((img) => (
-          <ImageCard
-            key={img.id}
-            image={img}
-            onVote={handleImageVote}
-            onOpen={openModal}
-            likeLoading={likeLoading}
-          />
-        ))}
-      </Row>
+  {images.map((img) => (
+    <div key={img.id} style={{ position: "relative" }}>
+      
+      {/* 🔴 ADMIN TÖRLÉS GOMB */}
+      {user?.isAdmin && (
+        <button
+          onClick={() => handleDeleteImage(img.id)}
+          title="Kép törlése"
+          style={{
+            position: "absolute",
+            top: "8px",
+            right: "8px",
+            zIndex: 10,
+            background: "rgba(255,0,0,0.85)",
+            color: "white",
+            border: "none",
+            borderRadius: "50%",
+            width: "26px",
+            height: "26px",
+            cursor: "pointer",
+            fontWeight: "bold",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          X
+        </button>
+      )}
+
+      <ImageCard
+        image={img}
+        onVote={handleImageVote}
+        onOpen={openModal}
+        likeLoading={likeLoading}
+      />
+    </div>
+  ))}
+</Row>
+
+
 
       {/* IMAGE MODAL */}
       <ImageModal
