@@ -1035,7 +1035,6 @@ app.delete("/api/images/:id", verifyToken, async (req, res) => {
     // 🧹 Kapcsolódó adatok törlése
     await conn.query("DELETE FROM comments WHERE image_id = ?", [imageId]);
     await conn.query("DELETE FROM image_votes WHERE image_id = ?", [imageId]);
-    await conn.query("DELETE FROM image_tags WHERE image_id = ?", [imageId]);
 
     // Kép törlése
     const deleteQuery = isAdmin
