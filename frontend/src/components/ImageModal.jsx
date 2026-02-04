@@ -55,11 +55,17 @@ const confirmDeleteComment = async () => {
       }
     );
 
-    if (res.status === 401 || res.status === 403) {
-      handleTokenError(res.status, navigate);
+    if (res.status === 401) {
+      handleTokenError(res.status);
+      navigate("/Login");
       return;
     }
-
+    
+    if (res.status === 403) {
+      alert("Nincs jogosultságod a komment törléséhez.");
+      return;
+    }
+    
     if (res.ok) {
       setLocalComments((prev) =>
         prev.filter((c) => c.id !== pendingDeleteCommentId)

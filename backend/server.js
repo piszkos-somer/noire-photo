@@ -717,10 +717,10 @@ app.put("/api/comments/:id", verifyToken, async (req, res) => {
 app.delete("/api/comments/:id", verifyToken, async (req, res) => {
   const commentId = req.params.id;
   const userId = req.user.id;
+  const isAdmin = req.user.isAdmin === true;
 
   const conn = await pool.getConnection();
   try {
-    // Ellenőrizzük, hogy a felhasználó a saját kommentjét törli-e
     const [commentRows] = await conn.query(
       "SELECT user_id FROM comments WHERE id = ?",
       [commentId]
@@ -730,20 +730,19 @@ app.delete("/api/comments/:id", verifyToken, async (req, res) => {
       return res.status(404).json({ error: "A komment nem található." });
     }
 
-    if (commentRows[0].user_id !== userId) {
-      return res.status(403).json({ error: "Csak a saját kommentedet törölheted." });
+    const ownerId = commentRows[0].user_id;
+
+    if (ownerId !== userId && !isAdmin) {
+      return res.status(403).json({ error: "Nincs jogosultság a komment törléséhez." });
     }
 
-    // Töröljük a kommenthez tartozó szavazatokat is
     await conn.query("DELETE FROM comment_votes WHERE comment_id = ?", [commentId]);
-    
-    // Töröljük a kommentet
     await conn.query("DELETE FROM comments WHERE id = ?", [commentId]);
 
-    res.json({ success: true, message: "Komment sikeresen törölve." });
+    res.json({ success: true });
   } catch (err) {
-    console.error("Komment törlési hiba:", err);
-    res.status(500).json({ error: "Szerverhiba a komment törlésénél." });
+    console.error(err);
+    res.status(500).json({ error: "Szerverhiba." });
   } finally {
     conn.release();
   }
