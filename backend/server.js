@@ -1344,3 +1344,90 @@ app.delete("/api/comments/:id", verifyToken, async (req, res) => {
     conn.release();
   }
 });
+// ✅ ADMIN: teljes profil törlése (képek+kommentek+vote-ok+követések), tagek maradnak
+app.delete("/api/admin/users/:id", verifyToken, async (req, res) => {
+  const targetUserId = Number(req.params.id);
+  const isAdmin = req.user?.isAdmin === true;
+
+  if (!isAdmin) return res.status(403).json({ message: "Nincs jogosultság." });
+  if (!targetUserId) return res.status(400).json({ message: "Hibás user id." });
+
+  // opcionális: ne lehessen az Admin usert törölni
+  if (targetUserId === 11) {
+    return res.status(403).json({ message: "Az admin fiók nem törölhető." });
+  }
+
+  const conn = await pool.getConnection();
+  try {
+    await conn.beginTransaction();
+
+    // létezik-e a user?
+    const [urows] = await conn.execute(
+      "SELECT id, profile_picture, is_admin FROM users WHERE id = ?",
+      [targetUserId]
+    );
+    if (urows.length === 0) {
+      await conn.rollback();
+      return res.status(404).json({ message: "Felhasználó nem található." });
+    }
+    if (urows[0].is_admin === 1) {
+      await conn.rollback();
+      return res.status(403).json({ message: "Admin fiók nem törölhető." });
+    }
+
+    // képfájlok listája (mielőtt kaszkád törli a DB-t)
+    const [imgRows] = await conn.execute(
+      "SELECT url FROM images WHERE user_id = ?",
+      [targetUserId]
+    );
+
+    const profilePicUrl = urows[0].profile_picture;
+
+    // 🔥 olyan vote-ok törlése, amiknél NINCS FK user_id-ra (különben orphan marad)
+    await conn.execute("DELETE FROM image_votes WHERE user_id = ?", [targetUserId]);
+    await conn.execute("DELETE FROM comment_votes WHERE user_id = ?", [targetUserId]);
+
+    // maga a user törlése:
+    // - images ON DELETE CASCADE -> képek mennek
+    // - comments (user_id) ON DELETE CASCADE -> user kommentjei mennek
+    // - comments (image_id) ON DELETE CASCADE -> képei alatti kommentek mennek
+    // - image_tags ON DELETE CASCADE (image_id) -> image_tags sorok mennek (tags tábla MARAD!)
+    // - image_votes ON DELETE CASCADE (image_id) -> képeihez tartozó vote-ok mennek
+    // - follows ON DELETE CASCADE -> követések mennek
+    await conn.execute("DELETE FROM users WHERE id = ?", [targetUserId]);
+
+    await conn.commit();
+
+    // ✅ fájlok törlése DB commit után (ha DB sikeres volt)
+    const safeUnlink = (p) => {
+      try {
+        if (p && fs.existsSync(p)) fs.unlinkSync(p);
+      } catch (e) {
+        console.warn("Fájl törlés hiba:", e.message);
+      }
+    };
+
+    // képek törlése lemezről
+    for (const r of imgRows) {
+      // r.url pl: "/images/1769030553027.jpg"
+      const absPath = path.join(__dirname, r.url);
+      safeUnlink(absPath);
+    }
+
+    // profilkép törlése
+    if (profilePicUrl) {
+      const absProfilePath = path.join(__dirname, profilePicUrl);
+      safeUnlink(absProfilePath);
+    }
+
+    return res.json({ success: true, message: "Profil teljesen törölve." });
+  } catch (err) {
+    try {
+      await conn.rollback();
+    } catch {}
+    console.error("Admin user törlés hiba:", err);
+    return res.status(500).json({ message: "Szerverhiba profil törlés közben." });
+  } finally {
+    conn.release();
+  }
+});

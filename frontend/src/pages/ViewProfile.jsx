@@ -450,6 +450,48 @@ function ViewProfile() {
         </div>
       )}
 
+{user?.isAdmin && !isOwnProfile && (
+  <div className="mt-3">
+    <Button
+      variant="danger"
+      onClick={async () => {
+        const ok = window.confirm(
+          "BIZTOS? Ez törli a felhasználót, a képeit, kommentjeit és szavazatait is."
+        );
+        if (!ok) return;
+
+        try {
+          const res = await fetch(`http://localhost:3001/api/admin/users/${id}`, {
+            method: "DELETE",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+
+          if (res.status === 401 || res.status === 403) {
+            handleTokenError(res.status, navigate);
+            return;
+          }
+
+          const data = await res.json().catch(() => ({}));
+
+          if (res.ok) {
+            alert("Profil törölve.");
+            navigate("/"); // vagy ahová akarod
+          } else {
+            alert(data?.message || "Hiba a profil törlésénél.");
+          }
+        } catch (e) {
+          console.error("Profil törlés hiba:", e);
+          alert("Szerverhiba.");
+        }
+      }}
+    >
+      Fiók törlése
+    </Button>
+  </div>
+)}
+
       {/* IMAGES GRID */}
       <h3 className="text-center mb-4">📸 {profile?.username} képei</h3>
 
