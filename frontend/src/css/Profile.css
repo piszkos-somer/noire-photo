@@ -92,3 +92,222 @@ img.rounded-circle:hover {
   height: 250px;
   object-fit: cover;
 }
+/* =========================
+   VAGÁNY PROFIL HERO (GLASS + NEON)
+   ========================= */
+
+   .profile-hero {
+    position: relative;
+    padding: 42px 22px;
+    border-radius: 22px;
+    overflow: hidden;
+    isolation: isolate;
+  
+    /* mély, “űr” háttér */
+    background:
+      radial-gradient(900px circle at 10% 10%, rgba(120, 170, 255, 0.25), transparent 55%),
+      radial-gradient(900px circle at 90% 25%, rgba(255, 120, 200, 0.20), transparent 55%),
+      radial-gradient(700px circle at 50% 100%, rgba(60, 255, 200, 0.14), transparent 60%),
+      linear-gradient(135deg, rgba(10, 12, 22, 0.95), rgba(16, 18, 30, 0.85));
+    box-shadow:
+      0 18px 60px rgba(0, 0, 0, 0.35),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+  }
+  
+  .profile-hero::before {
+    content: "";
+    position: absolute;
+    inset: -2px;
+    background: conic-gradient(
+      from 210deg,
+      rgba(90, 200, 255, 0.0),
+      rgba(90, 200, 255, 0.35),
+      rgba(255, 90, 200, 0.35),
+      rgba(80, 255, 200, 0.28),
+      rgba(90, 200, 255, 0.0)
+    );
+    filter: blur(18px);
+    opacity: 0.75;
+    z-index: -2;
+    animation: heroGlow 9s linear infinite;
+  }
+  
+  .profile-hero::after {
+    /* finom “noise” + fény */
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(800px circle at 50% 0%, rgba(255,255,255,0.10), transparent 60%),
+      radial-gradient(900px circle at 0% 70%, rgba(255,255,255,0.06), transparent 55%),
+      linear-gradient(0deg, rgba(255,255,255,0.03), rgba(255,255,255,0.03));
+    opacity: 0.8;
+    z-index: -1;
+    pointer-events: none;
+  }
+  
+  @keyframes heroGlow {
+    0% { transform: rotate(0deg) scale(1.02); }
+    100% { transform: rotate(360deg) scale(1.02); }
+  }
+  
+  .profile-hero-inner {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 26px;
+    align-items: center;
+  }
+  
+  @media (max-width: 768px) {
+    .profile-hero-inner {
+      grid-template-columns: 1fr;
+      text-align: center;
+    }
+  }
+  
+  .profile-avatar-wrap {
+    position: relative;
+    width: 200px;
+    height: 200px;
+    margin: 0 auto;
+    border-radius: 999px;
+    padding: 6px;
+  
+    background: conic-gradient(
+      from 90deg,
+      rgba(90, 200, 255, 0.95),
+      rgba(255, 90, 200, 0.95),
+      rgba(80, 255, 200, 0.9),
+      rgba(90, 200, 255, 0.95)
+    );
+  
+    box-shadow:
+      0 14px 40px rgba(0,0,0,0.45),
+      0 0 0 1px rgba(255,255,255,0.18) inset;
+    animation: avatarSpin 10s linear infinite;
+  }
+  
+  @keyframes avatarSpin {
+    0% { filter: hue-rotate(0deg); }
+    100% { filter: hue-rotate(360deg); }
+  }
+  
+  .profile-avatar {
+    width: 100%;
+    height: 100%;
+    border-radius: 999px;
+    object-fit: cover;
+    display: block;
+    background: rgba(0,0,0,0.25);
+    border: 2px solid rgba(255,255,255,0.35);
+    transform: translateZ(0);
+  }
+  
+  .profile-meta h2 {
+    margin: 0;
+    font-size: clamp(1.6rem, 3.2vw, 2.4rem);
+    letter-spacing: 0.3px;
+    color: rgba(255,255,255,0.95);
+    text-shadow: 0 10px 30px rgba(0,0,0,0.35);
+  }
+  
+  .profile-bio {
+    margin-top: 10px;
+    margin-bottom: 16px;
+    color: rgba(255,255,255,0.72) !important;
+    line-height: 1.45;
+  }
+  
+  .profile-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  
+  @media (max-width: 768px) {
+    .profile-actions { justify-content: center; }
+  }
+  
+  /* “Neon” gomb – Bootstrap Button mellé */
+  .btn-neon {
+    position: relative;
+    border: none !important;
+    padding: 10px 16px;
+    border-radius: 14px !important;
+  
+    color: rgba(255,255,255,0.96) !important;
+    background: linear-gradient(135deg, rgba(90,200,255,0.28), rgba(255,90,200,0.22)) !important;
+  
+    box-shadow:
+      0 14px 36px rgba(0,0,0,0.35),
+      0 0 0 1px rgba(255,255,255,0.14) inset;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  
+    transition: transform .18s ease, box-shadow .18s ease, filter .18s ease;
+  }
+  
+  .btn-neon::before {
+    content: "";
+    position: absolute;
+    inset: -2px;
+    border-radius: 16px;
+    background: conic-gradient(
+      rgba(90,200,255,0.0),
+      rgba(90,200,255,0.55),
+      rgba(255,90,200,0.55),
+      rgba(80,255,200,0.45),
+      rgba(90,200,255,0.0)
+    );
+    filter: blur(12px);
+    opacity: 0.65;
+    z-index: -1;
+  }
+  
+  .btn-neon:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.08);
+    box-shadow:
+      0 18px 48px rgba(0,0,0,0.45),
+      0 0 0 1px rgba(255,255,255,0.18) inset;
+  }
+  
+  .btn-neon:disabled {
+    opacity: 0.65;
+    transform: none;
+  }
+  
+  /* “Secondary” állapot is vagány legyen */
+  .btn-neon.is-following {
+    background: linear-gradient(135deg, rgba(255,255,255,0.14), rgba(255,255,255,0.07)) !important;
+  }
+  
+  /* Mini “pill” badge a név fölé / mellé */
+  .profile-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    color: rgba(255,255,255,0.86);
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.12);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: 0 10px 26px rgba(0,0,0,0.25);
+  }
+  
+  .profile-pill-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: rgba(80,255,200,0.9);
+    box-shadow: 0 0 16px rgba(80,255,200,0.55);
+  }
+  
+  /* A régi rounded-circle hover maradhat, de ne “harcoljon” */
+  img.rounded-circle { border: none; }
+  

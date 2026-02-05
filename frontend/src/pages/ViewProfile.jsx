@@ -418,8 +418,12 @@ function ViewProfile() {
   return (
     <Container className="py-5">
       {/* PROFILE HEADER */}
-      {profile && (
-        <div className="text-center mb-5">
+      {/* PROFILE HEADER */}
+{profile && (
+  <div className="profile-hero mb-5">
+    <div className="profile-hero-inner">
+      <div>
+        <div className="profile-avatar-wrap">
           <img
             src={
               profile.profile_picture
@@ -427,28 +431,44 @@ function ViewProfile() {
                 : "/profile-pictures/default.png"
             }
             alt={profile.username}
-            className="rounded-circle shadow-sm"
-            width={180}
-            height={180}
+            className="profile-avatar"
+            width={200}
+            height={200}
           />
-
-          <h2 className="mt-3">{profile.username}</h2>
-          <p className="text-muted">{profile.bio || "Nincs bio megadva."}</p>
-
-          {/* ✅ FOLLOW BUTTON ON PROFILE PAGE */}
-          {!isOwnProfile && token && (
-            <div className="mt-3">
-              <Button
-                variant={isFollowing ? "secondary" : "primary"}
-                onClick={handleFollowToggle}
-                disabled={followLoading}
-              >
-                {isFollowing ? "Követés leállítása" : "Követés"}
-              </Button>
-            </div>
-          )}
         </div>
-      )}
+      </div>
+
+      <div className="profile-meta">
+
+        <h2 className="mt-2">{profile.username}</h2>
+        <p className="profile-bio">
+          {profile.bio || "Nincs bio megadva."}
+        </p>
+
+        {!isOwnProfile && token && (
+          <div className="profile-actions">
+            <Button
+              className={`btn-neon ${isFollowing ? "is-following" : ""}`}
+              onClick={handleFollowToggle}
+              disabled={followLoading}
+            >
+              {isFollowing ? "Követés leállítása" : "Követés"}
+            </Button>
+          </div>
+        )}
+
+        {!token && !isOwnProfile && (
+          <div className="profile-actions">
+            <Button className="btn-neon" onClick={() => navigate("/Registration")}>
+              Követés (belépés kell)
+            </Button>
+          </div>
+        )}
+      </div>
+    </div>
+  </div>
+)}
+
 
 {user?.isAdmin && !isOwnProfile && (
   <div className="mt-3">
