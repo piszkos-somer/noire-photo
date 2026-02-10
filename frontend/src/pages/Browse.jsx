@@ -43,7 +43,73 @@ function Browse() {
     setPendingDeleteImageId(imageId);
     setShowDeleteImageModal(true);
   };
-
+  const handleCommentSubmit = async () => {
+    if (!token) return navigate("/Registration");
+    if (!newComment.trim()) return;
+    if (!selectedImage?.id) return;
+  
+    setCommentLoading(true);
+    try {
+      const res = await fetch(
+        `http://localhost:3001/api/images/${selectedImage.id}/comments`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ comment: newComment }),
+        }
+      );
+  
+      if (res.status === 401 || res.status === 403) {
+        handleTokenError(res.status, navigate);
+        return;
+      }
+  
+      if (res.ok) {
+        setNewComment("");
+        fetchComments(selectedImage.id);
+      }
+    } catch (err) {
+      console.error("Komment küldési hiba:", err);
+    } finally {
+      setCommentLoading(false);
+    }
+  };
+  
+  const handleCommentVote = async (commentId, vote) => {
+    if (!token) return navigate("/Registration");
+    try {
+      const res = await fetch(`http://localhost:3001/api/comments/${commentId}/like`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ vote }),
+      });
+  
+      if (res.status === 401 || res.status === 403) {
+        handleTokenError(res.status, navigate);
+        return;
+      }
+  
+      if (res.ok) {
+        const updated = await res.json();
+        setComments((prev) =>
+          prev.map((c) =>
+            c.id === commentId
+              ? { ...c, upvotes: updated.upvotes, downvotes: updated.downvotes, userVote: updated.userVote }
+              : c
+          )
+        );
+      }
+    } catch (err) {
+      console.error("Komment vote hiba:", err);
+    }
+  };
+  
   const confirmDeleteImage = async () => {
     if (!pendingDeleteImageId) return;
     setDeleteImageLoading(true);
@@ -351,7 +417,7 @@ function Browse() {
                   </button>
                 )}
 
-                <ImageCard image={img} onVote={handleImageVote} onOpen={openModal} likeLoading={likeLoading} />
+                <ImageCard image={img} onVote={handleImageVote} onOpen={openModal} likeLoading={likeLoading} searchQuery={query}/>
               </div>
             ))}
           </Container>
@@ -367,10 +433,11 @@ function Browse() {
         comments={comments}
         newComment={newComment}
         onCommentChange={(e) => setNewComment(e.target.value)}
-        onCommentSubmit={() => {}}
+        onCommentSubmit={handleCommentSubmit}
+onCommentVote={handleCommentVote}
+
         
         commentLoading={commentLoading}
-        onCommentVote={() => {}}
       />
 
       <Modal

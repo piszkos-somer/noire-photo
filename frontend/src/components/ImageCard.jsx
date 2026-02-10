@@ -4,9 +4,10 @@ import { useNavigate } from "react-router-dom";
 import { MessageCircle, ArrowUp, ArrowDown } from "lucide-react";
 import "../css/ImageCard.css";
 import { handleTokenError } from "../utils/auth";
+import { highlightText } from "../utils/highlight";
 
 
-function ImageCard({ image, onVote, onOpen, likeLoading, isAdmin, token, onDeleted }) {
+function ImageCard({ image, onVote, onOpen, likeLoading, isAdmin, token, onDeleted, searchQuery }) {
 
   const navigate = useNavigate();
   const [commentCount, setCommentCount] = useState(0);
@@ -126,7 +127,7 @@ function ImageCard({ image, onVote, onOpen, likeLoading, isAdmin, token, onDelet
 
         <Card.Body>
 <div className="d-flex justify-content-between align-items-start mb-2">
-  <h5 className="info-bubble img-title">{image.title}</h5>
+  <h5 className="info-bubble img-title">{highlightText(image.title, searchQuery)}</h5>
 
   <div className="text-end">
     <div className="d-flex align-items-center justify-content-end gap-1">
@@ -199,7 +200,8 @@ function ImageCard({ image, onVote, onOpen, likeLoading, isAdmin, token, onDelet
           )}
 
           {image.description && (
-            <div className="info-bubble text">{image.description}</div>
+            <div className="info-bubble text"><p>{highlightText(image.description, searchQuery)}</p>
+</div>
           )}
 
 {normalizedTags.length > 0 && (
@@ -211,7 +213,8 @@ function ImageCard({ image, onVote, onOpen, likeLoading, isAdmin, token, onDelet
         style={{ cursor: "pointer" }}
         onClick={(e) => handleTagClick(e, tag)}
       >
-        {tag}
+        {highlightText(tag, searchQuery)}
+
       </span>
     ))}
   </div>
