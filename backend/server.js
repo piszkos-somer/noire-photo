@@ -842,7 +842,8 @@ app.get("/api/users/search", async (req, res) => {
         FROM follows
         GROUP BY following_id
       ) fStats ON fStats.following_id = u.id
-      WHERE u.username LIKE ?
+      WHERE u.is_admin = 0
+        AND u.username LIKE ?
       ORDER BY imgStats.imageCount DESC, fStats.followerCount DESC, u.username ASC
       LIMIT 50
       `,

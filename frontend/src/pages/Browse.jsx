@@ -260,10 +260,19 @@ function Browse() {
                 }}
               />
               <Form.Select
-                value={filter}
-                onChange={(e) => setFilter(e.target.value)}
-                style={{ maxWidth: "150px" }}
-              >
+  value={filter}
+  onChange={(e) => {
+    const newFilter = e.target.value;
+    setFilter(newFilter);
+
+    if (newFilter === "author") {
+      setQuery("");
+      handleSearch("", "author");
+    }
+  }}
+  style={{ maxWidth: "150px" }}
+>
+
                 <option value="title">Cím / Leírás</option>
                 <option value="tag">Tag</option>
                 <option value="author">Feltöltő</option>
