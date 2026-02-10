@@ -1,10 +1,9 @@
-// src/pages/Browse.jsx
 import React, { useState, useEffect, useContext } from "react";
 import { Container, Form, Button, Row, Col, Modal } from "react-bootstrap";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import ImageCard from "../components/ImageCard";
 import ImageModal from "../components/ImageModal";
-import UserResultCard from "../components/UserResultCard"; // ✅ ÚJ
+import UserResultCard from "../components/UserResultCard";
 import "../css/Browse.css";
 import { handleTokenError } from "../utils/auth";
 import InfiniteScroll from "react-infinite-scroll-component";
@@ -34,7 +33,6 @@ function Browse() {
   const userData = localStorage.getItem("user");
   const token = userData ? JSON.parse(userData).token : null;
 
-  // --- admin delete image confirm (unchanged) ---
   const [showDeleteImageModal, setShowDeleteImageModal] = useState(false);
   const [deleteImageLoading, setDeleteImageLoading] = useState(false);
   const [pendingDeleteImageId, setPendingDeleteImageId] = useState(null);
@@ -314,8 +312,8 @@ function Browse() {
               <Form.Control
                 type="text"
                 placeholder={filter === "author"
-                  ? "Keress feltöltőre (üresen = top 50)"
-                  : "Keresés képre: cím / leírás / tag egyszerre..."}
+                  ? "Keress feltöltőre"
+                  : "Keresés képre"}
                 
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
@@ -330,18 +328,14 @@ function Browse() {
     setFilter(newFilter);
 
     if (newFilter === "author") {
-      // 👤 Feltöltők azonnali listázása
       setQuery("");
       handleSearch("", "author");
     } else {
-      // 🖼️ Visszaváltás "Kép"-re
       setUsers([]);
       setImages([]);
       setHasMore(true);
       setPage(1);
 
-      // ha van keresőkifejezés → keressen
-      // ha nincs → sima browse képek
       if (query.trim()) {
         handleSearch(query, "image");
       } else {

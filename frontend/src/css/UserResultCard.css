@@ -1,17 +1,14 @@
-/* src/css/UserResultCard.css */
-
 .u-card{
     position: relative;
     display: grid;
     grid-template-columns: 92px 1fr 140px;
     align-items: center;
     gap: 14px;
-  
+    margin-top: 10px;
     padding: 14px 14px;
     border-radius: 20px;
     cursor: pointer;
   
-    /* glassy background */
     background: rgba(255,255,255,0.06);
     border: 1px solid rgba(255,255,255,0.12);
     backdrop-filter: blur(14px);

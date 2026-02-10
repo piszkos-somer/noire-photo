@@ -20,7 +20,7 @@ export function getAuthHeader() {
 
 export function handleTokenError(status) {
   if (status === 401 || status === 403) {
-    console.warn("⚠️ Token érvénytelen vagy lejárt, kijelentkeztetés...");
+    console.warn("Token érvénytelen vagy lejárt, kijelentkeztetés...");
     localStorage.removeItem("user");
 
 
@@ -43,7 +43,7 @@ export function isTokenExpired() {
 
 export function logoutIfExpired(navigate) {
   if (isTokenExpired()) {
-    console.warn("⚠️ Token lejárt, kijelentkeztetés...");
+    console.warn("Token lejárt, kijelentkeztetés...");
     localStorage.removeItem("user");
   }
 }

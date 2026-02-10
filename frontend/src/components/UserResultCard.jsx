@@ -53,7 +53,7 @@ export default function UserResultCard({ user, onOpenProfile }) {
         </div>
 
         <div className="u-bio" title={user?.bio || ""}>
-          {user?.bio ? user.bio : "No bio yet… de majd lesz, stay tuned 😎"}
+          {user?.bio ? user.bio : "No bio yet"}
         </div>
       </div>
 

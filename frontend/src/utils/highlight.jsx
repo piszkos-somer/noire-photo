@@ -2,11 +2,6 @@ import React from "react";
 
 const escapeRegExp = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
-/**
- * Visszaad React node-okat, ahol a query egyezések <mark>-kal vannak kiemelve.
- * - case-insensitive
- * - biztonságos (nem használ dangerouslySetInnerHTML-t)
- */
 export function highlightText(text, query) {
   if (!text) return text;
   const q = (query || "").trim();
