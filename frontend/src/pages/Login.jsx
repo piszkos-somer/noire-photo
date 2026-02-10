@@ -34,10 +34,8 @@ function Login() {
       const data = await res.json();
   
       if (res.ok) {
-        // itt adjuk át az isAdmin-t is
         login(data.username, data.token, data.isAdmin); 
   
-        // átirányítás a jogosultság alapján
         if (data.isAdmin) {
           navigate("/browse");
         } else {

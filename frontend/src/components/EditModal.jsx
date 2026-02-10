@@ -11,7 +11,7 @@ function EditModal({ show, onHide, image, onSave, onDeleted }) {
   const [newTag, setNewTag] = useState("");
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false); // 🔹 új állapot a törlés megerősítő modalhoz
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -75,7 +75,6 @@ function EditModal({ show, onHide, image, onSave, onDeleted }) {
     setTags(tags.filter((t) => t !== tag));
   };
 
-  // 🔹 Kép törlés
   const handleDeleteConfirmed = async () => {
     try {
       const res = await fetch(`http://localhost:3001/api/images/${image.id}`, {
@@ -93,7 +92,7 @@ function EditModal({ show, onHide, image, onSave, onDeleted }) {
         setShowDeleteConfirm(false);
         onHide();
         if (onDeleted) {
-          onDeleted(image.id); // Értesíti a parent komponenst a törlésről
+          onDeleted(image.id);
         }
       } else {
         alert(data.error || "Hiba történt a törlés közben.");
@@ -109,7 +108,6 @@ function EditModal({ show, onHide, image, onSave, onDeleted }) {
 
   return (
     <>
-      {/* Fő szerkesztő modal */}
       <Modal show={show} onHide={onHide} centered size="lg" className="glass-modal">
         <Modal.Body className="p-0">
           <div className="glass-header d-flex justify-content-between align-items-center">
@@ -181,7 +179,6 @@ function EditModal({ show, onHide, image, onSave, onDeleted }) {
               )}
             </Form.Group>
 
-            {/* FOOTER */}
             <div className="d-flex justify-content-between align-items-center mt-4">
               <Button variant="danger" onClick={() => setShowDeleteConfirm(true)}>
                 Poszt törlése
@@ -200,7 +197,6 @@ function EditModal({ show, onHide, image, onSave, onDeleted }) {
         </Modal.Body>
       </Modal>
 
-      {/* 🔹 Törlés megerősítő modal */}
       <Modal
         show={showDeleteConfirm}
         onHide={() => setShowDeleteConfirm(false)}

@@ -1,4 +1,3 @@
-// src/components/NavbarNoire.jsx
 import React, { useState, useContext } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import {
@@ -18,7 +17,6 @@ function NavbarNoire() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // 🔍 Keresés indítása → Browse oldalra irányítás (cím/leírás keresés)
   const handleSearch = (e) => {
     e.preventDefault();
     if (!query.trim()) return;
@@ -27,11 +25,9 @@ function NavbarNoire() {
     setQuery("");
   };
 
-  // ✅ Logout + ha Profile-on vagyunk, irány vissza a főoldalra
   const handleLogout = () => {
     logout();
 
-    // kezeld mindkét lehetséges útvonalat (kis/nagybetű eltérések miatt)
     const path = (location.pathname || "").toLowerCase();
     if (path === "/profile") {
       navigate("/");
@@ -59,7 +55,6 @@ function NavbarNoire() {
             </Nav.Link>
           </Nav>
 
-          {/* 🔍 Kereső */}
           <Form className="d-flex me-3" onSubmit={handleSearch}>
             <FormControl
               type="search"

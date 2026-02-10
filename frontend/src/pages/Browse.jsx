@@ -158,7 +158,7 @@ function Browse() {
         return [...prev, ...newImages];
       });
     } catch (err) {
-      console.error("❌ Képek lekérési hiba:", err);
+      console.error("Képek lekérési hiba:", err);
     } finally {
       setLoading(false);
     }

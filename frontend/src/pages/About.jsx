@@ -5,8 +5,6 @@ import "../css/About.css";
 function About() {
   return (
     <Container className="py-5">
-
-      {/* HERO SZEKCIÓ */}
       <div className="about-hero">
         <h1>Rólunk</h1>
         <p className="lead">
@@ -18,10 +16,8 @@ function About() {
 
       <h2 className="about-subtitle">Ismerj meg minket, kik is vagyunk valójában.</h2>
 
-      {/* GRID ELRENDEZÉS */}
       <div className="about-grid">
         
-        {/* Attila */}
         <div className="about-item text-box">
           <div className="about-name">Perák Attila</div>
           <div>
@@ -37,7 +33,6 @@ function About() {
           <img src="../img/attilakep.jfif" alt="Attila" className='attilakep'/>
         </div>
 
-        {/* Zsombor */}
         <div className="about-item image-box"> 
           <img src="../img/zsomborkep.jfif" alt="Zsombor" className='zsomborkep'/>
         </div>
@@ -53,7 +48,6 @@ function About() {
           </div>
         </div>
 
-        {/* Tamás */}
         <div className="about-item text-box">
           <div className="about-name">Haberle Tamás</div>
           <div>
@@ -68,7 +62,6 @@ A csapatmunkában új tapasztalatokat szereztem, megtanultam a hatékony kommuni
         </div>
       </div>
 
-      {/* LÁBLÉC SZÖVEG */}
       <p className="mt-4 text-center">
         Az oldalt 2025-ben hoztuk létre, és azóta is folyamatosan fejlesztjük, hogy a látogatók
         könnyedén böngészhessenek, feltölthessenek és felfedezhessenek különleges képeket.

@@ -1,4 +1,3 @@
-// src/pages/ViewProfile.jsx
 import React, { useState, useEffect, useContext, useMemo } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { Container, Row, Spinner, Button, Modal } from "react-bootstrap";
@@ -15,7 +14,6 @@ function ViewProfile() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // ----- auth / token -----
   const userDataRaw = localStorage.getItem("user");
   const parsedLocalUser = useMemo(() => {
     try {
@@ -26,15 +24,12 @@ function ViewProfile() {
   }, [userDataRaw]);
 
   const token = useMemo(() => {
-    // prefer Context token if exists, else localStorage token
     return user?.token || parsedLocalUser?.token || null;
   }, [user?.token, parsedLocalUser?.token]);
 
   const loggedInId = useMemo(() => {
-    // 1) if local user contains id directly
     if (parsedLocalUser?.id) return parsedLocalUser.id;
 
-    // 2) try decode JWT payload { id: ... }
     try {
       const t = token;
       if (!t) return null;
@@ -45,27 +40,21 @@ function ViewProfile() {
     }
   }, [parsedLocalUser?.id, token]);
 
-  // ----- page state -----
   const [profile, setProfile] = useState(null);
   const [images, setImages] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // follow state (profile owner)
   const [isFollowing, setIsFollowing] = useState(false);
   const [followLoading, setFollowLoading] = useState(false);
 
-  // modal
   const [selectedImage, setSelectedImage] = useState(null);
   const [hasOpenedFromLink, setHasOpenedFromLink] = useState(false);
 
-  // comments
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
   const [commentLoading, setCommentLoading] = useState(false);
 
-  // voting UI
   const [likeLoading, setLikeLoading] = useState(null);
-  // ----- admin delete user confirm (glass modal) -----
   const [showDeleteUserModal, setShowDeleteUserModal] = useState(false);
   const [deleteUserLoading, setDeleteUserLoading] = useState(false);
   const askDeleteUser = () => setShowDeleteUserModal(true);
@@ -100,7 +89,6 @@ function ViewProfile() {
     }
   };
 
-  // ----- fetch profile -----
   useEffect(() => {
     const fetchProfile = async () => {
       try {
@@ -120,7 +108,6 @@ function ViewProfile() {
     fetchProfile();
   }, [id, navigate]);
 
-  // ----- fetch images -----
   useEffect(() => {
     const fetchImages = async () => {
       try {
@@ -145,7 +132,6 @@ function ViewProfile() {
     fetchImages();
   }, [id, token, navigate]);
 
-  // ----- follow status for the viewed profile -----
   useEffect(() => {
     const viewedId = Number(id);
 
@@ -154,7 +140,6 @@ function ViewProfile() {
       return;
     }
 
-    // ne kérdezd le / ne mutasd, ha a saját profilod
     if (loggedInId && viewedId === Number(loggedInId)) {
       setIsFollowing(false);
       return;
@@ -183,7 +168,6 @@ function ViewProfile() {
     fetchFollowStatus();
   }, [id, token, loggedInId, navigate]);
 
-  // ----- deep link: open modal from ?image=ID -----
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const imageId = params.get("image");
@@ -197,7 +181,6 @@ function ViewProfile() {
     }
   }, [location.search, images, hasOpenedFromLink, selectedImage]);
 
-  // ----- comments -----
   const fetchComments = async (imageId) => {
     try {
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
@@ -215,7 +198,6 @@ function ViewProfile() {
     }
   };
 
-  // ----- image vote (up/down/neutral) -----
   const handleImageVote = async (imageId, vote) => {
     if (!token) return navigate("/Registration");
     setLikeLoading(imageId);
@@ -227,7 +209,7 @@ function ViewProfile() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ vote }), // 1 | -1 | 0
+        body: JSON.stringify({ vote }),
       });
 
       if (res.status === 401 || res.status === 403) {
@@ -267,7 +249,7 @@ function ViewProfile() {
         );
       }
     } catch (err) {
-      console.error("❌ Kép szavazás hiba:", err);
+      console.error("Kép szavazás hiba:", err);
     } finally {
       setLikeLoading(null);
     }
@@ -302,8 +284,6 @@ function ViewProfile() {
     }
   };
   
-
-  // ----- comment submit -----
   const handleCommentSubmit = async () => {
     if (!token) return navigate("/Registration");
     if (!newComment.trim()) return;
@@ -330,19 +310,13 @@ function ViewProfile() {
         fetchComments(selectedImage.id);
       }
     } catch (err) {
-      console.error("❌ Komment küldési hiba:", err);
+      console.error("Komment küldési hiba:", err);
     } finally {
       setCommentLoading(false);
     }
   };
 
-  /**
-   * Komment vote kezelő.
-   * A te backend-ednél eddig csak /like volt body nélkül.
-   * Itt kompatibilisen:
-   * - ha kap vote-ot, elküldjük body-val (ha a backend már tudja),
-   * - ha nem, akkor "toggle like" jelleggel hívjuk.
-   */
+
   const handleCommentVote = async (commentId, vote) => {
     if (!token) return navigate("/Registration");
 
@@ -365,7 +339,6 @@ function ViewProfile() {
 
       if (res.ok) {
         const updated = await res.json();
-        // támogasd mindkét formátumot (likes / upvotes+downvotes / isLiked / userVote)
         setComments((prev) =>
           prev.map((c) =>
             c.id === commentId
@@ -386,7 +359,6 @@ function ViewProfile() {
     }
   };
 
-  // ----- modal open/close -----
   const openModal = (image) => {
     setSelectedImage(image);
     fetchComments(image.id);
@@ -406,14 +378,12 @@ function ViewProfile() {
     }
   };
 
-  // ----- follow toggle for the viewed profile -----
   const handleFollowToggle = async () => {
     if (!token) return navigate("/Registration");
 
     const viewedId = Number(id);
     if (!viewedId) return;
 
-    // ne engedd saját magadra
     if (loggedInId && viewedId === Number(loggedInId)) return;
 
     setFollowLoading(true);
@@ -437,7 +407,6 @@ function ViewProfile() {
     }
   };
 
-  // ----- loading -----
   if (loading) {
     return (
       <div className="text-center py-5">
@@ -451,8 +420,6 @@ function ViewProfile() {
 
   return (
     <Container className="py-5">
-      {/* PROFILE HEADER */}
-      {/* PROFILE HEADER */}
 {profile && (
   <div className="profile-hero mb-5">
     <div className="profile-hero-inner">
@@ -513,8 +480,6 @@ function ViewProfile() {
 
   </div>
 )}
-
-      {/* IMAGES GRID */}
       <h3 className="text-center mb-4">📸 {profile?.username} képei</h3>
 
       <Row xs={1} sm={2} md={3} lg={4} className="g-4">
@@ -535,10 +500,6 @@ function ViewProfile() {
   ))}
 </Row>
 
-
-
-
-      {/* IMAGE MODAL */}
       <ImageModal
         show={!!selectedImage}
         image={selectedImage}
@@ -552,7 +513,6 @@ function ViewProfile() {
         commentLoading={commentLoading}
         onCommentVote={handleCommentVote}
       />
-      {/* DELETE USER CONFIRM MODAL */}
 <Modal
   show={showDeleteUserModal}
   onHide={() => {

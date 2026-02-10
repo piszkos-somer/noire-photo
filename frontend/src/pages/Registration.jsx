@@ -3,7 +3,6 @@ import { Container, Form, Button, Alert, InputGroup, Modal } from "react-bootstr
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { Eye, EyeSlash } from "react-bootstrap-icons";
-import { Link } from "react-router-dom";
 
 function Registration() {
   const [formData, setFormData] = useState({
@@ -13,7 +12,7 @@ function Registration() {
     confirm: "",
   });
 
-  const [accepted, setAccepted] = useState(false); // ✅ új
+  const [accepted, setAccepted] = useState(false);
   const [showAszf, setShowAszf] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
@@ -116,7 +115,6 @@ function Registration() {
           </InputGroup>
         </Form.Group>
 
-        {/* ✅ KÖTELEZŐ checkbox a gombok felett */}
         <Form.Group className="mb-3">
   <Form.Check type="checkbox" id="acceptTerms">
     <Form.Check.Input
@@ -148,7 +146,6 @@ function Registration() {
   </Modal.Header>
 
   <Modal.Body style={{ maxHeight: "70vh", overflowY: "auto" }}>
-    {/* IDE jön az ÁSZF tartalma */}
     <h5>Általános Felhasználási Feltételek</h5>
 
 <p>

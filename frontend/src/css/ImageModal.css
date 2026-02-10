@@ -1,4 +1,3 @@
-/* 🪟 Üveghatású modal */
 .glass-modal .modal-dialog {
   max-width: 900px;
   border-radius: 24px !important;
@@ -17,12 +16,10 @@
   overflow: hidden !important;
   padding: 0 !important;
 }
-/* ✅ Törlős confirm modal kisebb legyen, de ugyanaz a glass design */
 .glass-modal.glass-confirm .modal-dialog {
-  max-width: 460px; /* kis középső */
+  max-width: 460px;
 }
 
-/* a leírás ne legyen full szélességű "doboz" érzés, ha nem akarod */
 .glass-modal.glass-confirm .glass-description {
   width: 100%;
 }
@@ -65,7 +62,6 @@
   pointer-events: none;
 }
 
-/* Modal kép */
 .modal-image {
   width: 100%;
   max-height: 70vh;
@@ -74,14 +70,12 @@
   display: block;
 }
 
-/* Modal háttér */
 .modal-backdrop.show {
   background: rgba(255, 255, 255, 0.04) !important;
   backdrop-filter: blur(10px) saturate(160%) !important;
   -webkit-backdrop-filter: blur(10px) saturate(160%) !important;
 }
 
-/* Gombok */
 .btn-outline-light {
   border-color: #007bff;
   color: #007bff;
@@ -93,7 +87,6 @@
   color: white;
 }
 
-/* HEADER */
 .glass-header {
   background: rgba(240, 240, 240, 0.25);
   backdrop-filter: blur(25px) saturate(150%);
@@ -111,7 +104,6 @@
   text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
 }
 
-/* INFO rész */
 .glass-info {
   background: rgba(255, 255, 255, 0.15);
   backdrop-filter: blur(20px) saturate(150%);
@@ -131,7 +123,6 @@
   gap: 1rem;
 }
 
-/* Szerző */
 .glass-author {
   font-weight: 600;
   color: #111;
@@ -142,7 +133,6 @@
   display: inline-block;
 }
 
-/* Leírás */
 .glass-description {
   line-height: 1.6;
   color: #111;
@@ -155,7 +145,6 @@
   text-align: left;
 }
 
-/* ❤️ Like gomb a modalban */
 .heart-btn-modal {
   display: flex;
   align-items: center;
@@ -175,7 +164,6 @@
   cursor: not-allowed;
 }
 
-/* 💬 Komment szekció */
 .comment-section {
   background: rgba(255, 255, 255, 0.08);
   border-top: 1px solid rgba(255, 255, 255, 0.2);
@@ -184,22 +172,19 @@
   padding-top: 15px;
 }
 
-/* Egyedi kommentkártya */
 .glass-comment {
   background: rgba(255, 255, 255, 0.15);
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 16px; /* 🔹 most már felül is kerek */
-  position: relative;  /* 🔹 a like gomb pozícionálásához */
+  border-radius: 16px;
+  position: relative;
   overflow: hidden;
 }
 
-/* Komment tartalom */
 .glass-comment .d-flex {
   align-items: flex-start;
 }
 
-/* ❤️ Komment like gomb pozícionálása */
 .glass-comment .comment-like {
   position: absolute;
   right: 12px;
@@ -209,20 +194,18 @@
   gap: 4px;
 }
 
-/* Kis finomítás a profilképre */
 .glass-comment img {
   border-radius: 50%;
   object-fit: cover;
 }
 
-/* Komment szöveg kicsit jobban elválik */
 .glass-comment p {
-  margin-bottom: 1.8rem; /* helyet hagy a like gombnak alul */
+  margin-bottom: 1.8rem;
 }
 
 .share-toast {
   position: fixed;
-  top: -80px; /* kezdetben kicsit fent */
+  top: -80px;
   left: 50%;
   transform: translateX(-50%);
   background: rgba(255, 255, 255, 0.25);
@@ -238,7 +221,6 @@
   animation: slideDownFade 0.5s ease forwards;
 }
 
-/* animáció, hogy szépen lecsússzon */
 @keyframes slideDownFade {
   from {
     top: -80px;
@@ -250,7 +232,6 @@
   }
 }
 
-/* ha el akarod tűntetni finoman */
 .share-toast.hide {
   animation: fadeOutUp 0.5s ease forwards;
 }
@@ -266,7 +247,6 @@
   }
 }
 
-/* 🔹 Komment akció gombok (Szerkesztés és Törlés) */
 .comment-action-btn {
   padding: 4px 8px !important;
   font-size: 16px !important;

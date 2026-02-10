@@ -32,7 +32,6 @@ function Home() {
   const [query, setQuery] = useState("");
   const { user } = useContext(UserContext);
   const [feedType, setFeedType] = useState("foryou");
-  // ----- admin delete image confirm (glass modal) -----
 const [showDeleteImageModal, setShowDeleteImageModal] = useState(false);
 const [deleteImageLoading, setDeleteImageLoading] = useState(false);
 const [pendingDeleteImageId, setPendingDeleteImageId] = useState(null);
@@ -67,7 +66,6 @@ const askDeleteImage = (imageId) => {
       }
   
       if (res.ok) {
-        // frissítjük a frontendben a komment listát
         setComments((prev) => prev.filter((c) => c.id !== commentId));
       } else {
         alert("Hiba a komment törlésénél!");
@@ -112,12 +110,7 @@ const askDeleteImage = (imageId) => {
       setPendingDeleteImageId(null);
     }
   };
-  
-  
-  
 
-
-  // JWT token dekódolása a user ID kinyeréséhez
   const getCurrentUserId = () => {
     if (!token) return null;
     try {
@@ -399,15 +392,14 @@ const handleImageVote = async (imageId, vote) => {
   {images.map((img) => (
     <div key={img.id} style={{ position: "relative", display: "inline-block" }}>
       
-      {/* ✅ Admin X gomb */}
       {user?.isAdmin && (
   <button
     onClick={() => askDeleteImage(img.id)}
     style={{
       position: "absolute",
-      top: "8px",      // távolság a tetejétől
-      right: "8px",    // távolság a jobbtól
-      zIndex: 10,      // a kép fölé kerül
+      top: "8px",
+      right: "8px",
+      zIndex: 10,
       background: "rgba(255,0,0,0.8)",
       color: "white",
       border: "none",
@@ -452,7 +444,6 @@ const handleImageVote = async (imageId, vote) => {
         onCommentVote={handleCommentVote}
       />
 
-      {/* DELETE IMAGE CONFIRM MODAL */}
 <Modal
   show={showDeleteImageModal}
   onHide={() => {

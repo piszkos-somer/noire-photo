@@ -489,7 +489,6 @@ const handleShare = async () => {
                           <small className="text-muted text-nowrap">
                             {new Date(c.created_at).toLocaleString("hu-HU")}
                           </small>
-                          {/* Saját komment: szerkesztés + törlés */}
 {c.user_id === loggedInId && (
   <div className="d-flex gap-1">
     <button
@@ -516,7 +515,6 @@ const handleShare = async () => {
   </div>
 )}
 
-{/* Admin: más kommentjénél piros X */}
 {c.user_id !== loggedInId && isAdmin && (
   <button
     type="button"

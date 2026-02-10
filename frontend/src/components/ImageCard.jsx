@@ -79,7 +79,6 @@ function ImageCard({ image, onVote, onOpen, likeLoading, isAdmin, token, onDelet
       tagsArray = image.tags.split(",").map(tag => tag.trim());
     }
   
-    // duplikáció eltávolítása
     return [...new Set(tagsArray)].filter(tag => tag !== "");
   }, [image.tags]);
   return (

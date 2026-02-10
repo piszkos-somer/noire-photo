@@ -4,7 +4,6 @@ import "../css/Upload.css";
 import { useNavigate } from "react-router-dom";
 import { handleTokenError } from "../utils/auth";
 
-// 🔐 Token segédfüggvények
 const getToken = () => {
   const userData = localStorage.getItem("user");
   if (!userData) return null;
@@ -44,21 +43,16 @@ function Upload() {
   const [description, setDescription] = useState("");
   const [uploadStatus, setUploadStatus] = useState("");
 
-  // 🔹 Ellenőrizd, hogy be van-e jelentkezve a felhasználó
   useEffect(() => {
     if (!token) {
       navigate("/Registration");
     }
   }, [token, navigate]);
 
-  // 📦 LocalStorage sync
   useEffect(() => {
     localStorage.setItem("tags", JSON.stringify(tags));
   }, [tags]);
 
-  
-
-  // 🔍 Tag-ajánlás gépelés közben
   useEffect(() => {
     const fetchSuggestions = async () => {
       if (newTag.trim().length < 1) {
@@ -86,13 +80,13 @@ if (res.status === 401 || res.status === 403) {
         console.error("Tag ajánlási hiba:", err);
       }
     };
-    const delay = setTimeout(fetchSuggestions, 250); // debounce
+    const delay = setTimeout(fetchSuggestions, 250);
     return () => clearTimeout(delay);
   }, [newTag, navigate]);
 
   const handleAddTag = (tagValue) => {
     const value = (tagValue || newTag).trim();
-    if (!value) return; // üresen ne adjon hozzá
+    if (!value) return;
     if (!tags.includes(value)) {
       setTags((prev) => [...prev, value]);
     }
@@ -111,14 +105,14 @@ if (res.status === 401 || res.status === 403) {
     if (!file) return;
 
     if (!file.type.startsWith("image/")) {
-      setFileError("❌ Csak képfájlokat tölthetsz fel! (jpg, png, gif, stb.)");
+      setFileError("Csak képfájlokat tölthetsz fel! (jpg, png, gif, stb.)");
       e.target.value = "";
       setSelectedFile(null);
       return;
     }
 
     if (file.size > 25 * 1024 * 1024) {
-      setFileError("❌ A fájl túl nagy! Maximum 25 MB engedélyezett.");
+      setFileError("A fájl túl nagy! Maximum 25 MB engedélyezett.");
       e.target.value = "";
       setSelectedFile(null);
       return;
@@ -135,11 +129,11 @@ if (res.status === 401 || res.status === 403) {
     }
 
     if (!selectedFile) {
-      setUploadStatus("❌ Nincs kiválasztott fájl!");
+      setUploadStatus("Nincs kiválasztott fájl!");
       return;
     }
     if (!title.trim()) {
-      setUploadStatus("❌ A kép címét meg kell adni!");
+      setUploadStatus("A kép címét meg kell adni!");
       return;
     }
 
@@ -158,7 +152,6 @@ if (res.status === 401 || res.status === 403) {
         body: formData,
       });
       
-      // helyesen: 'response', nem 'res'
       if (response.status === 401 || response.status === 403) {
         handleTokenError(response.status, navigate);
         return;
@@ -173,17 +166,17 @@ if (res.status === 401 || res.status === 403) {
       const data = await response.json();
 
       if (response.ok) {
-        setUploadStatus("✅ Feltöltés sikeres!");
+        setUploadStatus("Feltöltés sikeres!");
         setSelectedFile(null);
         setTitle("");
         setDescription("");
         setTags([]);
       } else {
-        setUploadStatus(`❌ Hiba: ${data.error || data.message || "Ismeretlen hiba"}`);
+        setUploadStatus(`Hiba: ${data.error || data.message || "Ismeretlen hiba"}`);
       }
     } catch (error) {
       console.error(error);
-      setUploadStatus("❌ Hálózati hiba történt.");
+      setUploadStatus("Hálózati hiba történt.");
     }
   };
 
@@ -192,7 +185,6 @@ if (res.status === 401 || res.status === 403) {
       <h1 className="text-center mb-4">Kép feltöltése</h1>
 
       <div className="upload-content">
-        {/* BAL OLDAL */}
         <div className="upload-left">
           <Form.Group className="mb-3">
             <Form.Label>Fájl feltöltése</Form.Label>
@@ -202,7 +194,7 @@ if (res.status === 401 || res.status === 403) {
             </div>
             {fileError && <div className="text-danger mt-2">{fileError}</div>}
             {selectedFile && (
-              <div className="text-success mt-2">✅ {selectedFile.name} kiválasztva</div>
+              <div className="text-success mt-2">{selectedFile.name} kiválasztva</div>
             )}
           </Form.Group>
 
@@ -235,7 +227,6 @@ if (res.status === 401 || res.status === 403) {
           </div>
         </div>
 
-        {/* JOBB OLDAL (tagek) */}
         <div className="upload-right position-relative">
           <h5>Tag-ek</h5>
           <div className="tags-list">
@@ -262,7 +253,7 @@ if (res.status === 401 || res.status === 403) {
   variant="success"
   onClick={() => handleAddTag(newTag.trim())}
   className="add-btn"
-  disabled={!newTag.trim()} // opcionális, hogy üresen ne lehessen kattintani
+  disabled={!newTag.trim()}
 >
   ✓
 </Button>

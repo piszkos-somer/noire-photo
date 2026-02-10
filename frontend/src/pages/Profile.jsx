@@ -43,7 +43,6 @@ function Profile() {
     await fetchComments(img.id);
   };
   
-  // 💬 Kommentek lekérése
   const fetchComments = async (imageId) => {
     try {
       const headers = user?.token ? { Authorization: `Bearer ${user.token}` } : {};
@@ -55,11 +54,10 @@ function Profile() {
       const data = await res.json();
       setComments(Array.isArray(data) ? data : []);
     } catch (err) {
-      console.error("❌ Kommentek lekérési hiba:", err);
+      console.error("Kommentek lekérési hiba:", err);
     }
   };
 
-  // 💬 Komment küldése
   const handleCommentSubmit = async () => {
     if (!newComment.trim() || !selectedImage) return;
     if (!user?.token) return navigate("/Registration");
@@ -67,14 +65,14 @@ function Profile() {
     setCommentLoading(true);
     try {
       const res = await fetch(
-        `http://localhost:3001/api/images/${selectedImage.id}/comments`, // ✅ comments (többes)
+        `http://localhost:3001/api/images/${selectedImage.id}/comments`,
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${user.token}`,
           },
-          body: JSON.stringify({ comment: newComment }), // ✅ comment kulcs
+          body: JSON.stringify({ comment: newComment }),
         }
       );
   
@@ -93,14 +91,12 @@ function Profile() {
       setNewComment("");
       await fetchComments(selectedImage.id);
     } catch (err) {
-      console.error("❌ Komment küldési hiba:", err);
+      console.error("Komment küldési hiba:", err);
     } finally {
       setCommentLoading(false);
     }
   };
   
-
-  // ❤️ Kép vote kezelése
   const handleImageVote = async (imageId, vote) => {
     if (!user?.token) return navigate("/Registration");
     setLikeLoading(imageId);
@@ -134,13 +130,12 @@ function Profile() {
         }
       }
     } catch (err) {
-      console.error("❌ Vote fetch hiba:", err);
+      console.error("Vote fetch hiba:", err);
     } finally {
       setLikeLoading(null);
     }
   };
 
-  // 💬 Komment vote kezelése
   const handleCommentVote = async (commentId, vote) => {
     if (!user?.token) return navigate("/Registration");
     try {
@@ -167,30 +162,19 @@ function Profile() {
         );
       }
     } catch (err) {
-      console.error("❌ Komment vote hiba:", err);
+      console.error("Komment vote hiba:", err);
     }
   };
   
   const handleDeleted = async (deletedId) => {
-    // A) leggyorsabb: helyben kiszűrjük
     setImages((prev) => prev.filter((img) => img.id !== deletedId));
-    setMessage("🗑️ Kép törölve!");
+    setMessage("Kép törölve!");
     
-    // opcionális: zárjuk a modalt és nullázzuk a kiválasztott képet
     setShowModal(false);
     setSelectedImage(null);
   
-    // B) ha biztosra akarsz menni: refetch (kommenteld ki az A-t, és használd ezt)
-    /*
-    const refresh = await fetch("http://localhost:3001/api/my-images", {
-      headers: { Authorization: `Bearer ${user.token}` },
-    });
-    const newData = await refresh.json();
-    if (Array.isArray(newData)) setImages(newData);
-    */
   };
   
-  // 🔹 Betöltéskor lekérjük a profil adatokat
   useEffect(() => {
     if (!user?.token) {
       navigate("/Login");

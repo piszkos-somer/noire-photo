@@ -134,14 +134,12 @@ app.post("/api/login", async (req, res) => {
       const match = await bcrypt.compare(password, user.password);
       if (!match) return res.status(401).json({ message: "Hibás email vagy jelszó." });
 
-      // JWT-be beletehetjük az is_admin-t is, ha szeretnénk backend ellenőrzést
       const token = jwt.sign(
         { id: user.id, username: user.username, isAdmin: user.is_admin === 1 },
         process.env.JWT_SECRET,
         { expiresIn: "1h" }
       );
 
-      // Visszaadjuk az admin státuszt a frontendnek is
       res.json({ 
         token, 
         username: user.username, 
@@ -518,14 +516,12 @@ app.post("/api/images/:id/like", verifyToken, async (req, res) => {
     let newVote;
 
     if (bodyVote === 1 || bodyVote === -1 || bodyVote === 0) {
-      // új up/down API – explicit szavazat
       newVote = bodyVote;
     } else {
-      // kompat: régi toggle like (ha nincs vote a body-ban)
       if (existing) {
-        newVote = 0; // törlés
+        newVote = 0;
       } else {
-        newVote = 1; // upvote
+        newVote = 1;
       }
     }
 
@@ -570,8 +566,6 @@ app.post("/api/images/:id/like", verifyToken, async (req, res) => {
     conn.release();
   }
 });
-
-
 
 app.post("/api/refresh-token", verifyToken, (req, res) => {
   const newToken = jwt.sign(
@@ -648,7 +642,6 @@ app.get("/api/images/:id/comments", async (req, res) => {
   }
 });
 
-
 app.post("/api/images/:id/comments", verifyToken, async (req, res) => {
   const imageId = req.params.id;
   const userId = req.user.id;
@@ -673,7 +666,6 @@ app.post("/api/images/:id/comments", verifyToken, async (req, res) => {
   }
 });
 
-// 🔹 Komment szerkesztése
 app.put("/api/comments/:id", verifyToken, async (req, res) => {
   const commentId = req.params.id;
   const userId = req.user.id;
@@ -685,7 +677,6 @@ app.put("/api/comments/:id", verifyToken, async (req, res) => {
 
   const conn = await pool.getConnection();
   try {
-    // Ellenőrizzük, hogy a felhasználó a saját kommentjét szerkeszti-e
     const [commentRows] = await conn.query(
       "SELECT user_id FROM comments WHERE id = ?",
       [commentId]
@@ -713,7 +704,6 @@ app.put("/api/comments/:id", verifyToken, async (req, res) => {
   }
 });
 
-// 🔹 Komment törlése
 app.delete("/api/comments/:id", verifyToken, async (req, res) => {
   const commentId = req.params.id;
   const userId = req.user.id;
@@ -751,7 +741,7 @@ app.delete("/api/comments/:id", verifyToken, async (req, res) => {
 app.post("/api/comments/:id/like", verifyToken, async (req, res) => {
   const commentId = req.params.id;
   const userId = req.user.id;
-  const bodyVote = req.body?.vote; // 1 | -1 | 0 vagy undefined
+  const bodyVote = req.body?.vote;
 
   const conn = await pool.getConnection();
   try {
@@ -814,7 +804,6 @@ app.post("/api/comments/:id/like", verifyToken, async (req, res) => {
     conn.release();
   }
 });
-// ✅ EZT TEDD AZ app.get("/api/users/:id") ELÉ !!!
 
 app.get("/api/users/search", async (req, res) => {
   const { q } = req.query;
@@ -949,7 +938,6 @@ app.get("/api/images/search", async (req, res) => {
   const { q } = req.query;
   const search = q && q.trim().length > 0 ? `%${q.trim()}%` : "%";
 
-  // auth optional – userVote miatt
   const authHeader = req.headers.authorization;
   let userId = null;
 
@@ -1046,7 +1034,6 @@ app.delete("/api/images/:id", verifyToken, async (req, res) => {
 
   const conn = await pool.getConnection();
   try {
-    // Jogosultság ellenőrzés
     const query = isAdmin
       ? "SELECT url FROM images WHERE id = ?"
       : "SELECT url FROM images WHERE id = ? AND user_id = ?";
@@ -1060,16 +1047,13 @@ app.delete("/api/images/:id", verifyToken, async (req, res) => {
 
     const imagePath = path.join(__dirname, rows[0].url);
 
-    // Fájl törlés
     if (fs.existsSync(imagePath)) {
       fs.unlinkSync(imagePath);
     }
 
-    // 🧹 Kapcsolódó adatok törlése
     await conn.query("DELETE FROM comments WHERE image_id = ?", [imageId]);
     await conn.query("DELETE FROM image_votes WHERE image_id = ?", [imageId]);
 
-    // Kép törlése
     const deleteQuery = isAdmin
       ? "DELETE FROM images WHERE id = ?"
       : "DELETE FROM images WHERE id = ? AND user_id = ?";
@@ -1088,9 +1072,6 @@ app.delete("/api/images/:id", verifyToken, async (req, res) => {
   }
 });
 
-
-
-// --- 👥 KÖVETÉS RENDSZER --- //
 app.post("/api/follow/:id", verifyToken, async (req, res) => {
   const followingId = parseInt(req.params.id);
   const followerId = req.user.id;
@@ -1106,14 +1087,12 @@ app.post("/api/follow/:id", verifyToken, async (req, res) => {
     );
 
     if (existing.length > 0) {
-      // ha már követi -> töröljük (unfollow)
       await conn.query(
         "DELETE FROM follows WHERE follower_id = ? AND following_id = ?",
         [followerId, followingId]
       );
       return res.json({ following: false });
     } else {
-      // ha nem követi -> követés
       await conn.query(
         "INSERT INTO follows (follower_id, following_id) VALUES (?, ?)",
         [followerId, followingId]
@@ -1339,15 +1318,13 @@ app.get("/api/random-images", async (req, res) => {
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => console.log(`Szerver fut a ${PORT} porton!`));
 
-// 🔹 Komment törlése (saját komment VAGY admin)
 app.delete("/api/comments/:id", verifyToken, async (req, res) => {
   const commentId = req.params.id;
   const userId = req.user.id;
-  const isAdmin = req.user.isAdmin === true; // JWT-be már beleteszed login-nál
+  const isAdmin = req.user.isAdmin === true;
 
   const conn = await pool.getConnection();
   try {
-    // lekérjük, kié a komment
     const [commentRows] = await conn.query(
       "SELECT user_id FROM comments WHERE id = ?",
       [commentId]
@@ -1359,15 +1336,12 @@ app.delete("/api/comments/:id", verifyToken, async (req, res) => {
 
     const ownerId = commentRows[0].user_id;
 
-    // jogosultság: tulaj VAGY admin
     if (ownerId !== userId && !isAdmin) {
       return res.status(403).json({ error: "Nincs jogosultság a komment törléséhez." });
     }
 
-    // Töröljük a kommenthez tartozó szavazatokat is
     await conn.query("DELETE FROM comment_votes WHERE comment_id = ?", [commentId]);
 
-    // Töröljük a kommentet
     await conn.query("DELETE FROM comments WHERE id = ?", [commentId]);
 
     res.json({ success: true, message: "Komment sikeresen törölve." });
@@ -1378,7 +1352,6 @@ app.delete("/api/comments/:id", verifyToken, async (req, res) => {
     conn.release();
   }
 });
-// ✅ ADMIN: teljes profil törlése (képek+kommentek+vote-ok+követések), tagek maradnak
 app.delete("/api/admin/users/:id", verifyToken, async (req, res) => {
   const targetUserId = Number(req.params.id);
   const isAdmin = req.user?.isAdmin === true;
@@ -1386,7 +1359,6 @@ app.delete("/api/admin/users/:id", verifyToken, async (req, res) => {
   if (!isAdmin) return res.status(403).json({ message: "Nincs jogosultság." });
   if (!targetUserId) return res.status(400).json({ message: "Hibás user id." });
 
-  // opcionális: ne lehessen az Admin usert törölni
   if (targetUserId === 11) {
     return res.status(403).json({ message: "Az admin fiók nem törölhető." });
   }
@@ -1395,7 +1367,6 @@ app.delete("/api/admin/users/:id", verifyToken, async (req, res) => {
   try {
     await conn.beginTransaction();
 
-    // létezik-e a user?
     const [urows] = await conn.execute(
       "SELECT id, profile_picture, is_admin FROM users WHERE id = ?",
       [targetUserId]
@@ -1409,7 +1380,6 @@ app.delete("/api/admin/users/:id", verifyToken, async (req, res) => {
       return res.status(403).json({ message: "Admin fiók nem törölhető." });
     }
 
-    // képfájlok listája (mielőtt kaszkád törli a DB-t)
     const [imgRows] = await conn.execute(
       "SELECT url FROM images WHERE user_id = ?",
       [targetUserId]
@@ -1417,22 +1387,13 @@ app.delete("/api/admin/users/:id", verifyToken, async (req, res) => {
 
     const profilePicUrl = urows[0].profile_picture;
 
-    // 🔥 olyan vote-ok törlése, amiknél NINCS FK user_id-ra (különben orphan marad)
     await conn.execute("DELETE FROM image_votes WHERE user_id = ?", [targetUserId]);
     await conn.execute("DELETE FROM comment_votes WHERE user_id = ?", [targetUserId]);
 
-    // maga a user törlése:
-    // - images ON DELETE CASCADE -> képek mennek
-    // - comments (user_id) ON DELETE CASCADE -> user kommentjei mennek
-    // - comments (image_id) ON DELETE CASCADE -> képei alatti kommentek mennek
-    // - image_tags ON DELETE CASCADE (image_id) -> image_tags sorok mennek (tags tábla MARAD!)
-    // - image_votes ON DELETE CASCADE (image_id) -> képeihez tartozó vote-ok mennek
-    // - follows ON DELETE CASCADE -> követések mennek
     await conn.execute("DELETE FROM users WHERE id = ?", [targetUserId]);
 
     await conn.commit();
 
-    // ✅ fájlok törlése DB commit után (ha DB sikeres volt)
     const safeUnlink = (p) => {
       try {
         if (p && fs.existsSync(p)) fs.unlinkSync(p);
@@ -1441,14 +1402,10 @@ app.delete("/api/admin/users/:id", verifyToken, async (req, res) => {
       }
     };
 
-    // képek törlése lemezről
     for (const r of imgRows) {
-      // r.url pl: "/images/1769030553027.jpg"
       const absPath = path.join(__dirname, r.url);
       safeUnlink(absPath);
     }
-
-    // profilkép törlése
     if (profilePicUrl) {
       const absProfilePath = path.join(__dirname, profilePicUrl);
       safeUnlink(absProfilePath);
@@ -1465,5 +1422,3 @@ app.delete("/api/admin/users/:id", verifyToken, async (req, res) => {
     conn.release();
   }
 });
-// 🔎 Users search (feltöltő keresés) – user kártyákhoz
-

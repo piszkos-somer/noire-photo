@@ -1,4 +1,3 @@
-// src/components/ImageModal.jsx
 import React, { useEffect, useState } from "react";
 import { Modal, Button, Dropdown } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
@@ -388,11 +387,6 @@ const handleShare = async () => {
 
   </div>
 </div>
-
-
-
-
-
           <p className="glass-description mt-3 mb-0">
             {localImage?.description || "Nincs leírás."}
           </p>

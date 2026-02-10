@@ -1,9 +1,8 @@
-/* ========== GRID ========== */
 .image-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); /* 💡 szélesebb kártyák */
+  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); 
   gap: 2rem;
-  align-items: stretch; /* minden kártya azonos magasságban */
+  align-items: stretch;
   justify-items: center;
   width: 100%;
   box-sizing: border-box;
@@ -21,13 +20,12 @@
   }
 }
 
-/* ========== ÜVEGES KÁRTYÁK ========== */
 .glass-card {
   display: flex;
   flex-direction: column;
   width: 100%;
-  max-width: 420px; /* 💡 szélesebb kártyák */
-  height: 100%; /* 💡 minden kártya azonos magasság */
+  max-width: 420px;
+  height: 100%;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
@@ -71,15 +69,13 @@
   pointer-events: none;
 }
 
-/* Hover állapot */
 .glass-card {
   will-change: transform;
   transform: translateZ(0);
 }
 
 .glass-inner {
-  /* NE transition: all; */
-  transition: box-shadow 0.3s ease; /* csak ami muszáj */
+  transition: box-shadow 0.3s ease;
 }
 
 .glass-card:hover {
@@ -88,14 +84,11 @@
 
 .glass-card:hover .glass-inner {
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
-  /* background változást inkább hagyd el, vagy opacity-vel oldd meg */
 }
 
-
-/* ========== KÉPEK ========== */
 .img-wrapper {
   flex-shrink: 0;
-  height: 250px; /* 💡 nagyobb, szélesebb képek */
+  height: 250px;
   width: 100%;
   overflow: hidden;
   border-radius: 22px;
@@ -112,7 +105,6 @@
   transform: scale(1.08);
 }
 
-/* ========== FEHÉR, ÜVEGHATÁSÚ BUBORÉKOK ========== */
 .info-bubble,
 .tag-bubble {
   display: inline-block;
@@ -130,7 +122,6 @@
   transition: all 0.25s ease;
 }
 
-/* ====== Tagek (világoskék, üveges gradient háttér) ====== */
 .tag-bubble {
   font-size: 0.85rem;
   font-weight: 600;
@@ -157,27 +148,23 @@
   color: #001b44;
 }
 
-/* Hover: fényesebb, tisztább */
 .info-bubble:hover {
   background: rgba(255, 255, 255, 0.8);
   transform: translateY(-2px);
 }
 
-/* ====== Cím (nagyobb, hangsúlyosabb) ====== */
 .info-bubble.title {
   font-size: 1.2rem;
   font-weight: 700;
   color: #111;
 }
 
-/* ====== Szerző (kisebb, szürkés) ====== */
 .info-bubble.author {
   font-size: 0.9rem;
   font-weight: 500;
   color: #555;
 }
 
-/* ====== Leírás (fehéres, tágabb) ====== */
 .info-bubble.text {
   display: -webkit-box;
   -webkit-line-clamp: 3;
@@ -189,7 +176,6 @@
   margin-bottom: 14px;
 }
 
-/* ========== LIKE GOMB ========== */
 .heart-btn {
   background: transparent;
   border: none;
@@ -206,14 +192,12 @@
   color: #ff0000;
 }
 
-/* ========== TAG TARTÓ ========== */
 .tag-container {
   display: flex;
   flex-wrap: wrap;
   gap: 0.4rem;
 }
 
-/* ========== BŐVEBBEN GOMB ========== */
 .btn-outline-light {
   border: 1px solid rgba(0, 123, 255, 0.6);
   color: #007bff;
@@ -226,7 +210,6 @@
   border-color: #007bff;
 }
 
-/* ========== EGYÉB FINOMÍTÁSOK ========== */
 .img-title {
   font-weight: 600;
 }
