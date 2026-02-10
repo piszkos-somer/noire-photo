@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Container, Form, Button, ListGroup } from "react-bootstrap";
 import "../css/Upload.css";
 import { useNavigate } from "react-router-dom";
 import { handleTokenError } from "../utils/auth";
+import { GoogleMap, Marker, useJsApiLoader } from "@react-google-maps/api";
 
 const getToken = () => {
   const userData = localStorage.getItem("user");
@@ -24,15 +25,11 @@ const getAuthHeader = () => {
   return token ? { Authorization: `Bearer ${token}` } : {};
 };
 
-
-
 function Upload() {
   const navigate = useNavigate();
   const token = getToken();
 
- const [tags, setTags] = useState([]); 
-
-
+  const [tags, setTags] = useState([]);
   const [newTag, setNewTag] = useState("");
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -42,6 +39,17 @@ function Upload() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [uploadStatus, setUploadStatus] = useState("");
+
+  const [enableLocation, setEnableLocation] = useState(false);
+  const [location, setLocation] = useState(null);
+
+  const { isLoaded } = useJsApiLoader({
+    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY || "",
+  });
+  
+
+  const defaultCenter = { lat: 47.4979, lng: 19.0402 };
+  const mapContainerStyle = { width: "100%", height: "320px", borderRadius: "12px" };
 
   useEffect(() => {
     if (!token) {
@@ -64,10 +72,12 @@ function Upload() {
           `http://localhost:3001/api/tags/search?q=${encodeURIComponent(newTag)}`,
           { headers: getAuthHeader() }
         );
-if (res.status === 401 || res.status === 403) {
-  handleTokenError(res.status, navigate);
-  return;
-}
+
+        if (res.status === 401 || res.status === 403) {
+          handleTokenError(res.status, navigate);
+          return;
+        }
+
         if (!res.ok) {
           handleTokenError(res.status, navigate);
           return;
@@ -80,9 +90,16 @@ if (res.status === 401 || res.status === 403) {
         console.error("Tag ajánlási hiba:", err);
       }
     };
+
     const delay = setTimeout(fetchSuggestions, 250);
     return () => clearTimeout(delay);
   }, [newTag, navigate]);
+
+  useEffect(() => {
+    if (!enableLocation) {
+      setLocation(null);
+    }
+  }, [enableLocation]);
 
   const handleAddTag = (tagValue) => {
     const value = (tagValue || newTag).trim();
@@ -94,7 +111,6 @@ if (res.status === 401 || res.status === 403) {
     setSuggestions([]);
     setShowSuggestions(false);
   };
-  
 
   const handleDeleteTag = (index) => {
     setTags(tags.filter((_, i) => i !== index));
@@ -122,6 +138,18 @@ if (res.status === 401 || res.status === 403) {
     setSelectedFile(file);
   };
 
+  const onMapClick = useCallback((e) => {
+    const lat = e.latLng?.lat();
+    const lng = e.latLng?.lng();
+    if (typeof lat !== "number" || typeof lng !== "number") return;
+
+    setLocation({
+      lat,
+      lng,
+      location_source: "map_click",
+    });
+  }, []);
+
   const handleUpload = async () => {
     if (!token) {
       navigate("/Registration");
@@ -136,6 +164,10 @@ if (res.status === 401 || res.status === 403) {
       setUploadStatus("A kép címét meg kell adni!");
       return;
     }
+    if (enableLocation && !location) {
+      setUploadStatus("Pipálva van a helyszín megadása, de nincs kijelölt hely a térképen.");
+      return;
+    }
 
     setUploadStatus("Feltöltés folyamatban...");
 
@@ -145,23 +177,28 @@ if (res.status === 401 || res.status === 403) {
     formData.append("description", description);
     formData.append("tags", JSON.stringify(tags));
 
+    if (enableLocation && location) {
+      formData.append("lat", String(location.lat));
+      formData.append("lng", String(location.lng));
+      formData.append("location_source", location.location_source);
+    }
+
     try {
       const response = await fetch("http://localhost:3001/api/upload", {
         method: "POST",
         headers: getAuthHeader(),
         body: formData,
       });
-      
+
       if (response.status === 401 || response.status === 403) {
         handleTokenError(response.status, navigate);
         return;
       }
-      
+
       if (!response.ok) {
         handleTokenError(response.status, navigate);
         return;
       }
-      
 
       const data = await response.json();
 
@@ -171,6 +208,8 @@ if (res.status === 401 || res.status === 403) {
         setTitle("");
         setDescription("");
         setTags([]);
+        setEnableLocation(false);
+        setLocation(null);
       } else {
         setUploadStatus(`Hiba: ${data.error || data.message || "Ismeretlen hiba"}`);
       }
@@ -193,9 +232,7 @@ if (res.status === 401 || res.status === 403) {
               <span className="text-muted small">max. 25 MB</span>
             </div>
             {fileError && <div className="text-danger mt-2">{fileError}</div>}
-            {selectedFile && (
-              <div className="text-success mt-2">{selectedFile.name} kiválasztva</div>
-            )}
+            {selectedFile && <div className="text-success mt-2">{selectedFile.name} kiválasztva</div>}
           </Form.Group>
 
           <Form.Group className="mb-3">
@@ -218,6 +255,53 @@ if (res.status === 401 || res.status === 403) {
               onChange={(e) => setDescription(e.target.value)}
             />
           </Form.Group>
+
+          <Form.Group className="mb-3">
+            <Form.Check
+              type="checkbox"
+              label="Kép helyszínének megadása"
+              checked={enableLocation}
+              onChange={(e) => setEnableLocation(e.target.checked)}
+            />
+          </Form.Group>
+
+          {enableLocation && (
+            <div className="mb-4">
+              <div className="mb-2 text-muted small">
+                Kattints a térképre a hely kijelöléséhez.
+              </div>
+
+              {!import.meta.env.VITE_GOOGLE_MAPS_API_KEY ? (
+
+                <div className="text-danger">
+                  Hiányzik a REACT_APP_GOOGLE_MAPS_API_KEY a .env fájlból.
+                </div>
+              ) : !isLoaded ? (
+                <div>Térkép betöltése...</div>
+              ) : (
+                <GoogleMap
+                  mapContainerStyle={mapContainerStyle}
+                  center={location ? { lat: location.lat, lng: location.lng } : defaultCenter}
+                  zoom={location ? 14 : 6}
+                  onClick={onMapClick}
+                  options={{
+                    clickableIcons: false,
+                    fullscreenControl: false,
+                    streetViewControl: false,
+                    mapTypeControl: false,
+                  }}
+                >
+                  {location && <Marker position={{ lat: location.lat, lng: location.lng }} />}
+                </GoogleMap>
+              )}
+
+              {location && (
+                <div className="mt-2 small">
+                  Kijelölt koordináta: {location.lat.toFixed(6)}, {location.lng.toFixed(6)}
+                </div>
+              )}
+            </div>
+          )}
 
           <div className="text-center mt-4">
             <Button variant="outline-dark" className="upload-btn" onClick={handleUpload}>
@@ -250,14 +334,13 @@ if (res.status === 401 || res.status === 403) {
               onKeyDown={(e) => e.key === "Enter" && handleAddTag()}
             />
             <Button
-  variant="success"
-  onClick={() => handleAddTag(newTag.trim())}
-  className="add-btn"
-  disabled={!newTag.trim()}
->
-  ✓
-</Button>
-
+              variant="success"
+              onClick={() => handleAddTag(newTag.trim())}
+              className="add-btn"
+              disabled={!newTag.trim()}
+            >
+              ✓
+            </Button>
 
             {showSuggestions && suggestions.length > 0 && (
               <ListGroup className="tag-suggestion-box shadow-sm">
