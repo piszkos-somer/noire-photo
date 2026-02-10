@@ -946,9 +946,10 @@ app.get("/api/user-images/:id", async (req, res) => {
 
 
 app.get("/api/images/search", async (req, res) => {
-  const { q, filter } = req.query;
-  const search = q ? `%${q}%` : "%";
-  
+  const { q } = req.query;
+  const search = q && q.trim().length > 0 ? `%${q.trim()}%` : "%";
+
+  // auth optional – userVote miatt
   const authHeader = req.headers.authorization;
   let userId = null;
 
@@ -962,56 +963,46 @@ app.get("/api/images/search", async (req, res) => {
 
   const conn = await pool.getConnection();
   try {
-    let query = `
+    const [rows] = await conn.query(
+      `
       SELECT 
-  i.id,
-  i.title,
-  i.description,
-  i.url,
-  COALESCE(SUM(CASE WHEN iv.vote = 1 THEN 1 ELSE 0 END), 0) AS upvotes,
-  COALESCE(SUM(CASE WHEN iv.vote = -1 THEN 1 ELSE 0 END), 0) AS downvotes,
-  CASE
-    WHEN ? IS NOT NULL THEN (
-      SELECT vote FROM image_votes 
-      WHERE image_id = i.id AND user_id = ? LIMIT 1
-    )
-    ELSE 0
-  END AS userVote,
-  u.username AS author,
-  u.id AS user_id,
-  COALESCE(GROUP_CONCAT(t.tag SEPARATOR ','), '') AS tags
-FROM images i
-JOIN users u ON i.user_id = u.id
-LEFT JOIN image_tags it ON i.id = it.image_id
-LEFT JOIN tags t ON it.tag_id = t.id
-LEFT JOIN image_votes iv ON i.id = iv.image_id
-
-    `;
-
-    if (filter === "author") {
-      query += " WHERE u.username LIKE ?";
-    } else if (filter === "tag") {
-      query += `
-        WHERE i.id IN (
-      SELECT image_id 
-      FROM image_tags it
-      JOIN tags t ON it.tag_id = t.id
-      WHERE t.tag LIKE ?
+        i.id,
+        i.title,
+        i.description,
+        i.url,
+        COALESCE(SUM(CASE WHEN iv.vote = 1 THEN 1 ELSE 0 END), 0) AS upvotes,
+        COALESCE(SUM(CASE WHEN iv.vote = -1 THEN 1 ELSE 0 END), 0) AS downvotes,
+        CASE
+          WHEN ? IS NOT NULL THEN (
+            SELECT vote FROM image_votes 
+            WHERE image_id = i.id AND user_id = ? LIMIT 1
+          )
+          ELSE 0
+        END AS userVote,
+        u.username AS author,
+        u.id AS user_id,
+        COALESCE(GROUP_CONCAT(DISTINCT t.tag SEPARATOR ','), '') AS tags
+      FROM images i
+      JOIN users u ON i.user_id = u.id
+      LEFT JOIN image_tags it ON i.id = it.image_id
+      LEFT JOIN tags t ON it.tag_id = t.id
+      LEFT JOIN image_votes iv ON i.id = iv.image_id
+      WHERE
+        (
+          i.title LIKE ?
+          OR i.description LIKE ?
+          OR EXISTS (
+            SELECT 1
+            FROM image_tags it2
+            JOIN tags t2 ON it2.tag_id = t2.id
+            WHERE it2.image_id = i.id AND t2.tag LIKE ?
+          )
         )
-      `;
-    } else {
-      query += " WHERE i.title LIKE ? OR i.description LIKE ?";
-    }
-    
-
-    query += " GROUP BY i.id ORDER BY i.id DESC";
-
-    const [rows] =
-      filter === "author"
-        ? await conn.query(query, [userId, userId, search])
-        : filter === "tag"
-        ? await conn.query(query, [userId, userId, search])
-        : await conn.query(query, [userId, userId, search, search]);
+      GROUP BY i.id
+      ORDER BY i.id DESC
+      `,
+      [userId, userId, search, search, search]
+    );
 
     rows.forEach((img) => {
       img.upvotes = Number(img.upvotes) || 0;
@@ -1019,14 +1010,12 @@ LEFT JOIN image_votes iv ON i.id = iv.image_id
       img.userVote = img.userVote || 0;
       img.likes = img.upvotes;
       img.isLiked = img.userVote === 1;
-      img.tags = img.tags
-        ? img.tags.split(",").filter((t) => t.trim() !== "")
-        : [];
+      img.tags = img.tags ? img.tags.split(",").filter((t) => t.trim() !== "") : [];
     });
 
     res.json(rows);
   } catch (err) {
-    console.error("Keresési hiba:", err);
+    console.error("Kép keresési hiba:", err);
     res.status(500).json({ error: "Szerverhiba keresés közben." });
   } finally {
     conn.release();

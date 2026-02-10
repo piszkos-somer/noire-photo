@@ -12,9 +12,9 @@ import { UserContext } from "../context/UserContext";
 
 function Browse() {
   const [images, setImages] = useState([]);
-  const [users, setUsers] = useState([]); // ✅ ÚJ
+  const [users, setUsers] = useState([]);
   const [query, setQuery] = useState("");
-  const [filter, setFilter] = useState("title");
+  const [filter, setFilter] = useState("image");
   const [loading, setLoading] = useState(false);
 
   const [selectedImage, setSelectedImage] = useState(null);
@@ -104,7 +104,6 @@ function Browse() {
     const urlParams = new URLSearchParams(location.search);
     const qParam = urlParams.get("q");
 
-    // resetek, hogy ne keveredjen a UI
     setUsers([]);
     setImages([]);
     setHasMore(true);
@@ -112,31 +111,30 @@ function Browse() {
 
     if (tag) {
       setQuery(tag);
-      setFilter("tag");
-      handleSearch(tag, "tag");
+      setFilter("image");
+      handleSearch(tag, "image");
     } else if (qParam) {
       setQuery(qParam);
-      setFilter("title");
-      handleSearch(qParam, "title");
+      setFilter("image");
+      handleSearch(qParam, "image");
     } else {
       fetchImages();
     }
+    
   }, [tag, location.search]);
 
   const fetchMoreImages = () => {
-    if (filter === "author") return; // ✅ authornál nincs infinite scroll
+    if (filter === "author" || !hasMore) return;
     setPage((prevPage) => prevPage + 1);
     fetchImages(page + 1);
   };
 
-  // 🔍 Keresés (images VAGY users)
   const handleSearch = async (q = query, f = filter) => {
     setLoading(true);
     try {
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
       if (f === "author") {
-        // ✅ USER KERESÉS
         const res = await fetch(
           `http://localhost:3001/api/users/search?q=${encodeURIComponent(q)}`,
           { headers }
@@ -147,14 +145,14 @@ function Browse() {
         }
         const data = await res.json();
         setUsers(Array.isArray(data) ? data : []);
-        setImages([]); // ✅ ne maradjanak régi képek
+        setImages([]);
         setHasMore(false);
       } else {
-        // ✅ IMAGE keresés (régi)
         const res = await fetch(
-          `http://localhost:3001/api/images/search?q=${encodeURIComponent(q)}&filter=${f}`,
+          `http://localhost:3001/api/images/search?q=${encodeURIComponent(q)}`,
           { headers }
         );
+        
         if (res.status === 401 || res.status === 403) {
           handleTokenError(res.status, navigate);
           return;
@@ -165,13 +163,12 @@ function Browse() {
         setHasMore(false);
       }
     } catch (err) {
-      console.error("❌ Keresési hiba:", err);
+      console.error("Keresési hiba:", err);
     } finally {
       setLoading(false);
     }
   };
 
-  // ❤️ Kép vote kezelése (unchanged)
   const handleImageVote = async (imageId, vote) => {
     if (!token) return navigate("/Registration");
     setLikeLoading(imageId);
@@ -207,13 +204,12 @@ function Browse() {
         }
       }
     } catch (err) {
-      console.error("❌ Vote fetch hiba:", err);
+      console.error("Vote fetch hiba:", err);
     } finally {
       setLikeLoading(null);
     }
   };
 
-  // 💬 Kommentek (unchanged)
   const fetchComments = async (imageId) => {
     try {
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
@@ -225,7 +221,7 @@ function Browse() {
       const data = await res.json();
       setComments(Array.isArray(data) ? data : []);
     } catch (err) {
-      console.error("❌ Komment lekérési hiba:", err);
+      console.error("Komment lekérési hiba:", err);
     }
   };
 
@@ -245,14 +241,16 @@ function Browse() {
         {filter === "author" ? "Feltöltők böngészése" : "Képek böngészése"}
       </h1>
 
-      {/* 🔍 Kereső és szűrő */}
       <Container className="mb-4">
         <Row className="justify-content-center">
           <Col md={8}>
             <div className="d-flex gap-2">
               <Form.Control
                 type="text"
-                placeholder="Keresés cím, leírás, tag vagy feltöltő alapján..."
+                placeholder={filter === "author"
+                  ? "Keress feltöltőre (üresen = top 50)"
+                  : "Keresés képre: cím / leírás / tag egyszerre..."}
+                
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 onKeyDown={(e) => {
@@ -266,17 +264,32 @@ function Browse() {
     setFilter(newFilter);
 
     if (newFilter === "author") {
+      // 👤 Feltöltők azonnali listázása
       setQuery("");
       handleSearch("", "author");
+    } else {
+      // 🖼️ Visszaváltás "Kép"-re
+      setUsers([]);
+      setImages([]);
+      setHasMore(true);
+      setPage(1);
+
+      // ha van keresőkifejezés → keressen
+      // ha nincs → sima browse képek
+      if (query.trim()) {
+        handleSearch(query, "image");
+      } else {
+        fetchImages(1);
+      }
     }
   }}
   style={{ maxWidth: "150px" }}
 >
+  <option value="image">Kép</option>
+  <option value="author">Feltöltő</option>
+</Form.Select>
 
-                <option value="title">Cím / Leírás</option>
-                <option value="tag">Tag</option>
-                <option value="author">Feltöltő</option>
-              </Form.Select>
+
               <Button variant="outline-light" onClick={() => handleSearch()}>
                 Keresés
               </Button>
@@ -285,7 +298,6 @@ function Browse() {
         </Row>
       </Container>
 
-      {/* ✅ AUTHOR MODE: user kártyák */}
       {filter === "author" ? (
         <Container className="user-results-stack">
           {loading && <h4 className="text-center text-light py-5">Töltés...</h4>}
@@ -303,7 +315,6 @@ function Browse() {
           ))}
         </Container>
       ) : (
-        // ✅ IMAGE MODE: marad az InfiniteScroll + grid
         <InfiniteScroll
           dataLength={images.length}
           next={fetchMoreImages}
@@ -347,7 +358,6 @@ function Browse() {
         </InfiniteScroll>
       )}
 
-      {/* Modalok (unchanged) */}
       <ImageModal
         show={!!selectedImage}
         image={selectedImage}
@@ -358,6 +368,7 @@ function Browse() {
         newComment={newComment}
         onCommentChange={(e) => setNewComment(e.target.value)}
         onCommentSubmit={() => {}}
+        
         commentLoading={commentLoading}
         onCommentVote={() => {}}
       />
