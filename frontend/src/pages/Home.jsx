@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Container, Form, Button, Row, Col } from "react-bootstrap";
+import { Container, Form, Button, Row, Col, Modal } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import ImageCard from "../components/ImageCard";
 import ImageModal from "../components/ImageModal";
@@ -32,6 +32,16 @@ function Home() {
   const [query, setQuery] = useState("");
   const { user } = useContext(UserContext);
   const [feedType, setFeedType] = useState("foryou");
+  // ----- admin delete image confirm (glass modal) -----
+const [showDeleteImageModal, setShowDeleteImageModal] = useState(false);
+const [deleteImageLoading, setDeleteImageLoading] = useState(false);
+const [pendingDeleteImageId, setPendingDeleteImageId] = useState(null);
+
+const askDeleteImage = (imageId) => {
+  setPendingDeleteImageId(imageId);
+  setShowDeleteImageModal(true);
+};
+
 
 
 
@@ -69,11 +79,12 @@ function Home() {
   };
   
 
-  const handleDeleteImage = async (imageId) => {
-    if (!window.confirm("Biztosan törölni akarod a képet?")) return;
+  const confirmDeleteImage = async () => {
+    if (!pendingDeleteImageId) return;
   
+    setDeleteImageLoading(true);
     try {
-      const res = await fetch(`http://localhost:3001/api/images/${imageId}`, {
+      const res = await fetch(`http://localhost:3001/api/images/${pendingDeleteImageId}`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
@@ -87,17 +98,21 @@ function Home() {
       }
   
       if (res.ok) {
-        // törlés frontend frissítés
-        setImages((prev) => prev.filter((img) => img.id !== imageId));
-        if (selectedImage?.id === imageId) closeModal();
+        setImages((prev) => prev.filter((img) => img.id !== pendingDeleteImageId));
+        if (selectedImage?.id === pendingDeleteImageId) closeModal();
       } else {
-        alert("Hiba a törlés során!");
+        alert("Hiba a kép törlésekor!");
       }
     } catch (err) {
       console.error("Kép törlés hiba:", err);
       alert("Hiba történt a törlés során!");
+    } finally {
+      setDeleteImageLoading(false);
+      setShowDeleteImageModal(false);
+      setPendingDeleteImageId(null);
     }
   };
+  
   
   
 
@@ -387,7 +402,7 @@ const handleImageVote = async (imageId, vote) => {
       {/* ✅ Admin X gomb */}
       {user?.isAdmin && (
   <button
-    onClick={() => handleDeleteImage(img.id)}
+    onClick={() => askDeleteImage(img.id)}
     style={{
       position: "absolute",
       top: "8px",      // távolság a tetejétől
@@ -436,6 +451,66 @@ const handleImageVote = async (imageId, vote) => {
         commentLoading={commentLoading}
         onCommentVote={handleCommentVote}
       />
+
+      {/* DELETE IMAGE CONFIRM MODAL */}
+<Modal
+  show={showDeleteImageModal}
+  onHide={() => {
+    if (deleteImageLoading) return;
+    setShowDeleteImageModal(false);
+    setPendingDeleteImageId(null);
+  }}
+  centered
+  backdrop="static"
+  keyboard={!deleteImageLoading}
+  className="glass-modal glass-confirm"
+>
+  <Modal.Body className="p-0">
+    <div className="glass-header d-flex justify-content-between align-items-center">
+      <h3 className="glass-title m-0">Kép törlése</h3>
+      <Button
+        variant="link"
+        onClick={() => {
+          if (deleteImageLoading) return;
+          setShowDeleteImageModal(false);
+          setPendingDeleteImageId(null);
+        }}
+        className="text-dark p-0"
+        style={{ fontSize: "24px", textDecoration: "none", lineHeight: 1 }}
+      >
+        ×
+      </Button>
+    </div>
+
+    <div className="glass-info p-4">
+      <p className="glass-description m-0">
+        BIZTOS? Ez véglegesen törli a képet (és a hozzá tartozó vote/comment dolgokat is, ha a backend így kezeli).
+      </p>
+
+      <div className="d-flex justify-content-end gap-2 mt-3">
+        <Button
+          variant="outline-light"
+          disabled={deleteImageLoading}
+          onClick={() => {
+            setShowDeleteImageModal(false);
+            setPendingDeleteImageId(null);
+          }}
+        >
+          Mégse
+        </Button>
+
+        <Button
+          variant="outline-danger"
+          disabled={deleteImageLoading}
+          onClick={confirmDeleteImage}
+        >
+          {deleteImageLoading ? "Törlés..." : "Igen, törlöm"}
+        </Button>
+      </div>
+    </div>
+  </Modal.Body>
+</Modal>
+
     </div>
   );
 }
