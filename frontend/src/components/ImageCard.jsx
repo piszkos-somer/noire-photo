@@ -1,13 +1,54 @@
 import React, { useEffect, useState } from "react";
-import { Card, Button } from "react-bootstrap";
+import { Card, Button, Modal } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { MessageCircle, ArrowUp, ArrowDown } from "lucide-react";
 import "../css/ImageCard.css";
+import { handleTokenError } from "../utils/auth";
 
-function ImageCard({ image, onVote, onOpen, likeLoading }) {
+
+function ImageCard({ image, onVote, onOpen, likeLoading, isAdmin, token, onDeleted }) {
 
   const navigate = useNavigate();
   const [commentCount, setCommentCount] = useState(0);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  
+  const askDelete = (e) => {
+    e.stopPropagation();
+    setShowDeleteModal(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!token) return navigate("/Registration");
+
+    setDeleteLoading(true);
+    try {
+      const res = await fetch(`http://localhost:3001/api/images/${image.id}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (res.status === 401 || res.status === 403) {
+        handleTokenError(res.status, navigate);
+        return;
+      }
+
+      if (res.ok) {
+        setShowDeleteModal(false);
+        onDeleted?.(image.id);
+      } else {
+        alert("Hiba a kép törlésekor!");
+      }
+    } catch (err) {
+      console.error("Kép törlés hiba:", err);
+      alert("Hiba történt a törlés során!");
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
 
   const handleAuthorClick = () => {
     if (image.user_id) {
@@ -41,7 +82,35 @@ function ImageCard({ image, onVote, onOpen, likeLoading }) {
     return [...new Set(tagsArray)].filter(tag => tag !== "");
   }, [image.tags]);
   return (
-    <div className="glass-card">
+    <div className="glass-card" style={{ position: "relative" }}>
+      
+      {isAdmin && (
+  <button
+    onClick={askDelete}
+    title="Kép törlése"
+    aria-label="Kép törlése"
+    style={{
+      position: "absolute",
+      top: "8px",
+      right: "8px",
+      zIndex: 10,
+      background: "rgba(255,0,0,0.85)",
+      color: "white",
+      border: "none",
+      borderRadius: "50%",
+      width: "26px",
+      height: "26px",
+      cursor: "pointer",
+      fontWeight: "bold",
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+    }}
+  >
+    X
+  </button>
+)}
+
       <Card className="glass-inner">
         <div className="img-wrapper" onClick={() => onOpen(image)} style={{ cursor: "pointer" }}>
         <Card.Img
@@ -154,6 +223,57 @@ function ImageCard({ image, onVote, onOpen, likeLoading }) {
           </Button>
         </Card.Body>
       </Card>
+      <Modal
+  show={showDeleteModal}
+  onHide={() => {
+    if (deleteLoading) return;
+    setShowDeleteModal(false);
+  }}
+  centered
+  backdrop="static"
+  keyboard={!deleteLoading}
+  className="glass-modal glass-confirm"
+>
+  <Modal.Body className="p-0" onClick={(e) => e.stopPropagation()}>
+    <div className="glass-header d-flex justify-content-between align-items-center">
+      <h3 className="glass-title m-0">Kép/poszt törlése</h3>
+      <Button
+        variant="link"
+        onClick={() => {
+          if (deleteLoading) return;
+          setShowDeleteModal(false);
+        }}
+        className="text-dark p-0"
+        style={{ fontSize: "24px", textDecoration: "none", lineHeight: 1 }}
+      >
+        ×
+      </Button>
+    </div>
+
+    <div className="glass-info p-4">
+      <p className="glass-description m-0">Biztosan törölni akarod ezt a képet?</p>
+
+      <div className="d-flex justify-content-end gap-2 mt-3">
+        <Button
+          variant="outline-light"
+          disabled={deleteLoading}
+          onClick={() => setShowDeleteModal(false)}
+        >
+          Mégse
+        </Button>
+
+        <Button
+          variant="outline-danger"
+          disabled={deleteLoading}
+          onClick={confirmDelete}
+        >
+          {deleteLoading ? "Törlés..." : "Igen, törlöm"}
+        </Button>
+      </div>
+    </div>
+  </Modal.Body>
+</Modal>
+
     </div>
   );
 }

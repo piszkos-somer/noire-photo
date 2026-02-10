@@ -1,7 +1,7 @@
 // src/pages/ViewProfile.jsx
 import React, { useState, useEffect, useContext, useMemo } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
-import { Container, Row, Spinner, Button } from "react-bootstrap";
+import { Container, Row, Spinner, Button, Modal } from "react-bootstrap";
 import ImageCard from "../components/ImageCard";
 import ImageModal from "../components/ImageModal";
 import "../css/Profile.css";
@@ -65,6 +65,40 @@ function ViewProfile() {
 
   // voting UI
   const [likeLoading, setLikeLoading] = useState(null);
+  // ----- admin delete user confirm (glass modal) -----
+  const [showDeleteUserModal, setShowDeleteUserModal] = useState(false);
+  const [deleteUserLoading, setDeleteUserLoading] = useState(false);
+  const askDeleteUser = () => setShowDeleteUserModal(true);
+
+  const confirmDeleteUser = async () => {
+    setDeleteUserLoading(true);
+    try {
+      const res = await fetch(`http://localhost:3001/api/admin/users/${id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (res.status === 401 || res.status === 403) {
+        handleTokenError(res.status, navigate);
+        return;
+      }
+
+      const data = await res.json().catch(() => ({}));
+
+      if (res.ok) {
+        alert("Profil törölve.");
+        navigate("/");
+      } else {
+        alert(data?.message || "Hiba a profil törlésénél.");
+      }
+    } catch (e) {
+      console.error("Profil törlés hiba:", e);
+      alert("Szerverhiba.");
+    } finally {
+      setDeleteUserLoading(false);
+      setShowDeleteUserModal(false);
+    }
+  };
 
   // ----- fetch profile -----
   useEffect(() => {
@@ -472,43 +506,11 @@ function ViewProfile() {
 
 {user?.isAdmin && !isOwnProfile && (
   <div className="mt-3">
-    <Button
-      variant="danger"
-      onClick={async () => {
-        const ok = window.confirm(
-          "BIZTOS? Ez törli a felhasználót, a képeit, kommentjeit és szavazatait is."
-        );
-        if (!ok) return;
+<Button variant="danger" onClick={askDeleteUser}>
+  Fiók törlése
+</Button>
 
-        try {
-          const res = await fetch(`http://localhost:3001/api/admin/users/${id}`, {
-            method: "DELETE",
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          });
 
-          if (res.status === 401 || res.status === 403) {
-            handleTokenError(res.status, navigate);
-            return;
-          }
-
-          const data = await res.json().catch(() => ({}));
-
-          if (res.ok) {
-            alert("Profil törölve.");
-            navigate("/"); // vagy ahová akarod
-          } else {
-            alert(data?.message || "Hiba a profil törlésénél.");
-          }
-        } catch (e) {
-          console.error("Profil törlés hiba:", e);
-          alert("Szerverhiba.");
-        }
-      }}
-    >
-      Fiók törlése
-    </Button>
   </div>
 )}
 
@@ -517,44 +519,22 @@ function ViewProfile() {
 
       <Row xs={1} sm={2} md={3} lg={4} className="g-4">
   {images.map((img) => (
-    <div key={img.id} style={{ position: "relative" }}>
-      
-      {/* 🔴 ADMIN TÖRLÉS GOMB */}
-      {user?.isAdmin && (
-        <button
-          onClick={() => handleDeleteImage(img.id)}
-          title="Kép törlése"
-          style={{
-            position: "absolute",
-            top: "8px",
-            right: "8px",
-            zIndex: 10,
-            background: "rgba(255,0,0,0.85)",
-            color: "white",
-            border: "none",
-            borderRadius: "50%",
-            width: "26px",
-            height: "26px",
-            cursor: "pointer",
-            fontWeight: "bold",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          X
-        </button>
-      )}
-
-      <ImageCard
-        image={img}
-        onVote={handleImageVote}
-        onOpen={openModal}
-        likeLoading={likeLoading}
-      />
-    </div>
+    <ImageCard
+      key={img.id}
+      image={img}
+      onVote={handleImageVote}
+      onOpen={openModal}
+      likeLoading={likeLoading}
+      isAdmin={!!user?.isAdmin}
+      token={token}
+      onDeleted={(deletedId) => {
+        setImages((prev) => prev.filter((x) => x.id !== deletedId));
+        if (selectedImage?.id === deletedId) closeModal();
+      }}
+    />
   ))}
 </Row>
+
 
 
 
@@ -572,6 +552,60 @@ function ViewProfile() {
         commentLoading={commentLoading}
         onCommentVote={handleCommentVote}
       />
+      {/* DELETE USER CONFIRM MODAL */}
+<Modal
+  show={showDeleteUserModal}
+  onHide={() => {
+    if (deleteUserLoading) return;
+    setShowDeleteUserModal(false);
+  }}
+  centered
+  backdrop="static"
+  keyboard={!deleteUserLoading}
+  className="glass-modal glass-confirm"
+>
+  <Modal.Body className="p-0">
+    <div className="glass-header d-flex justify-content-between align-items-center">
+      <h3 className="glass-title m-0">Fiók törlése</h3>
+      <Button
+        variant="link"
+        onClick={() => {
+          if (deleteUserLoading) return;
+          setShowDeleteUserModal(false);
+        }}
+        className="text-dark p-0"
+        style={{ fontSize: "24px", textDecoration: "none", lineHeight: 1 }}
+      >
+        ×
+      </Button>
+    </div>
+
+    <div className="glass-info p-4">
+      <p className="glass-description m-0">
+        BIZTOS? Ez törli a felhasználót, a képeit, kommentjeit és szavazatait is.
+      </p>
+
+      <div className="d-flex justify-content-end gap-2 mt-3">
+        <Button
+          variant="outline-light"
+          disabled={deleteUserLoading}
+          onClick={() => setShowDeleteUserModal(false)}
+        >
+          Mégse
+        </Button>
+
+        <Button
+          variant="outline-danger"
+          disabled={deleteUserLoading}
+          onClick={confirmDeleteUser}
+        >
+          {deleteUserLoading ? "Törlés..." : "Igen, törlöm"}
+        </Button>
+      </div>
+    </div>
+  </Modal.Body>
+</Modal>
+
     </Container>
   );
 }

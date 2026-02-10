@@ -10,10 +10,9 @@
   background: #5a6268 !important;
 }
 
-/* Képek egységes mérete */
 .image-wrapper {
   width: 100%;
-  height: 250px; /* fix magasság, minden kártyán ugyanannyi */
+  height: 250px;
   overflow: hidden;
   border-top-left-radius: 0.5rem;
   border-top-right-radius: 0.5rem;
@@ -22,10 +21,9 @@
 .card-img-fixed {
   width: 100%;
   height: 100%;
-  object-fit: cover; /* megtartja az arányt, kitölti a dobozt */
+  object-fit: cover;
 }
 
-/* Kártyák mérete és árnyéka */
 .card {
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
@@ -34,10 +32,9 @@
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
 }
 
-/* Tag badge stílus finomítás */
 .tag-badge {
   background-color: #6c757d !important;
-  border-radius: 0.4rem !important; /* csak enyhén lekerekített */
+  border-radius: 0.4rem !important;
   padding: 0.35em 0.7em;
   font-weight: 500;
   font-size: 0.9rem;
@@ -92,9 +89,6 @@ img.rounded-circle:hover {
   height: 250px;
   object-fit: cover;
 }
-/* =========================
-   VAGÁNY PROFIL HERO (GLASS + NEON)
-   ========================= */
 
    .profile-hero {
     position: relative;
@@ -103,7 +97,6 @@ img.rounded-circle:hover {
     overflow: hidden;
     isolation: isolate;
   
-    /* mély, “űr” háttér */
     background:
       radial-gradient(900px circle at 10% 10%, rgba(120, 170, 255, 0.25), transparent 55%),
       radial-gradient(900px circle at 90% 25%, rgba(255, 120, 200, 0.20), transparent 55%),
@@ -134,7 +127,6 @@ img.rounded-circle:hover {
   }
   
   .profile-hero::after {
-    /* finom “noise” + fény */
     content: "";
     position: absolute;
     inset: 0;
@@ -230,7 +222,6 @@ img.rounded-circle:hover {
     .profile-actions { justify-content: center; }
   }
   
-  /* “Neon” gomb – Bootstrap Button mellé */
   .btn-neon {
     position: relative;
     border: none !important;
@@ -278,13 +269,11 @@ img.rounded-circle:hover {
     opacity: 0.65;
     transform: none;
   }
-  
-  /* “Secondary” állapot is vagány legyen */
+
   .btn-neon.is-following {
     background: linear-gradient(135deg, rgba(255,255,255,0.14), rgba(255,255,255,0.07)) !important;
   }
   
-  /* Mini “pill” badge a név fölé / mellé */
   .profile-pill {
     display: inline-flex;
     align-items: center;
@@ -308,6 +297,5 @@ img.rounded-circle:hover {
     box-shadow: 0 0 16px rgba(80,255,200,0.55);
   }
   
-  /* A régi rounded-circle hover maradhat, de ne “harcoljon” */
   img.rounded-circle { border: none; }
   
