@@ -71,18 +71,21 @@ function NavbarNoire() {
           <Nav>
             {user?.username ? (
               <>
+              {!user.isAdmin && (
                 <Nav.Link as={Link} to="/profile">
-                  👤 {user.username}
+                  {user.username}
                 </Nav.Link>
-                <Button
-                  variant="outline-danger"
-                  size="sm"
-                  className="ms-2"
-                  onClick={handleLogout}
-                >
-                  Kijelentkezés
-                </Button>
-              </>
+              )}
+              <Button
+                variant="outline-danger"
+                size="sm"
+                className="ms-2"
+                onClick={handleLogout}
+              >
+                Kijelentkezés
+              </Button>
+            </>
+            
             ) : (
               <Nav.Link as={Link} to="/login">
                 Bejelentkezés

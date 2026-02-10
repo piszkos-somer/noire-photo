@@ -1,6 +1,6 @@
 Backend: 
  npm init -y
-    npm i dotenv express cors mysql nodemon
+    npm i dotenv express cors mysql nodemon nodemailer
     npm run start
 
 

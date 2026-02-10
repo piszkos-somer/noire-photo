@@ -7,6 +7,8 @@ const fs = require("fs");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
+const { sendWelcomeEmail } = require("./mailer");
+
 
 const app = express();
 
@@ -108,6 +110,11 @@ app.post("/api/register", async (req, res) => {
         email,
         hashed,
       ]);
+
+      try {
+        await sendWelcomeEmail({ to: email, username });
+      } catch (e) {}
+
       res.json({ message: "Sikeres regisztráció!" });
     } finally {
       conn.release();
@@ -117,6 +124,7 @@ app.post("/api/register", async (req, res) => {
     res.status(500).json({ message: "Szerverhiba regisztráció közben." });
   }
 });
+
 
 app.post("/api/login", async (req, res) => {
   const { email, password } = req.body;
@@ -1422,3 +1430,5 @@ app.delete("/api/admin/users/:id", verifyToken, async (req, res) => {
     conn.release();
   }
 });
+
+
