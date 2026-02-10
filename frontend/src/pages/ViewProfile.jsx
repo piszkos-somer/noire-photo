@@ -8,6 +8,23 @@ import "../css/Home.css";
 import { handleTokenError } from "../utils/auth";
 import { UserContext } from "../context/UserContext";
 
+const fallbackAvatar =
+  "data:image/svg+xml;charset=utf-8," +
+  encodeURIComponent(`
+  <svg xmlns="http://www.w3.org/2000/svg" width="160" height="160">
+    <defs>
+      <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#2b2b2b"/>
+        <stop offset="1" stop-color="#111"/>
+      </linearGradient>
+    </defs>
+    <rect width="100%" height="100%" fill="url(#g)"/>
+    <circle cx="80" cy="62" r="28" fill="#444"/>
+    <rect x="32" y="102" width="96" height="44" rx="22" fill="#333"/>
+  </svg>
+`);
+
+
 function ViewProfile() {
   const { user } = useContext(UserContext);
   const { id } = useParams();
@@ -75,7 +92,6 @@ function ViewProfile() {
       const data = await res.json().catch(() => ({}));
 
       if (res.ok) {
-        alert("Profil törölve.");
         navigate("/");
       } else {
         alert(data?.message || "Hiba a profil törlésénél.");
@@ -425,17 +441,21 @@ function ViewProfile() {
     <div className="profile-hero-inner">
       <div>
         <div className="profile-avatar-wrap">
-          <img
-            src={
-              profile.profile_picture
-                ? `http://localhost:3001${profile.profile_picture}`
-                : "/profile-pictures/default.png"
-            }
-            alt={profile.username}
-            className="profile-avatar"
-            width={200}
-            height={200}
-          />
+        <img
+  src={
+    profile.profile_picture
+      ? `http://localhost:3001${profile.profile_picture}`
+      : fallbackAvatar
+  }
+  alt={profile.username}
+  className="profile-avatar"
+  width={200}
+  height={200}
+  onError={(e) => {
+    e.currentTarget.src = fallbackAvatar;
+  }}
+/>
+
         </div>
       </div>
 

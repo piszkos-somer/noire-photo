@@ -817,6 +817,17 @@ app.get("/api/users/search", async (req, res) => {
   const { q } = req.query;
   const search = q ? `%${q}%` : "%";
 
+  const authHeader = req.headers.authorization;
+  let viewerId = null;
+
+  if (authHeader && authHeader.startsWith("Bearer ")) {
+    try {
+      const token = authHeader.split(" ")[1];
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      viewerId = decoded.id;
+    } catch (err) {}
+  }
+
   const conn = await pool.getConnection();
   try {
     const [rows] = await conn.query(
@@ -841,10 +852,11 @@ app.get("/api/users/search", async (req, res) => {
       ) fStats ON fStats.following_id = u.id
       WHERE u.is_admin = 0
         AND u.username LIKE ?
+        AND (? IS NULL OR u.id <> ?)
       ORDER BY imgStats.imageCount DESC, fStats.followerCount DESC, u.username ASC
       LIMIT 50
       `,
-      [search]
+      [search, viewerId, viewerId]
     );
 
     res.json(rows);
