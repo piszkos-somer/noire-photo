@@ -814,6 +814,50 @@ app.post("/api/comments/:id/like", verifyToken, async (req, res) => {
     conn.release();
   }
 });
+// ✅ EZT TEDD AZ app.get("/api/users/:id") ELÉ !!!
+
+app.get("/api/users/search", async (req, res) => {
+  const { q } = req.query;
+  const search = q ? `%${q}%` : "%";
+
+  const conn = await pool.getConnection();
+  try {
+    const [rows] = await conn.query(
+      `
+      SELECT
+        u.id,
+        u.username,
+        u.bio,
+        u.profile_picture,
+        COALESCE(imgStats.imageCount, 0) AS imageCount,
+        COALESCE(fStats.followerCount, 0) AS followerCount
+      FROM users u
+      LEFT JOIN (
+        SELECT user_id, COUNT(*) AS imageCount
+        FROM images
+        GROUP BY user_id
+      ) imgStats ON imgStats.user_id = u.id
+      LEFT JOIN (
+        SELECT following_id, COUNT(*) AS followerCount
+        FROM follows
+        GROUP BY following_id
+      ) fStats ON fStats.following_id = u.id
+      WHERE u.username LIKE ?
+      ORDER BY imgStats.imageCount DESC, fStats.followerCount DESC, u.username ASC
+      LIMIT 50
+      `,
+      [search]
+    );
+
+    res.json(rows);
+  } catch (err) {
+    console.error("User search hiba:", err);
+    res.status(500).json({ error: "Szerverhiba user keresés közben." });
+  } finally {
+    conn.release();
+  }
+});
+
 
 
 app.get("/api/users/:id", async (req, res) => {
@@ -1431,3 +1475,5 @@ app.delete("/api/admin/users/:id", verifyToken, async (req, res) => {
     conn.release();
   }
 });
+// 🔎 Users search (feltöltő keresés) – user kártyákhoz
+

@@ -37,3 +37,9 @@ body {
   );
   z-index: -1;
 }
+.user-results-stack{
+  max-width: 980px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
