@@ -3,12 +3,11 @@ import { Container, Form, Button, Row, Col, Modal } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import ImageCard from "../components/ImageCard";
 import ImageModal from "../components/ImageModal";
-import { motion, AnimatePresence } from "framer-motion";
 import "../css/Home.css";
 import { handleTokenError } from "../utils/auth";
 import { useContext } from "react";
 import { UserContext } from "../context/UserContext";
-
+import AnimatedWavesBackground from "../components/AnimatedWavesBackground";
 
 
 export const AnimatedHeart = ({ isLiked, onClick, }) => {
@@ -325,6 +324,7 @@ const handleImageVote = async (imageId, vote) => {
 
   return (
     <div className="home-page py-5">
+      <AnimatedWavesBackground />
       <h1 className="text-center text-light mb-4 szinatmenet">
   Noire Photo Collection
 </h1>
