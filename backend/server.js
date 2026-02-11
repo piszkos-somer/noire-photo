@@ -91,188 +91,6 @@ function verifyToken(req, res, next) {
     return res.status(403).json({ message: "Token hiba." });
   }
 }
-async function googleReverseGeocode({ lat, lng }) {
-  const key = process.env.GOOGLE_MAPS_API_KEY;
-  if (!key) throw new Error("Missing GOOGLE_MAPS_API_KEY");
-
-  const url =
-    "https://maps.googleapis.com/maps/api/geocode/json" +
-    `?latlng=${encodeURIComponent(`${lat},${lng}`)}` +
-    `&key=${encodeURIComponent(key)}` +
-    `&language=hu`;
-
-  const r = await fetch(url);
-  const data = await r.json();
-
-  if (data.status !== "OK" || !Array.isArray(data.results) || data.results.length === 0) {
-    return null;
-  }
-
-  const best = data.results[0];
-  return {
-    place_id: best.place_id || null,
-    formatted_address: best.formatted_address || null,
-  };
-}
-
-async function googlePlaceDetails({ placeId }) {
-  const key = process.env.GOOGLE_MAPS_API_KEY;
-  if (!key) throw new Error("Missing GOOGLE_MAPS_API_KEY");
-
-  const url =
-    "https://maps.googleapis.com/maps/api/place/details/json" +
-    `?place_id=${encodeURIComponent(placeId)}` +
-    `&fields=${encodeURIComponent("name,formatted_address,geometry")}` +
-    `&key=${encodeURIComponent(key)}` +
-    `&language=hu`;
-
-  const r = await fetch(url);
-  const data = await r.json();
-
-  if (data.status !== "OK" || !data.result) return null;
-
-  const loc = data.result.geometry?.location || null;
-
-  return {
-    place_name: data.result.name || null,
-    formatted_address: data.result.formatted_address || null,
-    lat: typeof loc?.lat === "number" ? loc.lat : null,
-    lng: typeof loc?.lng === "number" ? loc.lng : null,
-  };
-}
-
-function normalizeLatLng(lat, lng) {
-  const a = Number(lat);
-  const b = Number(lng);
-  if (!Number.isFinite(a) || !Number.isFinite(b)) return null;
-  if (a < -90 || a > 90 || b < -180 || b > 180) return null;
-  return { lat: a, lng: b };
-}
-
-app.put("/api/images/:id/location", verifyToken, async (req, res) => {
-  const imageId = Number(req.params.id);
-  const { lat, lng, place_id, location_source } = req.body || {};
-
-  if (!imageId) return res.status(400).json({ message: "Hibás image id." });
-
-  const src = location_source === "places" || location_source === "map_click" || location_source === "manual"
-    ? location_source
-    : "map_click";
-
-  const conn = await pool.getConnection();
-  try {
-    const [rows] = await conn.execute("SELECT id, user_id FROM images WHERE id = ?", [imageId]);
-    if (rows.length === 0) return res.status(404).json({ message: "Kép nem található." });
-
-    const ownerId = rows[0].user_id;
-    const isAdmin = req.user?.isAdmin === true;
-    if (ownerId !== req.user.id && !isAdmin) return res.status(403).json({ message: "Nincs jogosultság." });
-
-    let finalLat = null;
-    let finalLng = null;
-    let finalPlaceId = null;
-    let finalPlaceName = null;
-    let finalFormatted = null;
-
-    if (place_id && typeof place_id === "string" && place_id.trim().length > 0) {
-      finalPlaceId = place_id.trim();
-      const details = await googlePlaceDetails({ placeId: finalPlaceId });
-      if (details) {
-        finalPlaceName = details.place_name;
-        finalFormatted = details.formatted_address;
-        finalLat = details.lat;
-        finalLng = details.lng;
-      }
-    } else {
-      const norm = normalizeLatLng(lat, lng);
-      if (!norm) return res.status(400).json({ message: "Hibás lat/lng." });
-
-      finalLat = norm.lat;
-      finalLng = norm.lng;
-
-      const geocoded = await googleReverseGeocode({ lat: finalLat, lng: finalLng });
-      if (geocoded) {
-        finalPlaceId = geocoded.place_id;
-        finalFormatted = geocoded.formatted_address;
-        if (finalPlaceId) {
-          const details = await googlePlaceDetails({ placeId: finalPlaceId });
-          if (details) {
-            finalPlaceName = details.place_name;
-            finalFormatted = details.formatted_address || finalFormatted;
-          }
-        }
-      }
-    }
-
-    await conn.execute(
-      `
-      UPDATE images
-      SET
-        lat = ?,
-        lng = ?,
-        place_id = ?,
-        place_name = ?,
-        formatted_address = ?,
-        location_source = ?,
-        location_updated_at = NOW()
-      WHERE id = ?
-      `,
-      [finalLat, finalLng, finalPlaceId, finalPlaceName, finalFormatted, src, imageId]
-    );
-
-    res.json({
-      success: true,
-      imageId,
-      lat: finalLat,
-      lng: finalLng,
-      place_id: finalPlaceId,
-      place_name: finalPlaceName,
-      formatted_address: finalFormatted,
-      location_source: src,
-    });
-  } catch (err) {
-    console.error("Location update hiba:", err);
-    res.status(500).json({ message: "Szerverhiba." });
-  } finally {
-    conn.release();
-  }
-});
-async function googleReverseGeocode(lat, lng) {
-  const key = process.env.GOOGLE_MAPS_API_KEY;
-  if (!key) throw new Error("GOOGLE_MAPS_API_KEY hiányzik");
-
-  const url =
-    `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${key}&language=hu`;
-
-  const res = await fetch(url);
-  const data = await res.json();
-
-  if (data.status !== "OK" || !data.results?.length) return null;
-
-  const best = data.results[0];
-
-  return {
-    place_id: best.place_id || null,
-    formatted_address: best.formatted_address || null,
-  };
-}
-
-async function googlePlaceDetails(placeId) {
-  const key = process.env.GOOGLE_MAPS_API_KEY;
-  if (!key) throw new Error("GOOGLE_MAPS_API_KEY hiányzik");
-
-  const url =
-    `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=name&key=${key}&language=hu`;
-
-  const res = await fetch(url);
-  const data = await res.json();
-
-  if (data.status !== "OK" || !data.result) return null;
-
-  return {
-    place_name: data.result.name || null,
-  };
-}
 
 app.post("/api/register", async (req, res) => {
   const { username, email, password } = req.body;
@@ -398,14 +216,7 @@ app.get("/api/my-images", verifyToken, async (req, res) => {
 
     const [images] = await conn.execute(
       `
-      SELECT 
-        i.lat,
-        i.lng,
-        i.place_id,
-        i.place_name,
-        i.formatted_address,
-        i.location_source,
-        i.location_updated_at,
+      SELECT
         i.id, i.user_id, i.title, i.description, i.url,
         u.username AS author,
         COALESCE(SUM(CASE WHEN iv.vote = 1 THEN 1 ELSE 0 END), 0) AS upvotes,
@@ -645,13 +456,6 @@ app.get("/api/latest-images", async (req, res) => {
     const [rows] = await conn.query(
       `
       SELECT 
-        i.lat,
-        i.lng,
-        i.place_id,
-        i.place_name,
-        i.formatted_address,
-        i.location_source,
-        i.location_updated_at,
         i.id,
         i.user_id,
         i.title,
@@ -1104,13 +908,6 @@ app.get("/api/user-images/:id", async (req, res) => {
     const [rows] = await conn.query(
       `
       SELECT 
-        i.lat,
-        i.lng,
-        i.place_id,
-        i.place_name,
-        i.formatted_address,
-        i.location_source,
-        i.location_updated_at,
         i.id,
         i.user_id,
         i.title,
@@ -1178,13 +975,6 @@ app.get("/api/images/search", async (req, res) => {
     const [rows] = await conn.query(
       `
       SELECT
-        i.lat,
-        i.lng,
-        i.place_id,
-        i.place_name,
-        i.formatted_address,
-        i.location_source,
-        i.location_updated_at,
         i.id,
         i.title,
         i.description,
@@ -1365,13 +1155,6 @@ app.get("/api/following-images", verifyToken, async (req, res) => {
     const [rows] = await conn.query(
       `
       SELECT
-        i.lat,
-        i.lng,
-        i.place_id,
-        i.place_name,
-        i.formatted_address,
-        i.location_source,
-        i.location_updated_at,
         i.id,
         i.user_id,
         i.title,
@@ -1504,13 +1287,6 @@ app.get("/api/random-images", async (req, res) => {
     const [rows] = await conn.query(
       `
       SELECT 
-        i.lat,
-        i.lng,
-        i.place_id,
-        i.place_name,
-        i.formatted_address,
-        i.location_source,
-        i.location_updated_at,
         i.id,
         i.user_id,
         i.title,
@@ -1667,5 +1443,3 @@ app.delete("/api/admin/users/:id", verifyToken, async (req, res) => {
     conn.release();
   }
 });
-
-

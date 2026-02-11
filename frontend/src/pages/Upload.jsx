@@ -3,7 +3,6 @@ import { Container, Form, Button, ListGroup } from "react-bootstrap";
 import "../css/Upload.css";
 import { useNavigate } from "react-router-dom";
 import { handleTokenError } from "../utils/auth";
-import { GoogleMap, Marker, useJsApiLoader } from "@react-google-maps/api";
 
 const getToken = () => {
   const userData = localStorage.getItem("user");
@@ -39,17 +38,6 @@ function Upload() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [uploadStatus, setUploadStatus] = useState("");
-
-  const [enableLocation, setEnableLocation] = useState(false);
-  const [location, setLocation] = useState(null);
-
-  const { isLoaded } = useJsApiLoader({
-    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY || "",
-  });
-  
-
-  const defaultCenter = { lat: 47.4979, lng: 19.0402 };
-  const mapContainerStyle = { width: "100%", height: "320px", borderRadius: "12px" };
 
   useEffect(() => {
     if (!token) {
@@ -95,12 +83,6 @@ function Upload() {
     return () => clearTimeout(delay);
   }, [newTag, navigate]);
 
-  useEffect(() => {
-    if (!enableLocation) {
-      setLocation(null);
-    }
-  }, [enableLocation]);
-
   const handleAddTag = (tagValue) => {
     const value = (tagValue || newTag).trim();
     if (!value) return;
@@ -138,17 +120,6 @@ function Upload() {
     setSelectedFile(file);
   };
 
-  const onMapClick = useCallback((e) => {
-    const lat = e.latLng?.lat();
-    const lng = e.latLng?.lng();
-    if (typeof lat !== "number" || typeof lng !== "number") return;
-
-    setLocation({
-      lat,
-      lng,
-      location_source: "map_click",
-    });
-  }, []);
 
   const handleUpload = async () => {
     if (!token) {
@@ -164,10 +135,6 @@ function Upload() {
       setUploadStatus("A kép címét meg kell adni!");
       return;
     }
-    if (enableLocation && !location) {
-      setUploadStatus("Pipálva van a helyszín megadása, de nincs kijelölt hely a térképen.");
-      return;
-    }
 
     setUploadStatus("Feltöltés folyamatban...");
 
@@ -177,11 +144,6 @@ function Upload() {
     formData.append("description", description);
     formData.append("tags", JSON.stringify(tags));
 
-    if (enableLocation && location) {
-      formData.append("lat", String(location.lat));
-      formData.append("lng", String(location.lng));
-      formData.append("location_source", location.location_source);
-    }
 
     try {
       const response = await fetch("http://localhost:3001/api/upload", {
@@ -201,17 +163,6 @@ function Upload() {
       }
 
       const data = await response.json();
-      if (enableLocation && location && data?.imageId) {
-        await fetch(`http://localhost:3001/api/images/${data.imageId}/location`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json", ...getAuthHeader() },
-          body: JSON.stringify({
-            lat: location.lat,
-            lng: location.lng,
-            location_source: location.location_source
-          }),
-        });
-      }
       
       if (response.ok) {
         setUploadStatus("Feltöltés sikeres!");
@@ -219,8 +170,6 @@ function Upload() {
         setTitle("");
         setDescription("");
         setTags([]);
-        setEnableLocation(false);
-        setLocation(null);
       } else {
         setUploadStatus(`Hiba: ${data.error || data.message || "Ismeretlen hiba"}`);
       }
@@ -266,47 +215,6 @@ function Upload() {
               onChange={(e) => setDescription(e.target.value)}
             />
           </Form.Group>
-
-          <Form.Group className="mb-3">
-            <Form.Check
-              type="checkbox"
-              label="Helyszín megadása"
-              checked={enableLocation}
-              onChange={(e) => setEnableLocation(e.target.checked)}
-            />
-          </Form.Group>
-
-          {enableLocation && (
-            <div className="mb-4">
-              <div className="mb-2 text-muted small">
-                Kattints a térképre a hely kijelöléséhez.
-              </div>
-
-              {!import.meta.env.VITE_GOOGLE_MAPS_API_KEY ? (
-
-                <div className="text-danger">
-                  Hiányzik a REACT_APP_GOOGLE_MAPS_API_KEY a .env fájlból.
-                </div>
-              ) : !isLoaded ? (
-                <div>Térkép betöltése...</div>
-              ) : (
-                <GoogleMap
-                  mapContainerStyle={mapContainerStyle}
-                  center={location ? { lat: location.lat, lng: location.lng } : defaultCenter}
-                  zoom={location ? 14 : 6}
-                  onClick={onMapClick}
-                  options={{
-                    clickableIcons: false,
-                    fullscreenControl: false,
-                    streetViewControl: false,
-                    mapTypeControl: false,
-                  }}
-                >
-                  {location && <Marker position={{ lat: location.lat, lng: location.lng }} />}
-                </GoogleMap>
-              )}
-            </div>
-          )}
 
           <div className="text-center mt-4">
             <Button variant="outline-dark" className="upload-btn" onClick={handleUpload}>
