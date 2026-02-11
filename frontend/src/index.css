@@ -1,10 +1,8 @@
-/* Edge / Chromium password reveal kikapcsolása */
 input[type="password"]::-ms-reveal,
 input[type="password"]::-ms-clear {
   display: none;
 }
 
-/* Chrome / Safari */
 input[type="password"]::-webkit-textfield-decoration-container {
   display: none;
 }

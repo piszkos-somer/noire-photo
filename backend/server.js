@@ -164,7 +164,7 @@ app.post("/api/login", async (req, res) => {
 
 
 app.post("/api/upload", verifyToken, upload.single("image"), async (req, res) => {
-  const { title, description, lat, lng, location_source } = req.body;
+  const { title, description } = req.body;
 
   const tags = JSON.parse(req.body.tags || "[]");
   const imageFile = req.file;
