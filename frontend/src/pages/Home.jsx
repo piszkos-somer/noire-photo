@@ -7,7 +7,9 @@ import "../css/Home.css";
 import { handleTokenError } from "../utils/auth";
 import { useContext } from "react";
 import { UserContext } from "../context/UserContext";
-import AbstractLinesBackground from "../components/AbstractLinesBackground"
+import AnimatedLinesBackground from "../components/AnimatedLinesBackground";
+
+
 
 
 export const AnimatedHeart = ({ isLiked, onClick, }) => {
@@ -324,7 +326,7 @@ const handleImageVote = async (imageId, vote) => {
 
   return (
     <div className="home-page py-5">
-      <AbstractLinesBackground />
+      <AnimatedLinesBackground lineCount={38} speed={0.6} amplitude={0.22} alpha={0.22} color="#111" />
       <h1 className="text-center text-light mb-4 szinatmenet">
   Noire Photo Collection
 </h1>
