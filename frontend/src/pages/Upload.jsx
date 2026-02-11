@@ -201,7 +201,18 @@ function Upload() {
       }
 
       const data = await response.json();
-
+      if (enableLocation && location && data?.imageId) {
+        await fetch(`http://localhost:3001/api/images/${data.imageId}/location`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json", ...getAuthHeader() },
+          body: JSON.stringify({
+            lat: location.lat,
+            lng: location.lng,
+            location_source: location.location_source
+          }),
+        });
+      }
+      
       if (response.ok) {
         setUploadStatus("Feltöltés sikeres!");
         setSelectedFile(null);
@@ -259,7 +270,7 @@ function Upload() {
           <Form.Group className="mb-3">
             <Form.Check
               type="checkbox"
-              label="Kép helyszínének megadása"
+              label="Helyszín megadása"
               checked={enableLocation}
               onChange={(e) => setEnableLocation(e.target.checked)}
             />
@@ -293,12 +304,6 @@ function Upload() {
                 >
                   {location && <Marker position={{ lat: location.lat, lng: location.lng }} />}
                 </GoogleMap>
-              )}
-
-              {location && (
-                <div className="mt-2 small">
-                  Kijelölt koordináta: {location.lat.toFixed(6)}, {location.lng.toFixed(6)}
-                </div>
               )}
             </div>
           )}
