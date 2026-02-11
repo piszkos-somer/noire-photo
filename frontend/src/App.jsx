@@ -1,4 +1,4 @@
-// src/App.jsx
+import AnimatedLinesBackground from "./components/AnimatedLinesBackground";
 import {React, useEffect} from "react";
 import { Routes, Route, useNavigate } from "react-router-dom";
 import { UserProvider } from "./context/UserContext";
@@ -18,15 +18,15 @@ function App() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Ellenőrizzük, hogy lejárt-e a token
     logoutIfExpired(navigate);
 
-    // 1 percenként újraellenőrizzük
     const interval = setInterval(() => logoutIfExpired(navigate), 60000);
     return () => clearInterval(interval);
   }, [navigate]);
 
   return (
+    <>
+    <AnimatedLinesBackground lineCount={38} speed={0.6} amplitude={0.22} alpha={0.6} color="#2a6cff" />
     <UserProvider>
       <NavbarNoire />
       <Routes>
@@ -45,6 +45,7 @@ function App() {
       </Routes>
       <Footer />
     </UserProvider>
+    </>
   );
 }
 

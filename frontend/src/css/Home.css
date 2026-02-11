@@ -84,17 +84,7 @@ body {
   overflow: hidden;
 }
 
-.animated-lines-bg canvas {
-  width: 100%;
-  height: 100%;
-  display: block;
-  filter: blur(0.2px);
-}
 
-.home-page {
-  position: relative;
-  z-index: 0;
-}
 .glass-bubble,
 .glass-switch {
   background: rgba(255, 255, 255, 0.28);
