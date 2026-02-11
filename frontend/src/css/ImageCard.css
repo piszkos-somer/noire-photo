@@ -6,6 +6,7 @@
   justify-items: center;
   width: 100%;
   box-sizing: border-box;
+  justify-items: stretch;
 }
 
 @media (max-width: 992px) {
@@ -27,6 +28,9 @@
   max-width: 420px;
   height: 100%;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
+  justify-self: stretch;
+  width: 100%;
+  max-width: none;
 }
 
 .glass-inner {
