@@ -38,7 +38,7 @@ export default function AnimatedLinesBackground({
 
       ctx.clearRect(0, 0, w, h);
 
-      const coverage = 0.75; 
+      const coverage = 0.6; 
 const span = h * coverage;
 
 const startY = (h - span) / 2;

@@ -326,7 +326,7 @@ const handleImageVote = async (imageId, vote) => {
 
   return (
     <div className="home-page py-5">
-      <AnimatedLinesBackground lineCount={38} speed={0.6} amplitude={0.22} alpha={0.22} color="#111" />
+      <AnimatedLinesBackground lineCount={38} speed={0.6} amplitude={0.22} alpha={0.6} color="#2a6cff" />
       <h1 className="text-center text-light mb-4 szinatmenet">
   Noire Photo Collection
 </h1>
