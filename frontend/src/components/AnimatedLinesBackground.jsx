@@ -38,9 +38,16 @@ export default function AnimatedLinesBackground({
 
       ctx.clearRect(0, 0, w, h);
 
-      const centerY = h * 0.55;
-      const spanY = h * 0.36;
-      const baseAmp = spanY * amplitude;
+      const coverage = 0.75; 
+const span = h * coverage;
+
+const startY = (h - span) / 2;
+const endY = startY + span;
+
+const baseAmp = span * amplitude;
+const slope = span * 0.3;
+
+
 
       const leftPad = -w * 0.05;
       const rightPad = w * 1.05;
@@ -55,7 +62,9 @@ export default function AnimatedLinesBackground({
 
       for (let i = 0; i < lineCount; i++) {
         const k = i / (lineCount - 1);
-        const y0 = centerY + (k - 0.5) * spanY;
+        const y0 = startY + k * span;
+
+
 
         const lineAmp = baseAmp * (0.55 + 0.65 * Math.sin(k * Math.PI));
         const f1 = 1.25 + 0.85 * k;
@@ -74,7 +83,9 @@ export default function AnimatedLinesBackground({
             Math.sin((nx * Math.PI * 2.0 * f2) - phase * 0.7 + k * 7.0) * 0.28;
 
           const envelope = 0.25 + 0.75 * Math.sin(nx * Math.PI);
-          const y = y0 + a * lineAmp * envelope * wobble;
+          const diagonalOffset = (x / w) * slope;
+          const y = y0 + diagonalOffset + a * lineAmp * envelope * wobble;
+
 
           if (s === 0) ctx.moveTo(x, y);
           else ctx.lineTo(x, y);
