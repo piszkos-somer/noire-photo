@@ -28,41 +28,9 @@ const askDeleteImage = (imageId) => {
   setShowDeleteImageModal(true);
 };
 
-
-
-
   const navigate = useNavigate();
   const userData = localStorage.getItem("user");
-  const token = userData ? JSON.parse(userData).token : null;
-
-  const handleDeleteComment = async (commentId) => {
-    if (!window.confirm("Biztosan törölni akarod a kommentet?")) return;
-  
-    try {
-      const res = await fetch(`http://localhost:3001/api/comments/${commentId}`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
-  
-      if (res.status === 401 || res.status === 403) {
-        handleTokenError(res.status, navigate);
-        return;
-      }
-  
-      if (res.ok) {
-        setComments((prev) => prev.filter((c) => c.id !== commentId));
-      } else {
-        alert("Hiba a komment törlésénél!");
-      }
-    } catch (err) {
-      console.error("Komment törlés hiba:", err);
-      alert("Hiba történt a komment törlésénél!");
-    }
-  };
-  
+  const token = userData ? JSON.parse(userData).token : null;  
 
   const confirmDeleteImage = async () => {
     if (!pendingDeleteImageId) return;
@@ -188,7 +156,6 @@ const handleImageVote = async (imageId, vote) => {
     setLikeLoading(null);
   }
 };
-
 
   const fetchComments = async (imageId) => {
     try {

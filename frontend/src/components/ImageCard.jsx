@@ -198,10 +198,12 @@ function ImageCard({ image, onVote, onOpen, likeLoading, isAdmin, token, onDelet
             </div>
           )}
 
-          {image.description && (
-            <div className="info-bubble text"><p>{highlightText(image.description, searchQuery)}</p>
-</div>
-          )}
+{image.description && (
+  <div className="info-bubble text">
+    {highlightText(image.description, searchQuery)}
+  </div>
+)}
+
 
 {normalizedTags.length > 0 && (
   <div className="d-flex flex-wrap gap-2 mb-3">
