@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Gép: 127.0.0.1:3307
--- Létrehozás ideje: 2026. Feb 11. 10:13
+-- Létrehozás ideje: 2026. Feb 12. 11:22
 -- Kiszolgáló verziója: 10.4.28-MariaDB
 -- PHP verzió: 8.2.4
 
@@ -182,7 +182,11 @@ INSERT INTO `images` (`id`, `user_id`, `title`, `description`, `upload_date`, `u
 (41, 10, 'Fekete-fehér portré', 'Fekete-fehér portré: drámai kontraszttal és árnyékjátékkal. Profi setup: Canon EOS R6, 50mm f/1.2L objektív (f/4, ISO 100, 1/160s), Profoto A10 vaku + softbox (kulcsfény 1/4 power, háttérlámpa 1/8), Lightroom + Photoshop utómunka: fekete-fehér konverzió (N&B mix: Red +20, Yellow +15), lokális dodge & burn, textúra finomhangolás, élesség Unsharp Mask 120%, Radius 0.8px.', '2026-01-21 23:24:20', '/images/1769034260356.jpg'),
 (42, 10, 'Árnyékos alak', 'Fekete-fehér portré: férfi kicsit távolabbról pózol minimalista háttér előtt, ahol látható az árnyéka. Profi setup: Canon EOS R6, 70mm f/2.8L makró objektív (f/5.6, ISO 100, 1/125s), Profoto B1X vaku + octabox (kulcsfény 1/2 power, háttér rim light 1/16), Capture One utómunka: fekete-fehér konverzió (Orange +25, Blue -10), árnyék kiemelés Curves-szal, lokális kontraszt +15%, textúra élesítés High Pass filter 80%, Radius 1.0px.\r\n\r\n', '2026-01-21 23:28:15', '/images/1769034495873.jpg'),
 (43, 10, 'Festmények ', 'Legutóbbi munkám. Kontrasztos háttérrel és finom silhouettettel. Profi setup: Canon EOS R5, 135mm f/2L objektív (f/4, ISO 100, 1/160s), Profoto D2 vaku + grid spot (háttér 1/8 power, rim light 1/32), Capture One utómunka: színkorrekció (split toning: árnyékok kék -5, highlights narancs +8), textúra kiemelés Clarity +20, lokális vignette -15%, élesség Output Sharpening 150%, Radius 1.1px.', '2026-01-21 23:31:31', '/images/1769034691609.jpg'),
-(45, 1, 'Parti jelenet', 'tegnap csináltam', '2026-02-10 14:36:34', '/images/1770730594624.jpg');
+(47, 1, 'Parti jelenet', 'nagy buli volt moknál tegnap este', '2026-02-12 11:08:15', '/images/1770890895654.jpg'),
+(48, 1, 'Hétfő Moknál meló után', 'Meló után leültünk a haverokkal és megkértem hogy csináljon rólam egy fotót. Beauty filter van rajta de szerintem kivételesen jól áll ennek a képnek. (Mindet nekem hozza a csapos)', '2026-02-12 11:11:09', '/images/1770891069670.jpg'),
+(49, 1, 'Serbán bár', 'Delikvensünk szemrebbenés nélkül szívta el az utolsó szál malbimat. A kis pimasz!', '2026-02-12 11:14:56', '/images/1770891296248.jpg'),
+(50, 1, 'Jim Beam cocktail', 'Megkavarja Mok nekem a Jim Beamet Absinthal, nem kellett volna meginnom!', '2026-02-12 11:18:37', '/images/1770891517494.jpg'),
+(51, 1, 'Dance party', 'Sony Alpha 7 IV-el készítettem, f/2.8–f/4', '2026-02-12 11:21:55', '/images/1770891715828.jpg');
 
 -- --------------------------------------------------------
 
@@ -301,8 +305,24 @@ INSERT INTO `image_tags` (`image_id`, `tag_id`) VALUES
 (43, 59),
 (43, 89),
 (43, 92),
-(45, 20),
-(45, 93);
+(47, 55),
+(47, 96),
+(47, 97),
+(47, 98),
+(48, 55),
+(48, 97),
+(48, 99),
+(48, 100),
+(48, 101),
+(49, 104),
+(49, 105),
+(49, 106),
+(49, 107),
+(50, 97),
+(50, 108),
+(50, 109),
+(51, 110),
+(51, 111);
 
 -- --------------------------------------------------------
 
@@ -432,20 +452,26 @@ INSERT INTO `tags` (`id`, `tag`) VALUES
 (61, 'állat'),
 (74, 'Anglia'),
 (62, 'autó'),
+(105, 'Bago'),
+(100, 'Beauty'),
+(101, 'Beer'),
 (67, 'budapest'),
+(103, 'Buli'),
 (54, 'Busz'),
 (38, 'Cat'),
 (37, 'Cica'),
+(108, 'Cocktail'),
 (71, 'color'),
-(94, 'Csaholy'),
 (85, 'csésze'),
 (19, 'Cuki'),
+(110, 'Dance'),
 (80, 'Dér'),
 (88, 'divat'),
 (52, 'Domb'),
 (68, 'Duna'),
 (66, 'Éjszaka'),
 (15, 'Erdő'),
+(99, 'Este'),
 (86, 'étel'),
 (40, 'Fa'),
 (79, 'Fagy'),
@@ -460,26 +486,34 @@ INSERT INTO `tags` (`id`, `tag`) VALUES
 (17, 'Hegység'),
 (21, 'Hold'),
 (78, 'Jég'),
+(109, 'Jim Beam'),
 (83, 'kávé'),
-(95, 'Könyv'),
 (60, 'kutya'),
 (65, 'Lánchíd'),
 (51, 'Lomb'),
+(104, 'Lopik'),
+(106, 'Malbi'),
 (39, 'Mátra'),
 (48, 'mező'),
 (47, 'moha'),
+(97, 'Mok'),
 (81, 'Molylepke'),
 (41, 'Nap'),
 (42, 'Napfelkelte'),
+(98, 'Newmarkt'),
 (58, 'old'),
 (63, 'opel'),
 (45, 'Ösvény'),
 (75, 'Oxford'),
+(96, 'Parti'),
+(111, 'Party'),
 (59, 'portré'),
 (64, 'Prága'),
 (90, 'profi'),
 (84, 'reggel'),
 (49, 'repülő'),
+(107, 'Serbán'),
+(102, 'Sör'),
 (76, 'Spanyolország'),
 (89, 'stúdió'),
 (72, 'szín'),
@@ -519,7 +553,7 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `username`, `email`, `password`, `bio`, `profile_picture`, `is_admin`) VALUES
-(1, 'somer fatera', 'perakattis@gmail.com', '$2b$10$vBS.xhlLasGMI3DPjjr6r.8MlEsnH5wFVAr/V64MXllFI4gaMS76O', 'Sziasztok! Kezdő fotós vagyok, és szeretnék ügyesebb lenni a szakmában. Köszönök minden építő kritikát! aa', '/profile-pictures/1761583927591.jpg', 0),
+(1, 'Frittyes', 'perakattis@gmail.com', '$2b$10$vBS.xhlLasGMI3DPjjr6r.8MlEsnH5wFVAr/V64MXllFI4gaMS76O', 'Sziasztok! Kezdő fotós vagyok, és szeretnék ügyesebb lenni a szakmában. Köszönök minden építő kritikát! aa', '/profile-pictures/1761583927591.jpg', 0),
 (2, 'Papp Sándor', 'pappsanyi@gmail.com', '$2b$10$9/iX2OKNISqPmBo13Svi/OtdCjPTxgSYNoZ7MUcLP0NwLZ7YlTrr2', 'Sziasztok! Sanyi vagyok és 4 éve foglalkozom fotózással. Szívesen megosztom veletek a munkáimat és bármikor fordulhattok hozzám segítségért. Versenyre való felkészítést is vállalok!', '/profile-pictures/1761584967721.jpg', 0),
 (3, 'Dávid', 'kabzso820@hengersor.hu', '$2b$10$77rO1/wis8plfrsb8ooWhuFVRhr3D8oH34ZRF13qH/plHpzArhft.', 'Sziasztok Dávid vagyok. Mizu? Tapasztalt, de egyáltalán nem profi fotós vagyok. Csak egy átlagos srác aki a fotózás szerelmese.', '/profile-pictures/1768215912073.jfif', 0),
 (4, 'Kabai Zsombor', 'kabai.zsombi@gmail.com', '$2b$10$3NiUroXsfKSnwSa6SxQ6Pu9fJhX/9dNH9r/DYTjDq9e4VNW4hjYVq', 'Sziasztok az én nevem Zsombor. Kezdő fotósnak tartom magam. A telefonommal szoktam fotózni és abból próbálom kihozni a legtöbbett.', '/profile-pictures/1762093987308.jpg', 0),
@@ -624,7 +658,7 @@ ALTER TABLE `follows`
 -- AUTO_INCREMENT a táblához `images`
 --
 ALTER TABLE `images`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=47;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=52;
 
 --
 -- AUTO_INCREMENT a táblához `image_votes`
@@ -636,7 +670,7 @@ ALTER TABLE `image_votes`
 -- AUTO_INCREMENT a táblához `tags`
 --
 ALTER TABLE `tags`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=96;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=112;
 
 --
 -- AUTO_INCREMENT a táblához `users`
