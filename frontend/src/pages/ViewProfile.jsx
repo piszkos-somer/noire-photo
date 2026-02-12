@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext, useMemo } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
-import { Container, Row, Spinner, Button, Modal } from "react-bootstrap";
+import { Container, Row, Spinner, Button, Modal, Col } from "react-bootstrap";
 import ImageCard from "../components/ImageCard";
 import ImageModal from "../components/ImageModal";
 import "../css/Profile.css";
@@ -502,23 +502,25 @@ function ViewProfile() {
 )}
       <h3 className="text-center mb-4">📸 {profile?.username} képei</h3>
 
-      <Row xs={1} sm={2} md={3} lg={4} className="g-4">
+      <Row xs={1} sm={2} md={3} lg={3} className="g-4">
   {images.map((img) => (
-    <ImageCard
-      key={img.id}
-      image={img}
-      onVote={handleImageVote}
-      onOpen={openModal}
-      likeLoading={likeLoading}
-      isAdmin={!!user?.isAdmin}
-      token={token}
-      onDeleted={(deletedId) => {
-        setImages((prev) => prev.filter((x) => x.id !== deletedId));
-        if (selectedImage?.id === deletedId) closeModal();
-      }}
-    />
+    <Col key={img.id}>
+      <ImageCard
+        image={img}
+        onVote={handleImageVote}
+        onOpen={openModal}
+        likeLoading={likeLoading}
+        isAdmin={!!user?.isAdmin}
+        token={token}
+        onDeleted={(deletedId) => {
+          setImages((prev) => prev.filter((x) => x.id !== deletedId));
+          if (selectedImage?.id === deletedId) closeModal();
+        }}
+      />
+    </Col>
   ))}
 </Row>
+
 
       <ImageModal
         show={!!selectedImage}

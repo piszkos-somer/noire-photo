@@ -11,4 +11,3 @@ Frontend:
 	       npm i framer-motion
                npm i react-bootstrap-icons
 	       npm i react-infinite-scroll-component
-           npm install @react-google-maps/api
