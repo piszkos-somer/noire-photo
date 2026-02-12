@@ -8,7 +8,6 @@ import {
   Alert,
   Row,
   Col,
-  Card,
   Image,
 } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
@@ -452,7 +451,7 @@ if (res.status === 401 || res.status === 403) {
       <hr />
       <h3 className="mt-5 mb-3 text-center">Saját feltöltéseim</h3>
 
-      <Row xs={1} sm={2} md={3} lg={4} className="g-4">
+      <Row xs={1} sm={2} md={3} lg={3} className="g-4">
   {images.map((image) => (
     <Col key={image.id}>
       <ImageCard
