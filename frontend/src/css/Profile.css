@@ -177,13 +177,9 @@ img.rounded-circle:hover {
     box-shadow:
       0 14px 40px rgba(0,0,0,0.45),
       0 0 0 1px rgba(255,255,255,0.18) inset;
-    animation: avatarSpin 10s linear infinite;
+    animation: none;
   }
   
-  @keyframes avatarSpin {
-    0% { filter: hue-rotate(0deg); }
-    100% { filter: hue-rotate(360deg); }
-  }
   
   .profile-avatar {
     width: 100%;
