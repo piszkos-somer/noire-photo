@@ -5,8 +5,6 @@ import "../css/ImageModal.css";
 import { getToken, getAuthHeader, handleTokenError } from "../utils/auth";
 import { Share2, MessageCircle, ArrowUp, ArrowDown, MoreVertical } from "lucide-react";
 
-
-
 function ImageModal({
   show,
   image,
@@ -21,160 +19,175 @@ function ImageModal({
   commentLoading,
   onCommentVote,
 }) {
-
   const navigate = useNavigate();
   const tokenUser = JSON.parse(localStorage.getItem("user"));
   const decoded = tokenUser?.token
     ? JSON.parse(atob(tokenUser.token.split(".")[1]))
     : null;
   const loggedInId = decoded?.id;
+
   const [localImage, setLocalImage] = useState(image);
-const [showToast, setShowToast] = useState(false);
-const [isFollowing, setIsFollowing] = useState(false);
-const [editingCommentId, setEditingCommentId] = useState(null);
-const [editCommentText, setEditCommentText] = useState("");
-const [openDropdownId, setOpenDropdownId] = useState(null);
+  const [showToast, setShowToast] = useState(false);
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [editingCommentId, setEditingCommentId] = useState(null);
+  const [editCommentText, setEditCommentText] = useState("");
+  const [openDropdownId, setOpenDropdownId] = useState(null);
+
+  const [localComments, setLocalComments] = useState(comments || []);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [pendingDeleteCommentId, setPendingDeleteCommentId] = useState(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+
   useEffect(() => {
     setLocalImage(image);
   }, [image]);
-const handleDownload = async () => {
-  const token = getToken();
 
-  if (!token) {
-    navigate("/Registration");
-    return;
-  }
+  useEffect(() => {
+    setLocalComments(comments || []);
+  }, [comments]);
 
-  try {
-    const response = await fetch(`http://localhost:3001${localImage.url}`, {
-      headers: getAuthHeader(),
-    });
+  const handleDeleteComment = (commentId) => {
+    setPendingDeleteCommentId(commentId);
+    setShowDeleteModal(true);
+  };
 
-    if (response.status === 401 || response.status === 403) {
-      handleTokenError(response.status, navigate);
-      return;
-    }
+  const confirmDeleteComment = async () => {
+    if (!pendingDeleteCommentId) return;
 
-    if (!response.ok) {
-      handleTokenError(response.status, navigate);
-      return;
-    }
-
-    const blob = await response.blob();
-    const url = window.URL.createObjectURL(blob);
-
-    const filename = localImage.url.split("/").pop() || "kep.jpg";
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = filename;
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-    window.URL.revokeObjectURL(url);
-  } catch (error) {
-    console.error("Letöltés hiba:", error);
-  }
-};
-
-useEffect(() => {
-  if (!show || !localImage) return;
-
-  const token = getToken();
-  if (!token) {
-    setIsFollowing(false);
-    return;
-  }
-
-  if (localImage.user_id == JSON.parse(localStorage.getItem("user"))?.id) {
-    setIsFollowing(false);
-    return;
-  }
-
-  const fetchFollowStatus = async () => {
+    setDeleteLoading(true);
     try {
       const res = await fetch(
-        `http://localhost:3001/api/follow/status/${localImage.user_id}`,
-        { headers: getAuthHeader() }
+        `http://localhost:3001/api/comments/${pendingDeleteCommentId}`,
+        {
+          method: "DELETE",
+          headers: getAuthHeader(),
+        }
       );
 
-      if (res.status === 401 || res.status === 403) {
+      if (res.status === 401) {
         handleTokenError(res.status);
+        navigate("/Login");
         return;
       }
 
-      const data = await res.json();
-      setIsFollowing(data.following);
-    } catch (err) {
-      console.error("Követés státusz hiba:", err);
-    }
-  };
-
-  fetchFollowStatus();
-}, [show, localImage]);
-  if (!show || !localImage) return null;
-
-const handleUserClick = (userId) => {
-  if (userId) navigate(`/viewprofile/${userId}`);
-};
-
-const handleShare = async () => {
-  if (!localImage?.id || !localImage?.user_id) return;
-
-  const shareUrl = `${window.location.origin}/viewprofile/${localImage.user_id}?image=${localImage.id}`;
-
-  try {
-    await navigator.clipboard.writeText(shareUrl);
-
-    setShowToast(true);
-
-    setTimeout(() => setShowToast(false), 2500);
-  } catch (err) {
-    console.error("Másolás hiba:", err);
-  }
-};
-
-  const handleLikeClick = async () => {
-    if (!localImage) return;
-    await onLike(localImage.id);
-
-    setLocalImage((prev) =>
-      prev
-        ? {
-            ...prev,
-            isLiked: !prev.isLiked,
-            likes: prev.isLiked ? prev.likes - 1 : prev.likes + 1,
-          }
-        : prev
-    );
-  };
-
-  const handleDeleteComment = async (commentId) => {
-    if (!window.confirm("Biztosan törölni szeretnéd ezt a hozzászólást?")) return;
-
-    try {
-      const res = await fetch(`http://localhost:3001/api/comments/${commentId}`, {
-        method: "DELETE",
-        headers: getAuthHeader(),
-      });
-
-      if (res.status === 401 || res.status === 403) {
-        handleTokenError(res.status, navigate);
+      if (res.status === 403) {
+        alert("Nincs jogosultságod a komment törléséhez.");
         return;
       }
 
       if (res.ok) {
-        window.location.reload();
+        setLocalComments((prev) =>
+          prev.filter((c) => c.id !== pendingDeleteCommentId)
+        );
+        setShowDeleteModal(false);
+        setPendingDeleteCommentId(null);
       } else {
         alert("Hiba történt a törlés során");
       }
     } catch (err) {
       console.error("Komment törlési hiba:", err);
       alert("Szerverhiba");
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
+
+  const handleDownload = async () => {
+    const token = getToken();
+
+    if (!token) {
+      navigate("/Registration");
+      return;
+    }
+
+    try {
+      const response = await fetch(`http://localhost:3001${localImage.url}`, {
+        headers: getAuthHeader(),
+      });
+
+      if (response.status === 401 || response.status === 403) {
+        handleTokenError(response.status, navigate);
+        return;
+      }
+
+      if (!response.ok) {
+        handleTokenError(response.status, navigate);
+        return;
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+
+      const filename = localImage.url.split("/").pop() || "kep.jpg";
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Letöltés hiba:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (!show || !localImage) return;
+
+    const token = getToken();
+    if (!token) {
+      setIsFollowing(false);
+      return;
+    }
+
+    if (localImage.user_id == JSON.parse(localStorage.getItem("user"))?.id) {
+      setIsFollowing(false);
+      return;
+    }
+
+    const fetchFollowStatus = async () => {
+      try {
+        const res = await fetch(
+          `http://localhost:3001/api/follow/status/${localImage.user_id}`,
+          { headers: getAuthHeader() }
+        );
+
+        if (res.status === 401 || res.status === 403) {
+          handleTokenError(res.status);
+          return;
+        }
+
+        const data = await res.json();
+        setIsFollowing(data.following);
+      } catch (err) {
+        console.error("Követés státusz hiba:", err);
+      }
+    };
+
+    fetchFollowStatus();
+  }, [show, localImage]);
+
+  if (!show || !localImage) return null;
+
+  const handleUserClick = (userId) => {
+    if (userId) navigate(`/viewprofile/${userId}`);
+  };
+
+  const handleShare = async () => {
+    if (!localImage?.id || !localImage?.user_id) return;
+
+    const shareUrl = `${window.location.origin}/viewprofile/${localImage.user_id}?image=${localImage.id}`;
+
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 2500);
+    } catch (err) {
+      console.error("Másolás hiba:", err);
     }
   };
 
   const handleEditComment = (comment) => {
-    console.log("Edit comment clicked:", comment);
     setEditingCommentId(comment.id);
     setEditCommentText(comment.comment);
   };
@@ -201,9 +214,13 @@ const handleShare = async () => {
       }
 
       if (res.ok) {
+        setLocalComments((prev) =>
+          prev.map((c) =>
+            c.id === commentId ? { ...c, comment: editCommentText } : c
+          )
+        );
         setEditingCommentId(null);
         setEditCommentText("");
-        window.location.reload();
       } else {
         alert("Hiba történt a módosítás során");
       }
@@ -221,16 +238,16 @@ const handleShare = async () => {
   return (
     <Modal show={show} onHide={onClose} centered size="lg" className="glass-modal">
       {showToast && (
-  <div className="share-toast glass-effect">
-    📋 Link másolva a vágólapra!
-  </div>
-)}
+        <div className="share-toast glass-effect">
+          📋 Link másolva a vágólapra!
+        </div>
+      )}
 
       <Modal.Body className="p-0">
         <div className="glass-header d-flex justify-content-between align-items-center">
           <h3 className="glass-title m-0">{localImage?.title || "Kép megtekintése"}</h3>
-          <Button 
-            variant="link" 
+          <Button
+            variant="link"
             onClick={onClose}
             className="text-dark p-0"
             style={{ fontSize: "24px", textDecoration: "none", lineHeight: 1 }}
@@ -248,279 +265,110 @@ const handleShare = async () => {
         )}
 
         <div className="glass-info p-4">
-<div className="glass-info-top d-flex justify-content-between align-items-center flex-wrap gap-2">
-
-  <div className="d-flex align-items-center gap-2">
-
-    <div
-  className="px-3 py-2 rounded-3 glass-bubble"
-  style={{
-    backdropFilter: "blur(10px)",
-    cursor: "pointer",
-    display: "inline-flex",
-    alignItems: "center",
-    boxShadow: "0 0 10px rgba(255,255,255,0.15)",
-  }}
-  onClick={() => handleUserClick(localImage?.user_id)}
->
-  📷 {localImage?.author || "Ismeretlen szerző"}
-</div>
-
-
-
-
-{localImage?.user_id !== loggedInId && (
-  <Button
-    variant="outline-dark"
-    size="sm"
-    className="ms-2"
-    onClick={async (e) => {
-      e.stopPropagation();
-      const token = getToken();
-      if (!token) return navigate("/Login");
-
-      const res = await fetch(
-        `http://localhost:3001/api/follow/${localImage.user_id}`,
-        { method: "POST", headers: getAuthHeader() }
-      );
-      const data = await res.json();
-      setIsFollowing(data.following);
-    }}
-  >
-    {isFollowing ? "Követem" : "Követés"}
-  </Button>
-)}
-
-
-
-    <div
-      className="px-3 py-2 rounded-3 glass-bubble"
-      style={{
-        backdropFilter: "blur(10px)",
-        display: "inline-flex",
-        alignItems: "center",
-        boxShadow: "0 0 10px rgba(255,255,255,0.15)",
-      }}
-    >
-      <Button
-        variant="outline-light"
-        size="sm"
-        onClick={(e) => {
-          e.stopPropagation();
-          handleDownload();
-        }}
-      >
-        ⬇️ Letöltés
-      </Button>
-    </div>
-  </div>
-
-  <div className="d-flex align-items-center gap-3">
-    <Share2
-      size={22}
-      className="cursor-pointer text-light"
-      title="Megosztás"
-      color="black"
-      onClick={() => handleShare()}
-      style={{ opacity: 0.8 }}
-    />
-<div className="d-flex align-items-center">
-    <MessageCircle
-      size={21}
-      color="black"
-      className="me-1"
-      strokeWidth={2}
-      title="Hozzászólások"
-    />
-    <span style={{ color: "black", fontWeight: 500 }}>
-      {comments?.length || 0}
-    </span>
-  </div>
-  {(() => {
-  const up = localImage?.upvotes || localImage?.likes || 0;
-  const down = localImage?.downvotes || 0;
-  const total = up + down;
-  const upPercent = total ? Math.round((up / total) * 100) : 0;
-  const downPercent = total ? 100 - upPercent : 0;
-  const userVote = localImage?.userVote || (localImage?.isLiked ? 1 : 0);
-
-  return (
-    <div className="d-flex align-items-center gap-1">
-      <button
-        type="button"
-        className="btn btn-sm p-0 mx-1"
-        disabled={likeLoading === localImage?.id}
-        onClick={(e) => {
-          e.stopPropagation();
-          const nextVote = userVote === 1 ? 0 : 1;
-          onImageVote(localImage.id, nextVote);
-        }}
-      >
-        <ArrowUp
-          size={22}
-          color={userVote === 1 ? "#16a34a" : "#555"}
-          fill={userVote === 1 ? "#16a34a" : "none"}
-        />
-      </button>
-      <span className="small me-1">{upPercent}%</span>
-
-      <button
-        type="button"
-        className="btn btn-sm p-0 mx-1"
-        disabled={likeLoading === localImage?.id}
-        onClick={(e) => {
-          e.stopPropagation();
-          const nextVote = userVote === -1 ? 0 : -1;
-          onImageVote(localImage.id, nextVote);
-        }}
-      >
-        <ArrowDown
-          size={22}
-          color={userVote === -1 ? "#dc2626" : "#555"}
-          fill={userVote === -1 ? "#dc2626" : "none"}
-        />
-      </button>
-      <span className="small">{downPercent}%</span>
-    </div>
-  );
-})()}
-
-  </div>
-</div>
-          <p className="glass-description mt-3 mb-0">
-            {localImage?.description || "Nincs leírás."}
-          </p>
-
-          <div className="comment-section mt-5 px-2 px-md-4 pb-4">
-  <h5 className="mb-3">Hozzászólások</h5>
-
-  <div className="d-flex flex-column flex-sm-row gap-2 mb-3">
-    <input
-      type="text"
-      className="form-control"
-      placeholder="Írj egy kommentet..."
-      value={newComment || ""}
-      onChange={onCommentChange}
-    />
-    <Button
-      variant="outline-light"
-      onClick={onCommentSubmit}
-      disabled={commentLoading}
-      style={{ minWidth: "100px" }}
-    >
-      Küldés
-    </Button>
-  </div>
-
-  {!comments || comments.length === 0 ? (
-    <p className="text-muted">Még nincs komment ehhez a képhez.</p>
-  ) : (
-    comments.map((c) => (
-      <div
-        key={c.id}
-        className="comment-item glass-comment mb-3 p-3 rounded-3"
-      >
-        <div className="d-flex flex-column flex-sm-row align-items-start">
-          <img
-            src={`http://localhost:3001${c.profile_picture}`}
-            alt={c.username}
-            className="rounded-circle me-3 mb-2 mb-sm-0"
-            width="40"
-            height="40"
-            style={{ cursor: "pointer", flexShrink: 0 }}
-            onClick={() => handleUserClick(c.user_id)}
-          />
-          <div className="flex-grow-1 w-100">
-            <div className="d-flex flex-column flex-sm-row justify-content-between align-items-start gap-2">
-              <strong
-                style={{ cursor: "pointer" }}
-                onClick={() => handleUserClick(c.user_id)}
+          <div className="glass-info-top d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div className="d-flex align-items-center gap-2">
+              <div
+                className="px-3 py-2 rounded-3 glass-bubble"
+                style={{
+                  backdropFilter: "blur(10px)",
+                  cursor: "pointer",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  boxShadow: "0 0 10px rgba(255,255,255,0.15)",
+                }}
+                onClick={() => handleUserClick(localImage?.user_id)}
               >
-                {c.username}
-              </strong>
-              <div className="d-flex flex-wrap align-items-center gap-2">
-                <small className="text-muted text-nowrap">
-                  {new Date(c.created_at).toLocaleString("hu-HU")}
-                </small>
-                {c.user_id === loggedInId && (
-                  <div className="d-flex gap-1">
-                    <button
-                      className="btn btn-sm btn-outline-primary comment-action-btn"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleEditComment(c);
-                      }}
-                      title="Szerkesztés"
-                    >
-                      Szerkesztés
-                    </button>
-                    <button
-                      className="btn btn-sm btn-outline-danger comment-action-btn"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDeleteComment(c.id);
-                      }}
-                      title="Törlés"
-                    >
-                      Törlés
-                    </button>
-                  </div>
-                )}
+                📷 {localImage?.author || "Ismeretlen szerző"}
+              </div>
+
+              {localImage?.user_id !== loggedInId && (
+                <Button
+                  variant="outline-dark"
+                  size="sm"
+                  className="ms-2"
+                  onClick={async (e) => {
+                    e.stopPropagation();
+                    const token = getToken();
+                    if (!token) return navigate("/Login");
+
+                    const res = await fetch(
+                      `http://localhost:3001/api/follow/${localImage.user_id}`,
+                      { method: "POST", headers: getAuthHeader() }
+                    );
+                    const data = await res.json();
+                    setIsFollowing(data.following);
+                  }}
+                >
+                  {isFollowing ? "Követem" : "Követés"}
+                </Button>
+              )}
+
+              <div
+                className="px-3 py-2 rounded-3 glass-bubble"
+                style={{
+                  backdropFilter: "blur(10px)",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  boxShadow: "0 0 10px rgba(255,255,255,0.15)",
+                }}
+              >
+                <Button
+                  variant="outline-light"
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDownload();
+                  }}
+                >
+                  ⬇️ Letöltés
+                </Button>
               </div>
             </div>
 
-            {editingCommentId === c.id ? (
-              <div className="mt-2">
-                <input
-                  type="text"
-                  className="form-control form-control-sm mb-2"
-                  value={editCommentText}
-                  onChange={(e) => setEditCommentText(e.target.value)}
-                  autoFocus
+            <div className="d-flex align-items-center gap-3">
+              <Share2
+                size={22}
+                className="cursor-pointer text-light"
+                title="Megosztás"
+                color="black"
+                onClick={() => handleShare()}
+                style={{ opacity: 0.8 }}
+              />
+              <div className="d-flex align-items-center">
+                <MessageCircle
+                  size={21}
+                  color="black"
+                  className="me-1"
+                  strokeWidth={2}
+                  title="Hozzászólások"
                 />
-                <div className="d-flex gap-2">
-                  <Button
-                    size="sm"
-                    variant="success"
-                    onClick={() => handleSaveComment(c.id)}
-                  >
-                    Mentés
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    onClick={handleCancelEdit}
-                  >
-                    Mégse
-                  </Button>
-                </div>
+                <span style={{ color: "black", fontWeight: 500 }}>
+                  {localComments?.length || 0}
+                </span>
               </div>
-            ) : (
-              <p className="mb-1">{c.comment}</p>
-            )}
 
-            <div className="comment-like d-flex align-items-center gap-1 mt-1">
               {(() => {
-                const up = c.upvotes || c.likes || 0;
-                const down = c.downvotes || 0;
+                const up = localImage?.upvotes || localImage?.likes || 0;
+                const down = localImage?.downvotes || 0;
                 const total = up + down;
                 const upPercent = total ? Math.round((up / total) * 100) : 0;
                 const downPercent = total ? 100 - upPercent : 0;
-                const userVote = c.userVote || (c.isLiked ? 1 : 0);
+                const userVote = localImage?.userVote || (localImage?.isLiked ? 1 : 0);
 
                 return (
-                  <>
+                  <div className="d-flex align-items-center gap-1">
                     <button
                       type="button"
-                      className="btn btn-sm p-0"
-                      disabled={likeLoading === c.id}
-                      onClick={() => {
+                      className="btn btn-sm p-0 mx-1"
+                      disabled={likeLoading === localImage?.id}
+                      onClick={(e) => {
+                        e.stopPropagation();
                         const nextVote = userVote === 1 ? 0 : 1;
-                        onCommentVote(c.id, nextVote);
+                        onImageVote(localImage.id, nextVote);
                       }}
                     >
                       <ArrowUp
-                        size={18}
+                        size={22}
                         color={userVote === 1 ? "#16a34a" : "#555"}
                         fill={userVote === 1 ? "#16a34a" : "none"}
                       />
@@ -529,48 +377,268 @@ const handleShare = async () => {
 
                     <button
                       type="button"
-                      className="btn btn-sm p-0"
-                      disabled={likeLoading === c.id}
-                      onClick={() => {
+                      className="btn btn-sm p-0 mx-1"
+                      disabled={likeLoading === localImage?.id}
+                      onClick={(e) => {
+                        e.stopPropagation();
                         const nextVote = userVote === -1 ? 0 : -1;
-                        onCommentVote(c.id, nextVote);
+                        onImageVote(localImage.id, nextVote);
                       }}
                     >
                       <ArrowDown
-                        size={18}
+                        size={22}
                         color={userVote === -1 ? "#dc2626" : "#555"}
                         fill={userVote === -1 ? "#dc2626" : "none"}
                       />
                     </button>
                     <span className="small">{downPercent}%</span>
-                  </>
+                  </div>
                 );
               })()}
             </div>
           </div>
-        </div>
-      </div>
-    ))
-  )}
-</div>
 
+          <p className="glass-description mt-3 mb-0">
+            {localImage?.description || "Nincs leírás."}
+          </p>
+
+          <div className="comment-section mt-5 px-2 px-md-4 pb-4">
+            <h5 className="mb-3">Hozzászólások</h5>
+
+            <div className="d-flex flex-column flex-sm-row gap-2 mb-3">
+              <input
+                type="text"
+                className="form-control"
+                placeholder="Írj egy kommentet..."
+                value={newComment || ""}
+                onChange={onCommentChange}
+              />
+              <Button
+                variant="outline-light"
+                onClick={onCommentSubmit}
+                disabled={commentLoading}
+                style={{ minWidth: "100px" }}
+              >
+                Küldés
+              </Button>
+            </div>
+
+            {!localComments || localComments.length === 0 ? (
+              <p className="text-muted">Még nincs komment ehhez a képhez.</p>
+            ) : (
+              localComments.map((c) => (
+                <div
+                  key={c.id}
+                  className="comment-item glass-comment mb-3 p-3 rounded-3"
+                >
+                  <div className="d-flex flex-column flex-sm-row align-items-start">
+                    <img
+                      src={`http://localhost:3001${c.profile_picture}`}
+                      alt={c.username}
+                      className="rounded-circle me-3 mb-2 mb-sm-0"
+                      width="40"
+                      height="40"
+                      style={{ cursor: "pointer", flexShrink: 0 }}
+                      onClick={() => handleUserClick(c.user_id)}
+                    />
+                    <div className="flex-grow-1 w-100">
+                      <div className="d-flex flex-column flex-sm-row justify-content-between align-items-start gap-2">
+                        <strong
+                          style={{ cursor: "pointer" }}
+                          onClick={() => handleUserClick(c.user_id)}
+                        >
+                          {c.username}
+                        </strong>
+                        <div className="d-flex flex-wrap align-items-center gap-2">
+                          <small className="text-muted text-nowrap">
+                            {new Date(c.created_at).toLocaleString("hu-HU")}
+                          </small>
+
+                          {c.user_id === loggedInId && (
+                            <div className="d-flex gap-1">
+                              <button
+                                className="btn btn-sm btn-outline-primary comment-action-btn"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleEditComment(c);
+                                }}
+                                title="Szerkesztés"
+                              >
+                                Szerkesztés
+                              </button>
+                              <button
+                                className="btn btn-sm btn-outline-danger comment-action-btn"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDeleteComment(c.id);
+                                }}
+                                title="Törlés"
+                              >
+                                Törlés
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {editingCommentId === c.id ? (
+                        <div className="mt-2">
+                          <input
+                            type="text"
+                            className="form-control form-control-sm mb-2"
+                            value={editCommentText}
+                            onChange={(e) => setEditCommentText(e.target.value)}
+                            autoFocus
+                          />
+                          <div className="d-flex gap-2">
+                            <Button
+                              size="sm"
+                              variant="success"
+                              onClick={() => handleSaveComment(c.id)}
+                            >
+                              Mentés
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="secondary"
+                              onClick={handleCancelEdit}
+                            >
+                              Mégse
+                            </Button>
+                          </div>
+                        </div>
+                      ) : (
+                        <p className="mb-1">{c.comment}</p>
+                      )}
+
+                      <div className="comment-like d-flex align-items-center gap-1 mt-1">
+                        {(() => {
+                          const up = c.upvotes || c.likes || 0;
+                          const down = c.downvotes || 0;
+                          const total = up + down;
+                          const upPercent = total ? Math.round((up / total) * 100) : 0;
+                          const downPercent = total ? 100 - upPercent : 0;
+                          const userVote = c.userVote || (c.isLiked ? 1 : 0);
+
+                          return (
+                            <>
+                              <button
+                                type="button"
+                                className="btn btn-sm p-0"
+                                disabled={likeLoading === c.id}
+                                onClick={() => {
+                                  const nextVote = userVote === 1 ? 0 : 1;
+                                  onCommentVote(c.id, nextVote);
+                                }}
+                              >
+                                <ArrowUp
+                                  size={18}
+                                  color={userVote === 1 ? "#16a34a" : "#555"}
+                                  fill={userVote === 1 ? "#16a34a" : "none"}
+                                />
+                              </button>
+                              <span className="small me-1">{upPercent}%</span>
+
+                              <button
+                                type="button"
+                                className="btn btn-sm p-0"
+                                disabled={likeLoading === c.id}
+                                onClick={() => {
+                                  const nextVote = userVote === -1 ? 0 : -1;
+                                  onCommentVote(c.id, nextVote);
+                                }}
+                              >
+                                <ArrowDown
+                                  size={18}
+                                  color={userVote === -1 ? "#dc2626" : "#555"}
+                                  fill={userVote === -1 ? "#dc2626" : "none"}
+                                />
+                              </button>
+                              <span className="small">{downPercent}%</span>
+                            </>
+                          );
+                        })()}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
 
           <div className="text-end mt-3 d-flex justify-content-end gap-2">
-  <Button variant="outline-light" onClick={onClose}>
-    Bezárás
-  </Button>
-  <Button
-    variant="secondary"
-    onClick={() => {
-      onClose();
-      onEdit(localImage);
-    }}
-  >
-    Szerkesztés
-  </Button>
-</div>
-
+            <Button variant="outline-light" onClick={onClose}>
+              Bezárás
+            </Button>
+            <Button
+              variant="secondary"
+              onClick={() => {
+                onClose();
+                onEdit(localImage);
+              }}
+            >
+              Szerkesztés
+            </Button>
+          </div>
         </div>
+
+        <Modal
+          show={showDeleteModal}
+          onHide={() => {
+            if (deleteLoading) return;
+            setShowDeleteModal(false);
+            setPendingDeleteCommentId(null);
+          }}
+          centered
+          backdrop="static"
+          keyboard={!deleteLoading}
+          className="glass-modal glass-confirm"
+        >
+          <Modal.Body className="p-0">
+            <div className="glass-header d-flex justify-content-between align-items-center">
+              <h3 className="glass-title m-0"> Komment törlése</h3>
+              <Button
+                variant="link"
+                onClick={() => {
+                  if (deleteLoading) return;
+                  setShowDeleteModal(false);
+                  setPendingDeleteCommentId(null);
+                }}
+                className="text-dark p-0"
+                style={{ fontSize: "24px", textDecoration: "none", lineHeight: 1 }}
+              >
+                ×
+              </Button>
+            </div>
+
+            <div className="glass-info p-4">
+              <p className="glass-description m-0">
+                Biztosan törölni akarod ezt a hozzászólást?
+              </p>
+
+              <div className="d-flex justify-content-end gap-2 mt-3">
+                <Button
+                  variant="outline-light"
+                  disabled={deleteLoading}
+                  onClick={() => {
+                    setShowDeleteModal(false);
+                    setPendingDeleteCommentId(null);
+                  }}
+                >
+                  Mégse
+                </Button>
+
+                <Button
+                  variant="outline-danger"
+                  disabled={deleteLoading}
+                  onClick={confirmDeleteComment}
+                >
+                  {deleteLoading ? "Törlés..." : "Igen, törlöm"}
+                </Button>
+              </div>
+            </div>
+          </Modal.Body>
+        </Modal>
       </Modal.Body>
     </Modal>
   );
