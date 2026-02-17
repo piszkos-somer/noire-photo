@@ -2,10 +2,10 @@
 -- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- Gép: 127.0.0.1
--- Létrehozás ideje: 2026. Feb 13. 21:49
--- Kiszolgáló verziója: 10.4.32-MariaDB
--- PHP verzió: 8.2.12
+-- Gép: 127.0.0.1:3307
+-- Létrehozás ideje: 2026. Feb 17. 14:24
+-- Kiszolgáló verziója: 10.4.28-MariaDB
+-- PHP verzió: 8.2.4
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -505,7 +505,6 @@ INSERT INTO `image_votes` (`id`, `user_id`, `image_id`, `vote`, `created_at`) VA
 (186, 1, 11, 1, '2025-12-02 12:54:44'),
 (190, 3, 9, 1, '2025-12-02 12:54:44'),
 (193, 3, 10, 1, '2025-12-02 12:54:44'),
-(196, 3, 17, 1, '2026-01-12 11:05:19'),
 (198, 3, 15, 1, '2026-01-12 11:05:22'),
 (199, 3, 11, 1, '2026-01-12 11:05:44'),
 (201, 4, 17, 1, '2026-01-12 11:06:38'),
@@ -750,7 +749,13 @@ INSERT INTO `image_votes` (`id`, `user_id`, `image_id`, `vote`, `created_at`) VA
 (458, 21, 10, 1, '2026-02-13 20:39:47'),
 (459, 21, 9, 1, '2026-02-13 20:39:47'),
 (460, 21, 8, 1, '2026-02-13 20:39:50'),
-(461, 21, 6, 1, '2026-02-13 20:39:53');
+(461, 21, 6, 1, '2026-02-13 20:39:53'),
+(462, 3, 64, 1, '2026-02-17 12:23:31'),
+(463, 3, 65, 1, '2026-02-17 12:23:32'),
+(464, 3, 66, -1, '2026-02-17 12:23:33'),
+(465, 3, 62, 1, '2026-02-17 12:23:34'),
+(466, 3, 63, -1, '2026-02-17 12:23:35'),
+(467, 3, 43, 1, '2026-02-17 12:39:20');
 
 -- --------------------------------------------------------
 
@@ -1002,7 +1007,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT a táblához `comments`
 --
 ALTER TABLE `comments`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=90;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=97;
 
 --
 -- AUTO_INCREMENT a táblához `comment_votes`
@@ -1026,7 +1031,7 @@ ALTER TABLE `images`
 -- AUTO_INCREMENT a táblához `image_votes`
 --
 ALTER TABLE `image_votes`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=462;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=468;
 
 --
 -- AUTO_INCREMENT a táblához `tags`
