@@ -166,7 +166,27 @@ app.post("/api/login", async (req, res) => {
 app.post("/api/upload", verifyToken, upload.single("image"), async (req, res) => {
   const { title, description } = req.body;
 
-  const tags = JSON.parse(req.body.tags || "[]");
+  let tags = [];
+  try {
+    tags = JSON.parse(req.body.tags || "[]");
+  } catch {
+    return res.status(400).json({ error: "Hibás tags formátum." });
+  }
+
+  if (!Array.isArray(tags)) {
+    return res.status(400).json({ error: "A tags mezőnek tömbnek kell lennie." });
+  }
+
+  tags = tags
+    .map((t) => String(t).trim())
+    .filter((t) => t.length > 0);
+
+  tags = Array.from(new Set(tags));
+
+  if (tags.length > 5) {
+    return res.status(400).json({ error: "Maximum 5 tag adható meg." });
+  }
+
   const imageFile = req.file;
   const userId = req.user.id;
 
@@ -208,6 +228,7 @@ app.post("/api/upload", verifyToken, upload.single("image"), async (req, res) =>
     conn.release();
   }
 });
+
 
 app.get("/api/my-images", verifyToken, async (req, res) => {
   const conn = await pool.getConnection();

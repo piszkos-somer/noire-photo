@@ -27,6 +27,10 @@ const getAuthHeader = () => {
 function Upload() {
   const navigate = useNavigate();
   const token = getToken();
+  const TAG_LIMIT = 5;
+
+const [tagError, setTagError] = useState("");
+
 
   const [tags, setTags] = useState([]);
   const [newTag, setNewTag] = useState("");
@@ -86,17 +90,39 @@ function Upload() {
   const handleAddTag = (tagValue) => {
     const value = (tagValue || newTag).trim();
     if (!value) return;
-    if (!tags.includes(value)) {
-      setTags((prev) => [...prev, value]);
+  
+    if (tags.includes(value)) {
+      setNewTag("");
+      setSuggestions([]);
+      setShowSuggestions(false);
+      setTagError("");
+      return;
     }
+  
+    if (tags.length >= TAG_LIMIT) {
+      setTagError(`Maximum ${TAG_LIMIT} tag-et adhatsz hozzá.`);
+      setNewTag("");
+      setSuggestions([]);
+      setShowSuggestions(false);
+      return;
+    }
+  
+    setTags((prev) => [...prev, value]);
+    setTagError("");
     setNewTag("");
     setSuggestions([]);
     setShowSuggestions(false);
   };
+  
 
   const handleDeleteTag = (index) => {
-    setTags(tags.filter((_, i) => i !== index));
+    setTags((prev) => {
+      const next = prev.filter((_, i) => i !== index);
+      return next;
+    });
+    setTagError("");
   };
+  
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -244,16 +270,30 @@ function Upload() {
               placeholder="Új tag..."
               value={newTag}
               onChange={(e) => setNewTag(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleAddTag()}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  if (tags.length < TAG_LIMIT) handleAddTag();
+                  else setTagError(`Maximum ${TAG_LIMIT} tag-et adhatsz hozzá.`);
+                }
+              }}
+              
             />
             <Button
               variant="success"
               onClick={() => handleAddTag(newTag.trim())}
               className="add-btn"
-              disabled={!newTag.trim()}
+              disabled={!newTag.trim() || tags.length >= TAG_LIMIT}
+
             >
               ✓
             </Button>
+
+            {tagError && <div className="text-danger mt-2">{tagError}</div>}
+            {tags.length >= TAG_LIMIT && !tagError && (
+            <div className="text-muted mt-2">Elérted a maximum {TAG_LIMIT} tag-et.</div>
+            )}
+
 
             {showSuggestions && suggestions.length > 0 && (
               <ListGroup className="tag-suggestion-box shadow-sm">
