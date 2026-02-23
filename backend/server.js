@@ -683,10 +683,13 @@ app.post("/api/images/:id/comments", verifyToken, async (req, res) => {
 
   const conn = await pool.getConnection();
   try {
-    await conn.query(
-      "INSERT INTO comments (user_id, image_id, comment) VALUES (?, ?, ?)",
+    const [rows] = await conn.query(
+      "CALL sp_add_comment(?, ?, ?)",
       [userId, imageId, comment]
     );
+    
+    const commentId = rows?.[0]?.[0]?.comment_id;
+    res.json({ success: true, commentId });
     res.json({ success: true });
   } catch (err) {
     console.error("Komment mentési hiba:", err);

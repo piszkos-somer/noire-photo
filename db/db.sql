@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Gép: 127.0.0.1:3307
--- Létrehozás ideje: 2026. Feb 17. 14:24
+-- Létrehozás ideje: 2026. Feb 23. 13:02
 -- Kiszolgáló verziója: 10.4.28-MariaDB
 -- PHP verzió: 8.2.4
 
@@ -20,6 +20,35 @@ SET time_zone = "+00:00";
 --
 -- Adatbázis: `noire`
 --
+
+DELIMITER $$
+--
+-- Eljárások
+--
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_add_comment` (IN `p_user_id` INT UNSIGNED, IN `p_image_id` INT UNSIGNED, IN `p_comment` TEXT)   BEGIN
+  IF p_comment IS NULL OR CHAR_LENGTH(TRIM(p_comment)) = 0 THEN
+    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'A komment nem lehet üres.';
+  END IF;
+
+  IF CHAR_LENGTH(p_comment) > 2000 THEN
+    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'A komment túl hosszú (max 2000 karakter).';
+  END IF;
+
+  IF NOT EXISTS (SELECT 1 FROM users WHERE id = p_user_id) THEN
+    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'A felhasználó nem létezik.';
+  END IF;
+
+  IF NOT EXISTS (SELECT 1 FROM images WHERE id = p_image_id) THEN
+    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'A kép nem létezik.';
+  END IF;
+
+  INSERT INTO comments (user_id, image_id, comment)
+  VALUES (p_user_id, p_image_id, TRIM(p_comment));
+
+  SELECT LAST_INSERT_ID() AS comment_id;
+END$$
+
+DELIMITER ;
 
 -- --------------------------------------------------------
 
@@ -756,6 +785,26 @@ INSERT INTO `image_votes` (`id`, `user_id`, `image_id`, `vote`, `created_at`) VA
 (465, 3, 62, 1, '2026-02-17 12:23:34'),
 (466, 3, 63, -1, '2026-02-17 12:23:35'),
 (467, 3, 43, 1, '2026-02-17 12:39:20');
+
+--
+-- Eseményindítók `image_votes`
+--
+DELIMITER $$
+CREATE TRIGGER `trg_image_votes_validate` BEFORE INSERT ON `image_votes` FOR EACH ROW BEGIN
+  IF NEW.vote NOT IN (-1, 1) THEN
+    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'A vote értéke csak -1 vagy 1 lehet.';
+  END IF;
+
+  IF EXISTS (
+    SELECT 1
+    FROM image_votes
+    WHERE user_id = NEW.user_id AND image_id = NEW.image_id
+  ) THEN
+    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Erre a képre már szavaztál.';
+  END IF;
+END
+$$
+DELIMITER ;
 
 -- --------------------------------------------------------
 
