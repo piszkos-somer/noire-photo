@@ -1,0 +1,88 @@
+{
+  "info": {
+    "_postman_id": "613082be-7ac7-420c-820a-941e87c60915",
+    "name": "noire",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "41678676"
+  },
+  "item": [
+    {
+      "name": "registration",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"username\": \"pál\",\r\n  \"email\": \"palpal828@hengersor.hu\",\r\n  \"password\": \"MCZ\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:3001/api/register",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3001",
+          "path": [
+            "api",
+            "register"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "login",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"email\": \"perakattis@gmail.com\",\r\n  \"password\": \"ss\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:3001/api/login",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3001",
+          "path": [
+            "api",
+            "login"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "latest-images",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3001/api/latest-images",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3001",
+          "path": [
+            "api",
+            "latest-images"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}
