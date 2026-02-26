@@ -28,8 +28,11 @@ function Upload() {
   const navigate = useNavigate();
   const token = getToken();
   const TAG_LIMIT = 5;
+  const TITLE_MAX = 50;
+  const DESCRIPTION_MAX = 500;
+  const TAG_MAX_LENGTH = 15;
 
-const [tagError, setTagError] = useState("");
+  const [tagError, setTagError] = useState("");
 
 
   const [tags, setTags] = useState([]);
@@ -90,7 +93,10 @@ const [tagError, setTagError] = useState("");
   const handleAddTag = (tagValue) => {
     const value = (tagValue || newTag).trim();
     if (!value) return;
-  
+    if (value.length > TAG_MAX_LENGTH) {
+      setTagError(`A tag maximum ${TAG_MAX_LENGTH} karakter lehet.`);
+      return;
+    }
     if (tags.includes(value)) {
       setNewTag("");
       setSuggestions([]);
@@ -227,9 +233,10 @@ const [tagError, setTagError] = useState("");
               type="text"
               placeholder="Add meg a kép címét..."
               value={title}
-              onChange={(e) => setTitle(e.target.value)}
+              maxLength={TITLE_MAX}
+              onChange={(e) => setTitle(e.target.value.slice(0, TITLE_MAX))}
             />
-          </Form.Group>
+            </Form.Group>
 
           <Form.Group className="mb-3">
             <Form.Label>Kép leírása</Form.Label>
@@ -238,7 +245,8 @@ const [tagError, setTagError] = useState("");
               rows={5}
               placeholder="Írj néhány sort a képről..."
               value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              maxLength={DESCRIPTION_MAX}
+              onChange={(e) => setDescription(e.target.value.slice(0, DESCRIPTION_MAX))}
             />
           </Form.Group>
 
