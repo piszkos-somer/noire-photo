@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Gép: 127.0.0.1:3307
--- Létrehozás ideje: 2026. Feb 23. 13:02
+-- Létrehozás ideje: 2026. Feb 26. 10:57
 -- Kiszolgáló verziója: 10.4.28-MariaDB
 -- PHP verzió: 8.2.4
 
@@ -69,7 +69,6 @@ CREATE TABLE `comments` (
 --
 
 INSERT INTO `comments` (`id`, `user_id`, `image_id`, `comment`, `upload_date`) VALUES
-(4, 3, 6, 'Azta ez nagyon király lett.', '2025-11-02 15:04:27'),
 (8, 1, 11, 'Nagyon szép, de ha a Holdat akarod kiemelni, akkor legközelebb zoomolj rá jobban!', '2025-11-10 11:58:30'),
 (10, 4, 8, 'Uhhh. De komoly kép lett.', '2025-11-13 12:00:17'),
 (11, 3, 10, 'Nagyon aranyos😍', '2025-11-13 12:01:34'),
@@ -99,7 +98,6 @@ INSERT INTO `comments` (`id`, `user_id`, `image_id`, `comment`, `upload_date`) V
 (40, 1, 41, 'Ezzel a fekete fehér fileterrel vagány lett', '2026-01-22 08:18:48'),
 (41, 1, 30, 'Fantörpisztikus!', '2026-01-22 08:21:43'),
 (42, 4, 39, 'Majd írok papi😎', '2026-02-02 11:04:18'),
-(45, 1, 6, 'kopi', '2026-02-10 11:12:45'),
 (46, 18, 40, 'Milyen jóképű ❤️❤️❤️', '2026-02-13 20:53:06'),
 (47, 18, 9, 'mesés👌', '2026-02-13 20:53:21'),
 (48, 18, 32, 'Egy barátom erre fele él :D', '2026-02-13 20:54:10'),
@@ -109,7 +107,6 @@ INSERT INTO `comments` (`id`, `user_id`, `image_id`, `comment`, `upload_date`) V
 (52, 18, 25, 'Nem túl szimpi :P', '2026-02-13 20:55:17'),
 (53, 18, 50, 'Minden mennyiségben jöhet 😂', '2026-02-13 20:55:36'),
 (54, 19, 9, 'irigy vagyoook😒', '2026-02-13 21:05:15'),
-(55, 19, 6, 'ez tuti ai', '2026-02-13 21:05:43'),
 (56, 19, 10, 'aa nagyon cuki', '2026-02-13 21:06:00'),
 (57, 19, 19, 'Hasonlít az erdőhöz ahova én szoktam járni, ez hol van pontosan?', '2026-02-13 21:06:45'),
 (58, 19, 21, 'Inkább maradok az autóknál.', '2026-02-13 21:07:12'),
@@ -132,7 +129,6 @@ INSERT INTO `comments` (`id`, `user_id`, `image_id`, `comment`, `upload_date`) V
 (75, 20, 49, 'Úgylátom nem csak nekem jutott eszembe az ilyen kép készítés👍', '2026-02-13 21:25:13'),
 (76, 20, 43, 'Jó, és a rajzokról még nem is beszéltünk.', '2026-02-13 21:25:51'),
 (77, 20, 39, 'Elmennék egy ilyen fotózásra. írok!', '2026-02-13 21:26:21'),
-(78, 21, 6, 'Szerintem akár ai akár nem csodaszép!', '2026-02-13 21:40:14'),
 (79, 21, 8, 'Fullos!', '2026-02-13 21:40:33'),
 (80, 21, 15, 'Szerintem inkább Sanyis feje van mint Félix', '2026-02-13 21:41:08'),
 (81, 21, 20, 'Kicsit fakó a szaruráció állításával szebb lehet a kép, de amúgy ügyes vagy!', '2026-02-13 21:41:55'),
@@ -176,8 +172,6 @@ INSERT INTO `comment_votes` (`id`, `user_id`, `comment_id`, `vote`, `created_at`
 (69, 19, 47, 1, '2026-02-13 20:05:19'),
 (70, 19, 26, 1, '2026-02-13 20:05:23'),
 (71, 19, 12, 1, '2026-02-13 20:05:23'),
-(72, 19, 45, 1, '2026-02-13 20:05:39'),
-(73, 19, 4, -1, '2026-02-13 20:05:41'),
 (74, 19, 35, -1, '2026-02-13 20:06:02'),
 (75, 19, 38, 1, '2026-02-13 20:06:03'),
 (76, 19, 25, 1, '2026-02-13 20:06:07'),
@@ -186,9 +180,6 @@ INSERT INTO `comment_votes` (`id`, `user_id`, `comment_id`, `vote`, `created_at`
 (79, 19, 37, 1, '2026-02-13 20:09:10'),
 (80, 19, 46, -1, '2026-02-13 20:09:41'),
 (81, 20, 69, 1, '2026-02-13 20:24:12'),
-(82, 21, 55, -1, '2026-02-13 20:40:16'),
-(83, 21, 45, -1, '2026-02-13 20:40:17'),
-(84, 21, 4, 1, '2026-02-13 20:40:19'),
 (85, 21, 59, -1, '2026-02-13 20:41:57'),
 (86, 21, 29, -1, '2026-02-13 20:42:27'),
 (87, 21, 51, -1, '2026-02-13 20:43:05');
@@ -213,7 +204,6 @@ INSERT INTO `follows` (`id`, `follower_id`, `following_id`) VALUES
 (23, 1, 3),
 (20, 1, 4),
 (37, 1, 10),
-(24, 3, 2),
 (33, 4, 9),
 (32, 4, 10),
 (28, 7, 3),
@@ -241,7 +231,6 @@ CREATE TABLE `images` (
 --
 
 INSERT INTO `images` (`id`, `user_id`, `title`, `description`, `upload_date`, `url`) VALUES
-(6, 2, 'Izlandi hegység', 'Záridő: kb. 1/60 – 1/125 mp\r\nRekeszérték: f/8 – f/11\r\nISO érzékenység: 100 – 200\r\nGyújtótávolság: kb. 24–35 mm (nagylátószög)\r\nFehéregyensúly: napfény (kb. 5500 K)', '2025-10-27 19:41:21', '/images/1761586881317.jpg'),
 (8, 3, 'Görögország', 'Telefonnal csináltam Görög nyaraláson során. Semmi extra beállítás csak egy jól elkapott pillanat.😎\nTelefonom: Samsung Galaxy S25', '2025-11-02 15:25:26', '/images/1762093526424.jpg'),
 (9, 4, 'Naplementés Balaton', 'Tavaly nyáron készítettem ezt a naplementés képet a Balatonról a telefonommal.\r\nTelefon: Samsung Galaxy S22', '2025-11-02 15:40:36', '/images/1762094436028.jpg'),
 (10, 4, 'Teknős', 'Egyik nyaraláson csináltam ezt a képet erről az aranyos teknősről. Remélem tetszik nektek. A Samsung Galaxy S22-es telefonnal készítettem ezt a képet.', '2025-11-10 11:09:03', '/images/1762769343370.jfif'),
@@ -311,8 +300,6 @@ CREATE TABLE `image_tags` (
 --
 
 INSERT INTO `image_tags` (`image_id`, `tag_id`) VALUES
-(6, 11),
-(6, 17),
 (8, 11),
 (8, 20),
 (8, 31),
@@ -522,14 +509,11 @@ CREATE TABLE `image_votes` (
 --
 
 INSERT INTO `image_votes` (`id`, `user_id`, `image_id`, `vote`, `created_at`) VALUES
-(157, 2, 6, 1, '2025-12-02 12:54:44'),
 (175, 3, 8, 1, '2025-12-02 12:54:44'),
 (176, 4, 9, 1, '2025-12-02 12:54:44'),
-(177, 4, 6, 1, '2025-12-02 12:54:44'),
 (179, 4, 8, 1, '2025-12-02 12:54:44'),
 (180, 4, 11, 1, '2025-12-02 12:54:44'),
 (181, 4, 10, 1, '2025-12-02 12:54:44'),
-(182, 1, 6, -1, '2025-12-02 12:54:44'),
 (183, 1, 10, 1, '2025-12-02 12:54:44'),
 (186, 1, 11, 1, '2025-12-02 12:54:44'),
 (190, 3, 9, 1, '2025-12-02 12:54:44'),
@@ -543,7 +527,6 @@ INSERT INTO `image_votes` (`id`, `user_id`, `image_id`, `vote`, `created_at`) VA
 (208, 1, 9, 1, '2026-01-20 12:13:29'),
 (209, 1, 16, 1, '2026-01-20 12:21:44'),
 (210, 1, 17, 1, '2026-01-20 12:57:57'),
-(214, 3, 6, -1, '2026-01-20 15:42:20'),
 (216, 3, 16, 1, '2026-01-20 15:43:17'),
 (218, 6, 17, -1, '2026-01-21 21:04:32'),
 (219, 6, 16, 1, '2026-01-21 21:04:35'),
@@ -585,7 +568,6 @@ INSERT INTO `image_votes` (`id`, `user_id`, `image_id`, `vote`, `created_at`) VA
 (258, 10, 34, 1, '2026-01-21 22:33:21'),
 (259, 10, 32, 1, '2026-01-21 22:33:24'),
 (260, 10, 10, 1, '2026-01-21 22:33:39'),
-(261, 10, 6, 1, '2026-01-21 22:34:23'),
 (262, 10, 16, 1, '2026-01-21 22:34:37'),
 (265, 10, 35, 1, '2026-01-21 22:35:12'),
 (266, 1, 43, 1, '2026-01-22 07:17:29'),
@@ -614,7 +596,6 @@ INSERT INTO `image_votes` (`id`, `user_id`, `image_id`, `vote`, `created_at`) VA
 (291, 18, 34, 1, '2026-02-13 19:50:57'),
 (292, 18, 9, 1, '2026-02-13 19:50:58'),
 (293, 18, 40, 1, '2026-02-13 19:50:59'),
-(294, 18, 6, -1, '2026-02-13 19:51:00'),
 (296, 18, 30, -1, '2026-02-13 19:51:02'),
 (297, 18, 41, -1, '2026-02-13 19:51:03'),
 (298, 18, 51, 1, '2026-02-13 19:51:05'),
@@ -685,7 +666,6 @@ INSERT INTO `image_votes` (`id`, `user_id`, `image_id`, `vote`, `created_at`) VA
 (364, 19, 11, 1, '2026-02-13 20:04:17'),
 (365, 19, 8, -1, '2026-02-13 20:04:21'),
 (366, 19, 9, -1, '2026-02-13 20:04:22'),
-(367, 19, 6, -1, '2026-02-13 20:04:23'),
 (368, 20, 58, 1, '2026-02-13 20:21:10'),
 (369, 20, 57, -1, '2026-02-13 20:21:11'),
 (370, 20, 56, 1, '2026-02-13 20:21:11'),
@@ -730,7 +710,6 @@ INSERT INTO `image_votes` (`id`, `user_id`, `image_id`, `vote`, `created_at`) VA
 (410, 20, 10, 1, '2026-02-13 20:22:06'),
 (411, 20, 9, 1, '2026-02-13 20:22:08'),
 (412, 20, 8, 1, '2026-02-13 20:22:08'),
-(413, 20, 6, 1, '2026-02-13 20:22:09'),
 (414, 21, 61, 1, '2026-02-13 20:38:51'),
 (415, 21, 60, 1, '2026-02-13 20:38:52'),
 (416, 21, 59, 1, '2026-02-13 20:38:54'),
@@ -778,7 +757,6 @@ INSERT INTO `image_votes` (`id`, `user_id`, `image_id`, `vote`, `created_at`) VA
 (458, 21, 10, 1, '2026-02-13 20:39:47'),
 (459, 21, 9, 1, '2026-02-13 20:39:47'),
 (460, 21, 8, 1, '2026-02-13 20:39:50'),
-(461, 21, 6, 1, '2026-02-13 20:39:53'),
 (462, 3, 64, 1, '2026-02-17 12:23:31'),
 (463, 3, 65, 1, '2026-02-17 12:23:32'),
 (464, 3, 66, -1, '2026-02-17 12:23:33'),
@@ -966,7 +944,6 @@ CREATE TABLE `users` (
 
 INSERT INTO `users` (`id`, `username`, `email`, `password`, `bio`, `profile_picture`, `is_admin`) VALUES
 (1, 'Frittyes', 'perakattis@gmail.com', '$2b$10$vBS.xhlLasGMI3DPjjr6r.8MlEsnH5wFVAr/V64MXllFI4gaMS76O', 'Sziasztok! Kezdő fotós vagyok, és szeretnék ügyesebb lenni a szakmában. Köszönök minden építő kritikát! aa', '/profile-pictures/1761583927591.jpg', 0),
-(2, 'Papp Sándor', 'pappsanyi@gmail.com', '$2b$10$9/iX2OKNISqPmBo13Svi/OtdCjPTxgSYNoZ7MUcLP0NwLZ7YlTrr2', 'Sziasztok! Sanyi vagyok és 4 éve foglalkozom fotózással. Szívesen megosztom veletek a munkáimat és bármikor fordulhattok hozzám segítségért. Versenyre való felkészítést is vállalok!', '/profile-pictures/1761584967721.jpg', 0),
 (3, 'Dávid', 'kabzso820@hengersor.hu', '$2b$10$77rO1/wis8plfrsb8ooWhuFVRhr3D8oH34ZRF13qH/plHpzArhft.', 'Sziasztok Dávid vagyok. Mizu? Tapasztalt, de egyáltalán nem profi fotós vagyok. Csak egy átlagos srác aki a fotózás szerelmese.', '/profile-pictures/1768215912073.jfif', 0),
 (4, 'Kabai Zsombor', 'kabai.zsombi@gmail.com', '$2b$10$3NiUroXsfKSnwSa6SxQ6Pu9fJhX/9dNH9r/DYTjDq9e4VNW4hjYVq', 'Sziasztok az én nevem Zsombor. Kezdő fotósnak tartom magam. A telefonommal szoktam fotózni és abból próbálom kihozni a legtöbbett.', '/profile-pictures/1762093987308.jpg', 0),
 (6, 'Anna Kovács', 'annakovacsfoto@gmail.com', '$2b$10$lN7ktCWhr48SQjTqYVJmEOGIB4xYh9Qyh/0Mmq3Zed.PcUNXhJKGm', 'Kezdő tájképfotós Budapesten, szeretek kora reggeli fényekkel kísérletezni. Keresek tippeket a kompozícióra.', '/profile-pictures/1769028224562.jpg', 0),
