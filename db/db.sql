@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Gép: 127.0.0.1:3307
--- Létrehozás ideje: 2026. Feb 26. 10:57
+-- Létrehozás ideje: 2026. Már 04. 10:12
 -- Kiszolgáló verziója: 10.4.28-MariaDB
 -- PHP verzió: 8.2.4
 
@@ -930,7 +930,7 @@ INSERT INTO `tags` (`id`, `tag`) VALUES
 
 CREATE TABLE `users` (
   `id` int(10) UNSIGNED NOT NULL,
-  `username` varchar(50) NOT NULL,
+  `username` varchar(40) NOT NULL,
   `email` varchar(100) NOT NULL,
   `password` varchar(255) NOT NULL,
   `bio` varchar(500) DEFAULT NULL,
@@ -956,6 +956,34 @@ INSERT INTO `users` (`id`, `username`, `email`, `password`, `bio`, `profile_pict
 (19, 'BpStreetFrame', 'bpstreetframe@gmail.com', '$2b$10$Nk4pLnBEqOcNSMs2qKFTnuycnBxqHaPFyxaYM6pV9x6ihPE/YXghq', 'Budapesti street fotós, gyors pillanatokat vadászok. Tippeket keresek zónás fókuszhoz és fényhez.', '/profile-pictures/1771012704858.png', 0),
 (20, 'LensLili', 'lenslili.photo@gmail.com', '$2b$10$pjI3RxfKk6wfQUazSuiDQekQToKTW.9tGevbTxf8onB3aBHDwanLy', 'Portréval barátkozom, természetes fényben fotózok. Szeretnék jobb póz- és helyszínötleteket', '/profile-pictures/1771013964289.png', 0),
 (21, 'MacroMiki', 'macromiki@gmail.com', '$2b$10$IwwR83INMDySxk/pka4tz.LDugKBXNxvllGpMZOk5j2..WjPNhkna', 'Makró-hobbi, rovarok és virágok. Keresem a türelmes fókusz-trükköket és a stabil kéztartást. ', '/profile-pictures/1771014512195.png', 0);
+
+--
+-- Eseményindítók `users`
+--
+DELIMITER $$
+CREATE TRIGGER `trg_users_username_len_ins` BEFORE INSERT ON `users` FOR EACH ROW BEGIN
+  IF NEW.username IS NULL 
+     OR CHAR_LENGTH(TRIM(NEW.username)) > 40 THEN
+    SIGNAL SQLSTATE '45000'
+    SET MESSAGE_TEXT = 'A felhasználónév maximum 40 karakter lehet.';
+  END IF;
+
+  SET NEW.username = TRIM(NEW.username);
+END
+$$
+DELIMITER ;
+DELIMITER $$
+CREATE TRIGGER `trg_users_username_len_upd` BEFORE UPDATE ON `users` FOR EACH ROW BEGIN
+  IF NEW.username IS NULL 
+     OR CHAR_LENGTH(TRIM(NEW.username)) > 40 THEN
+    SIGNAL SQLSTATE '45000'
+    SET MESSAGE_TEXT = 'A felhasználónév maximum 40 karakter lehet.';
+  END IF;
+
+  SET NEW.username = TRIM(NEW.username);
+END
+$$
+DELIMITER ;
 
 --
 -- Indexek a kiírt táblákhoz
@@ -1069,7 +1097,7 @@ ALTER TABLE `tags`
 -- AUTO_INCREMENT a táblához `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
 
 --
 -- Megkötések a kiírt táblákhoz

@@ -93,29 +93,52 @@ function verifyToken(req, res, next) {
 }
 
 app.post("/api/register", async (req, res) => {
-  const { username, email, password } = req.body;
-  if (!username || !email || !password)
+  let { username, email, password } = req.body;
+
+  username = String(username || "").trim();
+  email = String(email || "").trim();
+
+  if (!username || !email || !password) {
     return res.status(400).json({ message: "Minden mező kötelező." });
+  }
+
+  if (username.length > 40) {
+    return res.status(400).json({ message: "A felhasználónév maximum 40 karakter lehet." });
+  }
 
   try {
     const conn = await pool.getConnection();
     try {
-      const [existing] = await conn.execute("SELECT id FROM users WHERE email = ?", [email]);
-      if (existing.length > 0)
+      const [existingEmail] = await conn.execute("SELECT id FROM users WHERE email = ?", [email]);
+      if (existingEmail.length > 0) {
         return res.status(400).json({ message: "Ez az email már regisztrálva van." });
+      }
+
+      const [existingUser] = await conn.execute("SELECT id FROM users WHERE username = ?", [username]);
+      if (existingUser.length > 0) {
+        return res.status(400).json({ message: "Ez a felhasználónév már foglalt." });
+      }
 
       const hashed = await bcrypt.hash(password, 10);
-      await conn.execute("INSERT INTO users (username, email, password) VALUES (?, ?, ?)", [
-        username,
-        email,
-        hashed,
-      ]);
+
+      await conn.execute(
+        "INSERT INTO users (username, email, password) VALUES (?, ?, ?)",
+        [username, email, hashed]
+      );
 
       try {
         await sendWelcomeEmail({ to: email, username });
       } catch (e) {}
 
       res.json({ message: "Sikeres regisztráció!" });
+    } catch (err) {
+      if (err && err.code === "ER_DUP_ENTRY") {
+        const msg = String(err.message || "");
+        if (msg.includes("users.username")) return res.status(400).json({ message: "Ez a felhasználónév már foglalt." });
+        if (msg.includes("users.email")) return res.status(400).json({ message: "Ez az email már regisztrálva van." });
+        return res.status(400).json({ message: "Duplikált adat." });
+      }
+      throw err;
     } finally {
       conn.release();
     }
@@ -280,34 +303,70 @@ app.get("/api/my-images", verifyToken, async (req, res) => {
 
 
 app.put("/api/update-profile", verifyToken, async (req, res) => {
-  const { username, email, password } = req.body;
+  let { username, email, password } = req.body;
+
   const updates = [];
   const params = [];
 
-  if (username) {
-    updates.push("username = ?");
-    params.push(username);
-  }
-  if (email) {
-    updates.push("email = ?");
-    params.push(email);
-  }
-  if (password) {
-    const hashed = await bcrypt.hash(password, 10);
-    updates.push("password = ?");
-    params.push(hashed);
+  if (username !== undefined) {
+    username = String(username || "").trim();
+    if (username.length > 40) {
+      return res.status(400).json({ message: "A felhasználónév maximum 40 karakter lehet." });
+    }
   }
 
-  if (updates.length === 0)
-    return res.status(400).json({ message: "Nincs módosítandó adat." });
-
-  params.push(req.user.id);
+  if (email !== undefined) {
+    email = String(email || "").trim();
+  }
 
   const conn = await pool.getConnection();
   try {
+    if (username) {
+      const [rows] = await conn.execute(
+        "SELECT id FROM users WHERE username = ? AND id <> ?",
+        [username, req.user.id]
+      );
+      if (rows.length > 0) {
+        return res.status(400).json({ message: "Ez a felhasználónév már foglalt." });
+      }
+      updates.push("username = ?");
+      params.push(username);
+    }
+
+    if (email) {
+      const [rows] = await conn.execute(
+        "SELECT id FROM users WHERE email = ? AND id <> ?",
+        [email, req.user.id]
+      );
+      if (rows.length > 0) {
+        return res.status(400).json({ message: "Ez az email már használatban van." });
+      }
+      updates.push("email = ?");
+      params.push(email);
+    }
+
+    if (password) {
+      const hashed = await bcrypt.hash(password, 10);
+      updates.push("password = ?");
+      params.push(hashed);
+    }
+
+    if (updates.length === 0) {
+      return res.status(400).json({ message: "Nincs módosítandó adat." });
+    }
+
+    params.push(req.user.id);
+
     await conn.execute(`UPDATE users SET ${updates.join(", ")} WHERE id = ?`, params);
+
     res.json({ message: "Adatok frissítve!", username });
   } catch (err) {
+    if (err && err.code === "ER_DUP_ENTRY") {
+      const msg = String(err.message || "");
+      if (msg.includes("users.username")) return res.status(400).json({ message: "Ez a felhasználónév már foglalt." });
+      if (msg.includes("users.email")) return res.status(400).json({ message: "Ez az email már használatban van." });
+      return res.status(400).json({ message: "Duplikált adat." });
+    }
     console.error("Profil módosítási hiba:", err);
     res.status(500).json({ message: "Szerverhiba." });
   } finally {

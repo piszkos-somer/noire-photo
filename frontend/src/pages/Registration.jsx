@@ -23,6 +23,11 @@ function Registration() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
 
   const handleSubmit = async (e) => {
+    const uname = formData.username.trim();
+    if (uname.length > 40) 
+    {
+      return setMessage("A felhasználónév maximum 40 karakter lehet.");
+    } 
     e.preventDefault();
 
     if (!accepted) return setMessage("Kérlek fogadd el az ÁSZF-et és az adatkezelési tájékoztatót!");
@@ -31,7 +36,7 @@ function Registration() {
 
     try {
       await axios.post("http://localhost:3001/api/register", {
-        username: formData.username,
+        username: uname,
         email: formData.email,
         password: formData.password,
       });
@@ -56,6 +61,7 @@ function Registration() {
             value={formData.username}
             onChange={handleChange}
             required
+            maxLength={40}
           />
         </Form.Group>
 
