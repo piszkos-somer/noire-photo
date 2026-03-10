@@ -141,22 +141,29 @@ function Browse() {
     }
   };
 
-  const fetchImages = async (pageNumber = 1) => {
+  const fetchImages = async () => {
     setLoading(true);
     try {
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
-      const res = await fetch(`http://localhost:3001/api/images?page=${pageNumber}&limit=12`, { headers });
+      const exclude = images.map((img) => img.id).join(",");
+      const url = exclude
+        ? `http://localhost:3001/api/random-images?exclude=${encodeURIComponent(exclude)}`
+        : `http://localhost:3001/api/random-images`;
+  
+      const res = await fetch(url, { headers });
+  
       if (res.status === 401 || res.status === 403) {
         handleTokenError(res.status, navigate);
         return;
       }
+  
       const data = await res.json();
-      if (data.length < 12) setHasMore(false);
-
-      setImages((prev) => {
-        const newImages = data.filter((n) => !prev.some((e) => e.id === n.id));
-        return [...prev, ...newImages];
-      });
+  
+      if (data.length < 12) {
+        setHasMore(false);
+      }
+  
+      setImages((prev) => [...prev, ...data]);
     } catch (err) {
       console.error("Képek lekérési hiba:", err);
     } finally {
@@ -190,7 +197,7 @@ function Browse() {
   const fetchMoreImages = () => {
     if (filter === "author" || !hasMore) return;
     setPage((prevPage) => prevPage + 1);
-    fetchImages(page + 1);
+    fetchImages();
   };
 
   const handleSearch = async (q = query, f = filter) => {
@@ -339,7 +346,7 @@ function Browse() {
       if (query.trim()) {
         handleSearch(query, "image");
       } else {
-        fetchImages(1);
+        fetchImages();
       }
     }
   }}

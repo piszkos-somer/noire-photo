@@ -1365,8 +1365,20 @@ app.get("/api/random-images", async (req, res) => {
     } catch (err) {}
   }
 
+  const excludeIds =
+    String(req.query.exclude || "")
+      .split(",")
+      .map((id) => Number(id))
+      .filter((id) => Number.isInteger(id) && id > 0);
+
   const conn = await pool.getConnection();
   try {
+    const excludeClause = excludeIds.length
+      ? `AND i.id NOT IN (${excludeIds.map(() => "?").join(",")})`
+      : "";
+
+    const params = [userId, userId, userId, userId, ...excludeIds];
+
     const [rows] = await conn.query(
       `
       SELECT 
@@ -1385,18 +1397,19 @@ app.get("/api/random-images", async (req, res) => {
           ELSE 0
         END AS userVote,
         u.username AS author,
-        COALESCE(GROUP_CONCAT(t.tag SEPARATOR ','), '') AS tags
+        COALESCE(GROUP_CONCAT(DISTINCT t.tag SEPARATOR ','), '') AS tags
       FROM images i
       JOIN users u ON i.user_id = u.id
       LEFT JOIN image_tags it ON i.id = it.image_id
       LEFT JOIN tags t ON it.tag_id = t.id
       LEFT JOIN image_votes iv ON i.id = iv.image_id
-      WHERE i.user_id != ? OR ? IS NULL
+      WHERE (i.user_id != ? OR ? IS NULL)
+      ${excludeClause}
       GROUP BY i.id
       ORDER BY RAND()
       LIMIT 12
       `,
-      [userId, userId, userId, userId]
+      params
     );
 
     rows.forEach((img) => {
