@@ -490,7 +490,7 @@ async function cleanupUnusedTags() {
       WHERE id NOT IN (SELECT DISTINCT tag_id FROM image_tags)
     `);
     if (result.affectedRows > 0)
-      console.log(`🧹 ${result.affectedRows} használatlan tag törölve.`);
+      console.log(`${result.affectedRows} használatlan tag törölve.`);
   } catch (err) {
     console.error("Tisztítási hiba:", err.message);
   } finally {
