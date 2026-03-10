@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Gép: 127.0.0.1:3307
--- Létrehozás ideje: 2026. Már 09. 12:09
+-- Létrehozás ideje: 2026. Már 10. 08:39
 -- Kiszolgáló verziója: 10.4.28-MariaDB
 -- PHP verzió: 8.2.4
 
@@ -794,7 +794,6 @@ INSERT INTO `tags` (`id`, `tag`) VALUES
 (105, 'Bago'),
 (100, 'Beauty'),
 (101, 'Beer'),
-(142, 'bokeh'),
 (67, 'budapest'),
 (126, 'Buli'),
 (54, 'Busz'),
@@ -806,7 +805,6 @@ INSERT INTO `tags` (`id`, `tag`) VALUES
 (115, 'Csepp'),
 (85, 'csésze'),
 (19, 'Cuki'),
-(149, 'daisy'),
 (110, 'Dance'),
 (80, 'Dér'),
 (88, 'divat'),
@@ -825,16 +823,13 @@ INSERT INTO `tags` (`id`, `tag`) VALUES
 (92, 'Festmény'),
 (70, 'flag'),
 (151, 'flowerdetails'),
-(146, 'fokusz'),
 (77, 'Fű'),
-(128, 'fürdés'),
 (119, 'Fyp'),
 (31, 'Görögország'),
 (32, 'Hajó'),
 (17, 'Hegység'),
 (21, 'Hold'),
 (122, 'Hungary'),
-(140, 'insectphotography'),
 (78, 'Jég'),
 (109, 'Jim Beam'),
 (129, 'kacsa'),
@@ -845,7 +840,6 @@ INSERT INTO `tags` (`id`, `tag`) VALUES
 (51, 'Lomb'),
 (104, 'Lopik'),
 (134, 'macro'),
-(143, 'macrolover'),
 (136, 'macrophoto'),
 (135, 'makró'),
 (106, 'Malbi'),
@@ -879,7 +873,6 @@ INSERT INTO `tags` (`id`, `tag`) VALUES
 (76, 'Spanyolország'),
 (127, 'Strand'),
 (89, 'stúdió'),
-(148, 'százszorszép'),
 (118, 'Szép'),
 (72, 'szín'),
 (44, 'Tábortűz'),
@@ -891,13 +884,10 @@ INSERT INTO `tags` (`id`, `tag`) VALUES
 (124, 'tél'),
 (20, 'Tenger'),
 (11, 'Természet'),
-(141, 'természetesfény'),
 (138, 'természetfotó'),
 (16, 'Tó'),
-(144, 'türelem'),
 (43, 'Tűz'),
 (46, 'út'),
-(125, 'Vakáció'),
 (50, 'város'),
 (69, 'Vietnam'),
 (121, 'Villamos'),
@@ -905,7 +895,6 @@ INSERT INTO `tags` (`id`, `tag`) VALUES
 (120, 'viral'),
 (114, 'Víz'),
 (53, 'Völgy'),
-(147, 'yellowflower'),
 (73, 'zászló');
 
 -- --------------------------------------------------------
