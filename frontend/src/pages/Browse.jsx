@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
 import { Container, Form, Button, Row, Col, Modal } from "react-bootstrap";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import ImageCard from "../components/ImageCard";
@@ -15,7 +15,8 @@ function Browse() {
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState("image");
   const [loading, setLoading] = useState(false);
-
+  const activeRequestRef = useRef(0);
+  const loadingRef = useRef(false);
   const [selectedImage, setSelectedImage] = useState(null);
   const [likeLoading, setLikeLoading] = useState(null);
   const [comments, setComments] = useState([]);
@@ -141,11 +142,19 @@ function Browse() {
     }
   };
 
-  const fetchImages = async () => {
+  const fetchImages = async ({ reset = false } = {}) => {
+    if (loadingRef.current) return;
+  
+    loadingRef.current = true;
     setLoading(true);
+  
+    const requestId = ++activeRequestRef.current;
+  
     try {
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
-      const exclude = images.map((img) => img.id).join(",");
+      const currentImages = reset ? [] : images;
+      const exclude = currentImages.map((img) => img.id).join(",");
+  
       const url = exclude
         ? `http://localhost:3001/api/random-images?exclude=${encodeURIComponent(exclude)}`
         : `http://localhost:3001/api/random-images`;
@@ -159,27 +168,41 @@ function Browse() {
   
       const data = await res.json();
   
+      if (requestId !== activeRequestRef.current) return;
+  
       if (data.length < 12) {
         setHasMore(false);
       }
   
-      setImages((prev) => [...prev, ...data]);
+      setImages((prev) => {
+        const base = reset ? [] : prev;
+        const map = new Map(base.map((img) => [img.id, img]));
+  
+        for (const img of data) {
+          map.set(img.id, img);
+        }
+  
+        return Array.from(map.values());
+      });
     } catch (err) {
       console.error("Képek lekérési hiba:", err);
     } finally {
-      setLoading(false);
+      if (requestId === activeRequestRef.current) {
+        setLoading(false);
+        loadingRef.current = false;
+      }
     }
   };
 
   useEffect(() => {
     const urlParams = new URLSearchParams(location.search);
     const qParam = urlParams.get("q");
-
+  
     setUsers([]);
     setImages([]);
     setHasMore(true);
     setPage(1);
-
+  
     if (tag) {
       setQuery(tag);
       setFilter("image");
@@ -189,11 +212,10 @@ function Browse() {
       setFilter("image");
       handleSearch(qParam, "image");
     } else {
-      fetchImages();
+      setQuery("");
+      fetchImages({ reset: true });
     }
-    
   }, [tag, location.search]);
-
   const fetchMoreImages = () => {
     if (filter === "author" || !hasMore) return;
     setPage((prevPage) => prevPage + 1);
@@ -201,20 +223,28 @@ function Browse() {
   };
 
   const handleSearch = async (q = query, f = filter) => {
+    const requestId = ++activeRequestRef.current;
+    loadingRef.current = true;
     setLoading(true);
+  
     try {
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
-
+  
       if (f === "author") {
         const res = await fetch(
           `http://localhost:3001/api/users/search?q=${encodeURIComponent(q)}`,
           { headers }
         );
+  
         if (res.status === 401 || res.status === 403) {
           handleTokenError(res.status, navigate);
           return;
         }
+  
         const data = await res.json();
+  
+        if (requestId !== activeRequestRef.current) return;
+  
         setUsers(Array.isArray(data) ? data : []);
         setImages([]);
         setHasMore(false);
@@ -223,20 +253,31 @@ function Browse() {
           `http://localhost:3001/api/images/search?q=${encodeURIComponent(q)}`,
           { headers }
         );
-        
+  
         if (res.status === 401 || res.status === 403) {
           handleTokenError(res.status, navigate);
           return;
         }
+  
         const data = await res.json();
-        setImages(Array.isArray(data) ? data : []);
+  
+        if (requestId !== activeRequestRef.current) return;
+  
+        const unique = Array.isArray(data)
+          ? Array.from(new Map(data.map((img) => [img.id, img])).values())
+          : [];
+  
+        setImages(unique);
         setUsers([]);
         setHasMore(false);
       }
     } catch (err) {
       console.error("Keresési hiba:", err);
     } finally {
-      setLoading(false);
+      if (requestId === activeRequestRef.current) {
+        setLoading(false);
+        loadingRef.current = false;
+      }
     }
   };
 
