@@ -1,7 +1,7 @@
 .u-card{
     position: relative;
     display: grid;
-    grid-template-columns: 92px 1fr 140px;
+    grid-template-columns: 92px 1fr auto;
     align-items: center;
     gap: 14px;
     margin-top: 10px;
@@ -154,4 +154,8 @@
     font-size: 16px;
     opacity: 0.9;
   }
-  
+  @media (max-width: 576px) {
+    .u-pill {
+      display: none;
+    }
+  }

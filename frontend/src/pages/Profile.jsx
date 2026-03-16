@@ -371,82 +371,83 @@ if (res.status === 401 || res.status === 403) {
 
       {message && <Alert variant="info" className="text-center">{message}</Alert>}
 
-      <div className="profile-section d-flex justify-content-center align-items-start mb-5">
-        <div className="profile-left text-center me-5 pe-5 border-end">
-          <Image
-            src={preview || "/profile-pictures/default.png"}
-            roundedCircle
-            width={180}
-            height={180}
-            className="object-fit-cover mb-3 shadow-sm"
-          />
-          <Form onSubmit={handleProfileUpdate}>
-            <Form.Group controlId="formFile" className="mb-3">
-              <Form.Label>Profilkép módosítása</Form.Label>
-              <Form.Control type="file" accept="image/*" onChange={handleFileChange} />
-            </Form.Group>
+      <div className="profile-section mb-5">
+  <div className="profile-left">
+    <Image
+      src={preview || "/profile-pictures/default.png"}
+      roundedCircle
+      width={180}
+      height={180}
+      className="profile-avatar-image mb-3"
+    />
 
-            <Form.Group className="mb-3">
-              <Form.Label>Rólam</Form.Label>
-              <Form.Control
-                as="textarea"
-                rows={4}
-                maxLength={500}
-                placeholder="Írj magadról valamit..."
-                value={bio}
-                onChange={(e) => setBio(e.target.value)}
-              />
-            </Form.Group>
+    <Form onSubmit={handleProfileUpdate} className="profile-form">
+      <Form.Group controlId="formFile" className="mb-3">
+        <Form.Label>Profilkép módosítása</Form.Label>
+        <Form.Control type="file" accept="image/*" onChange={handleFileChange} />
+      </Form.Group>
 
-            <Button variant="primary" type="submit" className="w-100">
-              Mentés
-            </Button>
-          </Form>
-        </div>
+      <Form.Group className="mb-3">
+        <Form.Label>Rólam</Form.Label>
+        <Form.Control
+          as="textarea"
+          rows={4}
+          maxLength={500}
+          placeholder="Írj magadról valamit..."
+          value={bio}
+          onChange={(e) => setBio(e.target.value)}
+        />
+      </Form.Group>
 
-        <div className="profile-right ps-5" style={{ maxWidth: "500px", width: "100%" }}>
-          <Form onSubmit={handleAccountUpdate}>
-            <Form.Group className="mb-3">
-              <Form.Label>Jelenlegi felhasználónév</Form.Label>
-              <Form.Control type="text" value={user.username || ""} disabled />
-            </Form.Group>
+      <Button variant="primary" type="submit" className="w-100">
+        Mentés
+      </Button>
+    </Form>
+  </div>
 
-            <Form.Group className="mb-3">
-              <Form.Label>Új felhasználónév</Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="Add meg az új felhasználónevet"
-                value={newUsername}
-                onChange={(e) => setNewUsername(e.target.value)}
-              />
-            </Form.Group>
+  <div className="profile-right">
+    <Form onSubmit={handleAccountUpdate} className="profile-form">
+      <Form.Group className="mb-3">
+        <Form.Label>Jelenlegi felhasználónév</Form.Label>
+        <Form.Control type="text" value={user.username || ""} disabled />
+      </Form.Group>
 
-            <Form.Group className="mb-3">
-              <Form.Label>Új email cím</Form.Label>
-              <Form.Control
-                type="email"
-                placeholder="Add meg az új email címet"
-                value={newEmail}
-                onChange={(e) => setNewEmail(e.target.value)}
-              />
-            </Form.Group>
+      <Form.Group className="mb-3">
+        <Form.Label>Új felhasználónév</Form.Label>
+        <Form.Control
+          type="text"
+          placeholder="Add meg az új felhasználónevet"
+          value={newUsername}
+          onChange={(e) => setNewUsername(e.target.value)}
+        />
+      </Form.Group>
 
-            <Form.Group className="mb-4">
-              <Form.Label>Új jelszó</Form.Label>
-              <Form.Control
-                type="password"
-                placeholder="Adj meg új jelszót"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-              />
-            </Form.Group>
+      <Form.Group className="mb-3">
+        <Form.Label>Új email cím</Form.Label>
+        <Form.Control
+          type="email"
+          placeholder="Add meg az új email címet"
+          value={newEmail}
+          onChange={(e) => setNewEmail(e.target.value)}
+        />
+      </Form.Group>
 
-            <Button variant="success" type="submit" className="w-100">
-              Adatok mentése
-            </Button>
-          </Form>
-        </div>
-      </div>
+      <Form.Group className="mb-4">
+        <Form.Label>Új jelszó</Form.Label>
+        <Form.Control
+          type="password"
+          placeholder="Adj meg új jelszót"
+          value={newPassword}
+          onChange={(e) => setNewPassword(e.target.value)}
+        />
+      </Form.Group>
+
+      <Button variant="success" type="submit" className="w-100">
+        Adatok mentése
+      </Button>
+    </Form>
+  </div>
+</div>
 
       <hr />
       <h3 className="mt-5 mb-3 text-center">Saját feltöltéseim</h3>
