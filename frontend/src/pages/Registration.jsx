@@ -27,7 +27,13 @@ function Registration() {
     if (uname.length > 40) 
     {
       return setMessage("A felhasználónév maximum 40 karakter lehet.");
-    } 
+    }
+    if (formData.email.length > 100) {
+      return setMessage("Az email cím maximum 100 karakter lehet.");
+    }
+    if (formData.password.length > 255) {
+      return setMessage("A jelszó maximum 255 karakter lehet.");
+    }
     e.preventDefault();
 
     if (!accepted) return setMessage("Kérlek fogadd el az ÁSZF-et és az adatkezelési tájékoztatót!");
@@ -74,6 +80,7 @@ function Registration() {
             value={formData.email}
             onChange={handleChange}
             required
+            maxLength={100}
           />
         </Form.Group>
 
@@ -87,6 +94,7 @@ function Registration() {
               value={formData.password}
               onChange={handleChange}
               required
+              maxLength={255}
             />
             <Button
               variant="outline-secondary"
@@ -109,6 +117,7 @@ function Registration() {
               value={formData.confirm}
               onChange={handleChange}
               required
+              maxLength={255}
             />
             <Button
               variant="outline-secondary"

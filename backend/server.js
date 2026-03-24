@@ -106,6 +106,14 @@ app.post("/api/register", async (req, res) => {
     return res.status(400).json({ message: "A felhasználónév maximum 40 karakter lehet." });
   }
 
+  if (email.length > 100) {
+    return res.status(400).json({ message: "Az email cím maximum 100 karakter lehet." });
+  }
+
+  if (password.length > 255) {
+    return res.status(400).json({ message: "A jelszó maximum 255 karakter lehet." });
+  }
+
   try {
     const conn = await pool.getConnection();
     try {
