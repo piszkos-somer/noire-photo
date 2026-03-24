@@ -411,7 +411,7 @@ function Browse() {
           {loading && <h4 className="text-center text-light py-5">Töltés...</h4>}
 
           {!loading && users.length === 0 && (
-            <h5 className="text-center text-light py-5">Nincs találat.</h5>
+            <h5 className="text-center text-danger py-5">Nincs találat.</h5>
           )}
 
           {users.map((u) => (
@@ -428,7 +428,7 @@ function Browse() {
           next={fetchMoreImages}
           hasMore={hasMore}
           loader={<h4 className="text-center text-light py-5">Töltés...</h4>}
-          endMessage={<h5 className="text-center text-light py-5">Nincs több kép.</h5>}
+          endMessage={<h5 className="text-center text-danger py-5">Nincs több kép.</h5>}
         >
           <Container className="image-grid">
             {images.map((img) => (
