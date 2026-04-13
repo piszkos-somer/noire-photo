@@ -343,3 +343,18 @@ img.rounded-circle:hover {
     height: 140px;
   }
 }
+
+.default-avatar {
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  background: #e4e6eb; 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.default-avatar svg {
+  width: 90px;
+  height: 90px;
+}

@@ -373,13 +373,26 @@ if (res.status === 401 || res.status === 403) {
 
       <div className="profile-section mb-5">
   <div className="profile-left">
+  <div className="profile-avatar-image mb-3">
+  {preview ? (
     <Image
-      src={preview || "/profile-pictures/default.png"}
+      src={preview}
       roundedCircle
       width={180}
       height={180}
-      className="profile-avatar-image mb-3"
+      className="w-100 h-100"
     />
+  ) : (
+    <div className="default-avatar">
+      <svg viewBox="0 0 24 24">
+        <path
+          fill="#aaa"
+          d="M12 12c2.7 0 5-2.3 5-5s-2.3-5-5-5-5 2.3-5 5 2.3 5 5 5zm0 2c-3.3 0-10 1.7-10 5v3h20v-3c0-3.3-6.7-5-10-5z"
+        />
+      </svg>
+    </div>
+  )}
+</div>
 
     <Form onSubmit={handleProfileUpdate} className="profile-form">
       <Form.Group controlId="formFile" className="mb-3">
