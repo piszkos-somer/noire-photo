@@ -9,6 +9,7 @@ import {
   Row,
   Col,
   Image,
+  Modal,
 } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { UserContext } from "../context/UserContext";
@@ -18,6 +19,8 @@ import "../css/Home.css"
 import { handleTokenError } from "../utils/auth";
 
 function Profile() {
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+const [deleteLoading, setDeleteLoading] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
   const [newUsername, setNewUsername] = useState("");
   const [newEmail, setNewEmail] = useState("");
@@ -33,7 +36,7 @@ function Profile() {
   const [newComment, setNewComment] = useState("");
   const [commentLoading, setCommentLoading] = useState(false);
   const [likeLoading, setLikeLoading] = useState(null);
-  const { user, updateUsername } = useContext(UserContext);
+  const { user, updateUsername, logout } = useContext(UserContext);
   const navigate = useNavigate();
   const openViewModal = async (img) => {
     setNewComment("");
@@ -43,32 +46,41 @@ function Profile() {
   };
 
   const handleDeleteProfile = async () => {
-    if (!window.confirm("Biztosan törölni szeretnéd a profilodat? Ez végleges!")) return;
+    if (!user?.token) {
+      navigate("/Login");
+      return;
+    }
+  
+    setDeleteLoading(true);
   
     try {
-      const token = localStorage.getItem("token");
       const res = await fetch("http://localhost:3001/api/delete-profile", {
         method: "DELETE",
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${user.token}`,
         },
       });
   
-      const data = await res.json();
+      if (res.status === 401 || res.status === 403) {
+        handleTokenError(res.status, navigate);
+        return;
+      }
+  
+      const data = await res.json().catch(() => ({}));
   
       if (res.ok) {
-        // Törlés után azonnal kijelentkeztetés
-        localStorage.removeItem("token");
-        if (logout) {
-          logout();
-        }
+        setShowDeleteConfirm(false);
+        setMessage("Profil sikeresen törölve.");
+        logout();
         navigate("/");
       } else {
-        setMessage(data.message || data.error || "Hiba történt a törlés során.");
+        setMessage(data.message || data.error || "Hiba történt a profil törlése során.");
       }
     } catch (err) {
       console.error("Profil törlés hiba:", err);
       setMessage("Szerverhiba a profil törlése közben.");
+    } finally {
+      setDeleteLoading(false);
     }
   };
   
@@ -271,10 +283,10 @@ function Profile() {
         const refreshed = await fetch("http://localhost:3001/api/me", {
           headers: { Authorization: `Bearer ${user.token}` },
         });
-        if (res.status === 401 || res.status === 403) {
-  handleTokenError(res.status, navigate);
-  return;
-}
+        if (refreshed.status === 401 || refreshed.status === 403) {
+          handleTokenError(refreshed.status, navigate);
+          return;
+        }
         const newData = await refreshed.json();
         setBio(newData.bio || "");
         if (newData.profile_picture)
@@ -492,7 +504,7 @@ if (res.status === 401 || res.status === 403) {
       <Button
   variant="danger"
   className="w-100 mt-3"
-  onClick={handleDeleteProfile}
+  onClick={() => setShowDeleteConfirm(true)}
 >
   Profil törlése
 </Button>
@@ -545,6 +557,35 @@ if (res.status === 401 || res.status === 403) {
   onSave={handleSave}
   onDeleted={handleDeleted}
 />
+<Modal
+  show={showDeleteConfirm}
+  onHide={() => setShowDeleteConfirm(false)}
+  centered
+  className="glass-modal"
+>
+  <Modal.Body className="text-center p-4">
+  <h4 className="mb-3 text-dark">Biztosan törölni szeretnéd a profilodat?</h4>
+    <p className="text-secondary mb-4">
+      Ez a művelet nem visszavonható.
+    </p>
+    <div className="d-flex justify-content-center gap-3">
+      <Button
+        variant="outline-light"
+        onClick={() => setShowDeleteConfirm(false)}
+        disabled={deleteLoading}
+      >
+        Mégse
+      </Button>
+      <Button
+        variant="danger"
+        onClick={handleDeleteProfile}
+        disabled={deleteLoading}
+      >
+        {deleteLoading ? "Törlés..." : "Törlés"}
+      </Button>
+    </div>
+  </Modal.Body>
+</Modal>
 
     </Container>
   );

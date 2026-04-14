@@ -204,7 +204,7 @@ function EditModal({ show, onHide, image, onSave, onDeleted }) {
         className="glass-modal"
       >
         <Modal.Body className="text-center p-4">
-          <h4 className="mb-3 text-light">Biztosan törölni szeretnéd ezt a képet?</h4>
+          <h4 className="mb-3 text-dark">Biztosan törölni szeretnéd ezt a képet?</h4>
           <p className="text-secondary mb-4">
             Ez a művelet nem visszavonható.
           </p>
