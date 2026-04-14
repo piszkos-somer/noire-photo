@@ -2,6 +2,7 @@ import React, { createContext, useState, useEffect } from "react";
 
 export const UserContext = createContext();
 
+
 export function UserProvider({ children }) {
   const [user, setUser] = useState(() => {
     const storedUser = localStorage.getItem("user");
@@ -42,6 +43,7 @@ export function UserProvider({ children }) {
       return updated;
     });
   };
+  
 
   return (
     <UserContext.Provider value={{ user, login, logout, updateUsername }}>

@@ -358,3 +358,7 @@ img.rounded-circle:hover {
   width: 90px;
   height: 90px;
 }
+
+button.btn-danger {
+  font-weight: bold;
+}

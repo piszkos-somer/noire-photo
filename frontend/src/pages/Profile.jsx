@@ -41,6 +41,36 @@ function Profile() {
     setShowViewModal(true);
     await fetchComments(img.id);
   };
+
+  const handleDeleteProfile = async () => {
+    if (!window.confirm("Biztosan törölni szeretnéd a profilodat? Ez végleges!")) return;
+  
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch("http://localhost:3001/api/delete-profile", {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+  
+      const data = await res.json();
+  
+      if (res.ok) {
+        // Törlés után azonnal kijelentkeztetés
+        localStorage.removeItem("token");
+        if (logout) {
+          logout();
+        }
+        navigate("/");
+      } else {
+        setMessage(data.message || data.error || "Hiba történt a törlés során.");
+      }
+    } catch (err) {
+      console.error("Profil törlés hiba:", err);
+      setMessage("Szerverhiba a profil törlése közben.");
+    }
+  };
   
   const fetchComments = async (imageId) => {
     try {
@@ -458,6 +488,14 @@ if (res.status === 401 || res.status === 403) {
       <Button variant="success" type="submit" className="w-100">
         Adatok mentése
       </Button>
+
+      <Button
+  variant="danger"
+  className="w-100 mt-3"
+  onClick={handleDeleteProfile}
+>
+  Profil törlése
+</Button>
     </Form>
   </div>
 </div>

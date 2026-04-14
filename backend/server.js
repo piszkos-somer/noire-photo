@@ -1512,3 +1512,59 @@ app.delete("/api/admin/users/:id", verifyToken, async (req, res) => {
     conn.release();
   }
 });
+
+
+
+app.delete("/api/delete-profile", verifyToken, async (req, res) => {
+  const userId = req.user.id;
+
+  const conn = await pool.getConnection();
+  try {
+    await conn.beginTransaction();
+
+
+    const [imgRows] = await conn.execute(
+      "SELECT url FROM images WHERE user_id = ?",
+      [userId]
+    );
+
+    const [userRows] = await conn.execute(
+      "SELECT profile_picture FROM users WHERE id = ?",
+      [userId]
+    );
+
+
+    await conn.execute("DELETE FROM image_votes WHERE user_id = ?", [userId]);
+    await conn.execute("DELETE FROM comment_votes WHERE user_id = ?", [userId]);
+    await conn.execute("DELETE FROM follows WHERE follower_id = ? OR following_id = ?", [userId, userId]);
+
+
+    await conn.execute("DELETE FROM users WHERE id = ?", [userId]);
+
+    await conn.commit();
+
+  
+    const safeUnlink = (p) => {
+      try {
+        if (p && fs.existsSync(p)) fs.unlinkSync(p);
+      } catch (e) {
+        console.warn("Fájl törlés hiba:", e.message);
+      }
+    };
+
+    for (const r of imgRows) {
+      safeUnlink(path.join(__dirname, r.url));
+    }
+    if (userRows[0]?.profile_picture) {
+      safeUnlink(path.join(__dirname, userRows[0].profile_picture));
+    }
+
+    res.json({ message: "Profil sikeresen törölve." });
+  } catch (err) {
+    try { await conn.rollback(); } catch {}
+    console.error("Profil törlés hiba:", err);
+    res.status(500).json({ error: "Szerver hiba profil törléskor." });
+  } finally {
+    conn.release();
+  }
+});

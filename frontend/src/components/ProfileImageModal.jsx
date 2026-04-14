@@ -432,15 +432,30 @@ function ImageModal({
                   className="comment-item glass-comment mb-3 p-3 rounded-3"
                 >
                   <div className="d-flex flex-column flex-sm-row align-items-start">
-                    <img
-                      src={`http://localhost:3001${c.profile_picture}`}
-                      alt={c.username}
-                      className="rounded-circle me-3 mb-2 mb-sm-0"
-                      width="40"
-                      height="40"
-                      style={{ cursor: "pointer", flexShrink: 0 }}
-                      onClick={() => handleUserClick(c.user_id)}
-                    />
+                  {c.profile_picture ? (
+                  <img
+                    src={`http://localhost:3001${c.profile_picture}`}
+                    alt={c.username}
+                    className="rounded-circle me-3 mb-2 mb-sm-0"
+                    width="40"
+                    height="40"
+                    style={{ cursor: "pointer", flexShrink: 0 }}
+                    onClick={() => handleUserClick(c.user_id)}
+                  />
+                ) : (
+                  <div
+                    className="default-avatar-small me-3 mb-2 mb-sm-0"
+                    onClick={() => handleUserClick(c.user_id)}
+                    style={{ cursor: "pointer", flexShrink: 0 }}
+                  >
+                    <svg viewBox="0 0 24 24">
+                      <path
+                        fill="#aaa"
+                        d="M12 12c2.7 0 5-2.3 5-5s-2.3-5-5-5-5 2.3-5 5 2.3 5 5 5zm0 2c-3.3 0-10 1.7-10 5v3h20v-3c0-3.3-6.7-5-10-5z"
+                      />
+                    </svg>
+                  </div>
+                )}
                     <div className="flex-grow-1 w-100">
                       <div className="d-flex flex-column flex-sm-row justify-content-between align-items-start gap-2">
                         <strong
